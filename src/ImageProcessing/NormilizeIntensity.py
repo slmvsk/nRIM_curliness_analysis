@@ -49,7 +49,6 @@ def normalize_intensity(first_scene):
     return adjusted_stack
 
 # Example of using the function
-# Assuming 'scenes' is your list of 11 3D numpy arrays
 
 # Adjust the histogram of the first scene
 adjusted_stack = adjust_histogram_individual(first_scene)
