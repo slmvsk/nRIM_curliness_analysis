@@ -58,7 +58,7 @@ def validate_image_adjustment(n_scene, adjusted_stack):
     if n_scene.shape != adjusted_stack.shape:
         raise ValueError(f"Shape mismatch: Original shape {n_scene.shape} doesn't match adjusted shape {adjusted_stack.shape}")
 
-def process_all_scenes(scenes):
+def normilize_and_validate_all(scenes):
     for index, scene in enumerate(scenes):
         adjusted_scene = normalize_intensity(scene)
         validate_image_adjustment(scene, adjusted_scene)
@@ -74,4 +74,4 @@ def process_all_scenes(scenes):
         plt.show()
 
 # Assuming 'scenes' is your list of 11 3D numpy arrays
-#process_all_scenes(scenes)
+#normilize_and_validate_all(scenes)
