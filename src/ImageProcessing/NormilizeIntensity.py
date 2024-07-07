@@ -74,4 +74,4 @@ def validate_image_adjustment(scene, adjusted_scene):
         raise ValueError(f"Shape mismatch: Original shape {scene.shape} doesn't match adjusted shape {adjusted_scene.shape}")
 
 # Assuming 'scenes' is your list of 11 3D numpy arrays
-adjusted_scenes = process_scenes(scenes)
+#adjusted_scenes = process_scenes(scenes)
