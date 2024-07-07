@@ -36,18 +36,18 @@ def normalize_intensity(image_stack):
 
     return adjusted_stack
 
-def validate_image_adjustment(n_scene, adjusted_stack):
-    print("Scene shape:", n_scene.shape)
-    scene_min, scene_max = np.min(n_scene), np.max(n_scene)
-    print("Scene - min, max:", scene_min, scene_max)
+def validate_image_adjustment(scenes, adjusted_stack):
+    print("Scene shape:", scenes.shape)
+    scene_min, scene_max = np.min(scenes), np.max(scenes)
+    print("Scene - min, max:", scenes_min, scenes_max)
 
     print("Adjusted stack shape:", adjusted_stack.shape)
     adjusted_min, adjusted_max = np.min(adjusted_stack), np.max(adjusted_stack)
     print("Adjusted stack - min, max:", adjusted_min, adjusted_max)
 
-    if n_scene.dtype == np.uint8:
+    if scenes.dtype == np.uint8:
         expected_max_val = 255
-    elif n_scene.dtype == np.uint16:
+    elif scenes.dtype == np.uint16:
         expected_max_val = 65535
     else:
         raise ValueError("Unsupported image data type")
@@ -55,16 +55,16 @@ def validate_image_adjustment(n_scene, adjusted_stack):
     if adjusted_min != 0 or adjusted_max != expected_max_val:
         raise ValueError(f"Adjustment function failed to utilize full dynamic range: Expected 0 to {expected_max_val}, got {adjusted_min} to {adjusted_max}")
 
-    if n_scene.shape != adjusted_stack.shape:
+    if scenes.shape != adjusted_stack.shape:
         raise ValueError(f"Shape mismatch: Original shape {n_scene.shape} doesn't match adjusted shape {adjusted_stack.shape}")
 
 def normilize_and_validate_all(scenes):
     for index, scene in enumerate(scenes):
-        adjusted_scene = normalize_intensity(scene)
-        validate_image_adjustment(scene, adjusted_scene)
+        adjusted_scene = normalize_intensity(scenes)
+        validate_image_adjustment(scenes, adjusted_scene)
         plt.figure(figsize=(10, 5))
         plt.subplot(121)
-        plt.imshow(scene[:, :, scene.shape[2] // 2], cmap='gray')
+        plt.imshow(scene[:, :, scenes.shape[2] // 2], cmap='gray')
         plt.title(f'Original Scene {index + 1}')
         plt.axis('off')
         plt.subplot(122)
