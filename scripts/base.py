@@ -28,6 +28,28 @@ print(img1.shape)
 img2=img1[2,:,:]
 io.imshow(img2)
 
+
+print(adjusted_scenes.shape)  # dimensions
+
+#Let us extract only relevant pixels, all channels in x and y for
+#scene=0, time=5, channel=1, z=11, y, x, RGB=0
+img1_ch0=img[0, 5, 0, 11, :, :, 0]
+img1_ch1=img[0, 5, 1, 11, :, :, 0]
+
+
+fig = plt.figure(figsize=(12, 12))
+ax1 = fig.add_subplot(2,2,1)
+ax1.imshow(img1_ch0, cmap='cubehelix')
+ax1.title.set_text('1st channel')
+ax2 = fig.add_subplot(2,2,2)
+ax2.imshow(img1_ch1, cmap='hot')
+ax2.title.set_text('2nd channel')
+
+
+
+
+
+
 ######################################################################################
 ### Reading multiple images from a folder
 #The glob module finds all the path names 

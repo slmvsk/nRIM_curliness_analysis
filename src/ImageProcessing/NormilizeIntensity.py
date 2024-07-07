@@ -5,8 +5,8 @@ Created on Sat Jul  6 15:52:36 2024
 
 @author: tetianasalamovska
 """
-
-#from skimage import exposure
+import numpy as np
+from skimage import exposure
 
 def normalize_intensity(image_stack):
     """
