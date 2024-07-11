@@ -75,7 +75,7 @@ input_mask = np.reshape(mask_patches, (-1, mask_patches.shape[3], mask_patches.s
 
 print(input_img.shape)  # n_patches, x, y, z
 print(input_mask.shape)
-# combined number of patches in 16 (1*4*4)
+# combined number of patches in 16 (1*4*4) 
 
 n_classes=2 #Probably I will need 3 classes and one of them will be soma (annotate)
 
@@ -273,7 +273,7 @@ print(reconstructed_image.dtype)
 
 #Now save it as segmented volume.
 from tifffile import imsave
-imsave('/content/drive/MyDrive/Colab Notebooks/data/sandstone_3d/all_images/segmented.tif', reconstructed_image)
+imsave('....segmented.tif', reconstructed_image)
 
 #If you would like to save the volume as multichannel dataset....
 
