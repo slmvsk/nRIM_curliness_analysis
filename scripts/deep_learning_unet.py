@@ -54,12 +54,12 @@ from sklearn.model_selection import train_test_split
 import tifffile as tf
 
 #Load input images and masks.
-#Here we load 256x256x256 pixel volume. We will break it into patches of 64x64x64 for training.
+#Here we load 1024x1024x20 pixel volume. We will break it into patches of 128x128x20 for training.
 image = tf.imread('/Users/tetianasalamovska/Documents/IHCT_THT53_40x2x_IHCT08_slice6_stack_positions_A488_laser08_sp...T53_40x2x_IHCT08_slice6_stack_positions_A488_laser1_speed6 #11.tif')
-img_patches = patchify(image, (5, 256, 256), step=256)  #Step=64 for 64 patches means no overlap
+img_patches = patchify(image, (20, 128, 128), step=128)  #Step=64 for 64 patches means no overlap
 
 mask = io.imread('/Users/tetianasalamovska/Documents/mask.tif')
-mask_patches = patchify(mask, (5, 256, 256), step=256)
+mask_patches = patchify(mask, (20, 128, 128), step=128)
 
 print(image.shape)
 
@@ -75,7 +75,7 @@ input_mask = np.reshape(mask_patches, (-1, mask_patches.shape[3], mask_patches.s
 
 print(input_img.shape)  # n_patches, x, y, z
 print(input_mask.shape)
-# combined number of patches in 16 (1*4*4) 
+# combined number of patches in 64 (1*8*48 
 
 n_classes=2 #Probably I will need 3 classes and one of them will be soma (annotate)
 
@@ -108,7 +108,7 @@ def dice_coefficient_loss(y_true, y_pred):
 encoder_weights = 'imagenet'
 BACKBONE = 'resnet50'  #Try vgg16, efficientnetb7, inceptionv3, resnet50
 activation = 'softmax'
-patch_size = 16
+patch_size = (128, 128, 20)
 n_classes = 2
 channels=3
 
@@ -135,7 +135,7 @@ X_test_prep = preprocess_input(X_test)
 
 #Define the model. Here we use Unet but we can also use other model architectures from the library.
 model = sm.Unet(BACKBONE, classes=n_classes,
-                input_shape=(256, 256, 5, channels), # problem here 
+                input_shape=(20, 128, 128, channels), # problem here 
                 encoder_weights=encoder_weights,
                 activation=activation)
 
