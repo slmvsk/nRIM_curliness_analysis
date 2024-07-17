@@ -10,6 +10,8 @@ Created on Tue Jun 25 09:33:53 2024
 from czitools.metadata_tools import czi_metadata as czimd
 import numpy as np
 from czifile import CziFile
+from src.FileImport.PlottingImage import plot_slice_from_stack
+from src.ImageProcessing.NormilizeIntensity import normalize_intensity, validate_image_adjustment, process_scenes
 
 import sys
 sys.path.append('/Users/tetianasalamovska/Documents/GitHub/nRIM_curliness_analysis')
@@ -41,13 +43,17 @@ czi_sample = czimd.CziSampleInfo(file_path)
 #centerposY = []
 
 # normalizing intensities min 0 max 65535 for 16 bit 
-from src.ImageProcessing.NormilizeIntensity import normalize_intensity, validate_image_adjustment, process_scenes
-
 adjusted_scenes = process_scenes(scenes)
 
 if adjusted_scenes:
     print(adjusted_scenes[0-10].shape)
 
 # plot to compare original and normalized image 
-
+# Example usage assuming 'scenes' and 'adjusted_scenes' are your lists of 3D numpy arrays
+slice_index = 5  # Specify the slice index you want to compare
+if slice_index < len(scenes[1]) and slice_index < len(adjusted_scenes[1]):
+    plot_specific_slice_from_stack(scenes[1], slice_index)
+    plot_specific_slice_from_stack(adjusted_scenes[1], slice_index)
+else:
+    print("Specified slice index is out of range.")
 
