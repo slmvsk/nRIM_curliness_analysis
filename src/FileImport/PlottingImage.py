@@ -6,7 +6,7 @@ Created on Sun Jul  7 10:53:21 2024
 @author: tetianasalamovska
 """
 
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 
 
 def plot_slice_from_stack(image_stack, slice_index):
