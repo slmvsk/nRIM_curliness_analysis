@@ -37,3 +37,30 @@ def plot_slice_from_stack(image_stack, slice_index):
 #else:
     #print("Specified slice index is out of range.")
     
+    
+def plot_comparison(image1, image2, title):
+    """
+    Plots two images side-by-side for comparison.
+
+    Parameters:
+        image1 (ndarray): First image to plot.
+        image2 (ndarray): Second image to plot.
+        title (str): Title for the subplot.
+    """
+    fig, axes = plt.subplots(1, 2, figsize=(12, 6))
+    ax1, ax2 = axes.ravel()
+
+    ax1.imshow(image1, cmap='gray')
+    ax1.set_title('Original')
+    ax1.axis('off')  # Turn off axis numbering
+
+    ax2.imshow(image2, cmap='gray')
+    ax2.set_title('Filtered')
+    ax2.axis('off')  # Turn off axis numbering
+
+    plt.suptitle(title)
+    plt.show()
+
+# Example usage:
+# Assuming adjusted_scenes[2][5,:,:] and filtered_image[5,:,:] are correctly shaped (1024, 1024)
+#plot_comparison(adjusted_scenes[2][5,:,:], filtered_image[5,:,:], "Background Correction Comparison")

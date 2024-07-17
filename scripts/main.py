@@ -52,8 +52,9 @@ if adjusted_scenes:
 # Example usage assuming 'scenes' and 'adjusted_scenes' are your lists of 3D numpy arrays
 slice_index = 5  # Specify the slice index you want to compare
 if slice_index < len(scenes[1]) and slice_index < len(adjusted_scenes[1]):
-    plot_specific_slice_from_stack(scenes[1], slice_index)
-    plot_specific_slice_from_stack(adjusted_scenes[1], slice_index)
+    plot_slice_from_stack(scenes[1], slice_index)
+    plot_slice_from_stack(adjusted_scenes[1], slice_index)
 else:
     print("Specified slice index is out of range.")
+
 
