@@ -133,9 +133,11 @@ preprocess_input = sm.get_preprocessing(BACKBONE)
 X_train_prep = preprocess_input(X_train)
 X_test_prep = preprocess_input(X_test)
 
+# debugging 
+input_shape = patch_size + (channels,)  # Resulting in (128, 128, 20, 3)
 #Define the model. Here we use Unet but we can also use other model architectures from the library.
 model = sm.Unet(BACKBONE, classes=n_classes,
-                input_shape=(20, 128, 128, channels), # problem here 
+                input_shape=input_shape, # problem here 
                 encoder_weights=encoder_weights,
                 activation=activation)
 
