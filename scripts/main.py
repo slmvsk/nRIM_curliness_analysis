@@ -57,4 +57,32 @@ if slice_index < len(scenes[1]) and slice_index < len(adjusted_scenes[1]):
 else:
     print("Specified slice index is out of range.")
 
+# remove somatas function apply (finish writing)
+
+#from src.ImageProcessing.ImageProcessing import gaussian_filter
+import cv2
+
+# Parameters for Gaussian blur
+ksize = (5, 5)  # Kernel size should be odd numbers
+sigmaX = 3      # Standard deviation
+
+# Apply Gaussian blur to each slice of each 3D array
+blurred_scenes = []
+for scene in adjusted_scenes:
+    blurred_scene = np.empty_like(scene)  # Create an empty array to store the blurred slices
+    for z in range(scene.shape[0]):
+        blurred_scene[z] = cv2.GaussianBlur(scene[z], ksize, sigmaX)  # Apply blur to each slice
+    blurred_scenes.append(blurred_scene)
+
+# Optionally, check the output
+for index, scene in enumerate(blurred_scenes):
+    print(f"Blurred scene {index} shape: {scene.shape}")
+
+
+print(blurred_scenes[2].shape)
+print(adjusted_scenes[2].shape)
+
+# Example of plotting comparison for the first scene
+plot_comparison(adjusted_scenes[5][8,:,:], blurred_scenes[5][8,:,:], "Background Correction Comparison")
+
 
