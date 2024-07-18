@@ -15,6 +15,25 @@ from skimage.filters import gaussian, threshold_otsu
 from skimage.feature import hessian_matrix, hessian_matrix_eigvals
 from skimage import exposure, morphology
 
+def morphological_skeleton_3d(image):
+    return skimage.morphology.skeletonize_3d(image)
+
+
+def median_filter(image, window_size, mode):
+    return scipy.ndimage.median_filter(image, size=window_size, mode=mode)
+
+
+def reduce_noise(image, patch_size, patch_distance, cutoff_distance, channel_axis=None):
+    denoised = skimage.restoration.denoise_nl_means(
+        image=image,
+        patch_size=patch_size,
+        patch_distance=patch_distance,
+        h=cutoff_distance,
+        channel_axis=channel_axis,
+        fast_mode=True,
+    )
+    return denoised
+
 
 
 # 2D to try because takes time for 3D 
@@ -56,3 +75,13 @@ def enhance_neurites(image, sigma):
 
 # Example usage, assuming 'img' is your loaded 2D image array
 # img_enhanced = enhance_neurites(img, sigma=2)
+
+
+
+
+def enhance_edges_log(image, mask=None, sigma=2.0):
+    size = int(sigma * 4) + 1
+    output_pixels = centrosome.filter.laplacian_of_gaussian(image, mask, size, sigma)
+    return output_pixels
+
+
