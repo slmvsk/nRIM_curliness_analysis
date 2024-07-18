@@ -64,7 +64,7 @@ import cv2
 
 # Parameters for Gaussian blur
 ksize = (5, 5)  # Kernel size should be odd numbers
-sigmaX = 3      # Standard deviation
+sigmaX = 4      # Standard deviation
 
 # Apply Gaussian blur to each slice of each 3D array
 blurred_scenes = []
@@ -83,6 +83,26 @@ print(blurred_scenes[2].shape)
 print(adjusted_scenes[2].shape)
 
 # Example of plotting comparison for the first scene
-plot_comparison(adjusted_scenes[5][8,:,:], blurred_scenes[5][8,:,:], "Background Correction Comparison")
+plot_comparison(adjusted_scenes[1][8,:,:], blurred_scenes[1][8,:,:], "Gaussian comparison")
+
+#tubness method adapted from imagej 
+
+import numpy as np
+from skimage.feature import hessian_matrix, hessian_matrix_eigvals
+
+import numpy as np
+from skimage.filters import gaussian
+from skimage.feature import hessian_matrix, hessian_matrix_eigvals
+from src.ImageProcessing.ImageProcessing import enhance_neurites
+
+# Example usage (assuming you have an image 'img' and a sigma value)
+enhanced_scenes = enhance_neurites(blurred_scenes[1], sigma=6)
+plot_comparison(adjusted_scenes[1][1,:,:], blurred_scenes[1][1,:,:], "Tubeness comparison")
+
+
+enhanced_image = meijering(blurred_scenes[1], sigmas=range(1, 10, 2), black_ridges=True)
+
+plot_comparison(adjusted_scenes[1][1,:,:], blurred_scenes[1][1,:,:], "Comparison")
+
 
 
