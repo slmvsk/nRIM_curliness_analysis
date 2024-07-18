@@ -15,6 +15,9 @@ from skimage.filters import gaussian, threshold_otsu
 from skimage.feature import hessian_matrix, hessian_matrix_eigvals
 from skimage import exposure, morphology
 
+
+
+# 2D to try because takes time for 3D 
 def enhance_neurites(image, sigma):
     """
     Enhance neurites using an advanced method incorporating Gaussian smoothing, 
