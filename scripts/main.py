@@ -88,9 +88,6 @@ plot_comparison(adjusted_scenes[1][8,:,:], blurred_scenes[1][8,:,:], "Gaussian c
 #tubness method adapted from imagej 
 
 import numpy as np
-from skimage.feature import hessian_matrix, hessian_matrix_eigvals
-
-import numpy as np
 from skimage.filters import gaussian
 from skimage.feature import hessian_matrix, hessian_matrix_eigvals
 from src.ImageProcessing.ImageProcessing import enhance_neurites
@@ -100,9 +97,47 @@ enhanced_scenes = enhance_neurites(blurred_scenes[1], sigma=6)
 plot_comparison(adjusted_scenes[1][1,:,:], blurred_scenes[1][1,:,:], "Tubeness comparison")
 
 
-enhanced_image = meijering(blurred_scenes[1], sigmas=range(1, 10, 2), black_ridges=True)
+#enhanced_image = meijering(blurred_scenes[1], sigmas=range(1, 10, 2), black_ridges=True)
 
 plot_comparison(adjusted_scenes[1][1,:,:], blurred_scenes[1][1,:,:], "Comparison")
 
+import imagej
+import os
 
+# Initialize ImageJ
+ij = imagej.init('sc.fiji:fiji')  # Make sure Fiji is installed correctly and the path is recognized
+
+# Assuming 'scenes' is your list of 3D numpy arrays
+scenes = [np.random.random((100, 100, 100)) for _ in range(5)]  # Example scenes
+
+# List to hold the processed scenes
+processed_scenes = []
+
+# Iterate over each scene
+for i, scene in enumerate(scenes):
+    # Convert the numpy array to an ImageJ2 compatible image
+    image = ij.py.to_java(scene)
+
+    # Apply the Tubeness plugin
+    # Adjust 'sigma' and other parameters according to your needs
+    ij.py.run_plugin('FeatureJ', {
+        'command': 'Tubeness',
+        'sigmas': [1.0],  # List of sigmas to process with
+        'output': ['Tubeness'],
+        'input': image
+    })
+
+    # Retrieve the processed image
+    processed_image = ij.py.from_java(ij.py.get_image_plus())  # Converts the result back to a numpy array
+
+    # Append the result to the list of processed scenes
+    processed_scenes.append(processed_image)
+
+    print(f"Processed scene {i + 1}/{len(scenes)}")
+
+# Cleanup ImageJ resources
+ij.dispose()
+
+# Optionally, display or analyze the processed scenes further
+print("Processing complete. Processed scenes are stored in the 'processed_scenes' list.")
 

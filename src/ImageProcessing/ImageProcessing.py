@@ -19,6 +19,15 @@ def morphological_skeleton_3d(image):
     return skimage.morphology.skeletonize_3d(image)
 
 
+from ...imageprocessing import morphological_skeleton_2d, morphological_skeleton_3d
+
+def morphologicalskeleton(image, volumetric):
+    if volumetric: 
+        return morphological_skeleton_3d(image)
+    else:
+        return morphological_skeleton_2d(image)
+
+
 def median_filter(image, window_size, mode):
     return scipy.ndimage.median_filter(image, size=window_size, mode=mode)
 
