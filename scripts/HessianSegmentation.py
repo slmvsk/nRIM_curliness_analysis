@@ -61,4 +61,5 @@ rescale_filter.SetInput(multi_scale_filter.GetOutput())
 # Convert the output ITK image back to a NumPy array
 output_numpy_image = itk.GetArrayFromImage(rescale_filter.GetOutput())
 
-# You can now use `output_numpy_image` in your Python environment
+# You can now use `output_numpy_image` inw your Python environment
+

@@ -10,11 +10,13 @@ Created on Tue Jun 25 09:33:53 2024
 from czitools.metadata_tools import czi_metadata as czimd
 import numpy as np
 from czifile import CziFile
-from src.FileImport.PlottingImage import plot_slice_from_stack
-from src.ImageProcessing.NormilizeIntensity import normalize_intensity, validate_image_adjustment, process_scenes
 
 import sys
 sys.path.append('/Users/tetianasalamovska/Documents/GitHub/nRIM_curliness_analysis')
+
+
+from src.FileImport.PlottingImage import plot_slice_from_stack, plot_comparison
+from src.ImageProcessing.NormilizeIntensity import normalize_intensity, validate_image_adjustment, process_scenes
 
 from src.FileImport.ReadZeissStacks import read_czi_stack
 
@@ -84,6 +86,14 @@ print(adjusted_scenes[2].shape)
 
 # Example of plotting comparison for the first scene
 plot_comparison(adjusted_scenes[1][8,:,:], blurred_scenes[1][8,:,:], "Gaussian comparison")
+
+
+
+
+
+
+
+
 
 #tubness method adapted from imagej 
 
