@@ -170,29 +170,47 @@ def tubeness(image, sigma):
 # Example usage with a 3D numpy array `data`
 # data should be your actual 3D image data
 # sigma should be chosen based on the scale of the structures you're looking to enhance
-sigma = 5.0  # Gaussian smoothing parameter
+sigma = 4.0  # Gaussian smoothing parameter
 result = tubeness(blurred_scenes[2], sigma)
 
 plot_comparison(result[8,:,:], blurred_scenes[2][8,:,:], "Gaussian comparison")
 
 
-# Example to process multiple scenes
-enhanced_scenes = []
-for scene in blurred_scenes:
-    # Create a mask for the scene
-    spacing = 1.0  # Adjust this based on your image metadata
-    sigma = 2.0  # Adjust based on your specific requirements
+def plot_images(image1, image2, title1='Image 1', title2='Image 2'):
+    """Plot two images side by side with high quality."""
+    fig, ax = plt.subplots(1, 2, figsize=(10, 5), dpi=300)  # Increase dpi for higher quality
     
-    # Process the scene to enhance neurites
-    enhanced_scene = enhance_neurites_tubeness(blurred_scenes, mask, spacing, sigma)
-    enhanced_scenes.append(enhanced_scene)
+    # Plot the first image
+    ax[0].imshow(image1, cmap='gray')
+    ax[0].set_title(title1)
+    ax[0].axis('off')  # Hide the axes
+
+    # Plot the second image
+    ax[1].imshow(image2, cmap='gray')
+    ax[1].set_title(title2)
+    ax[1].axis('off')  # Hide the axes
+
+    plt.tight_layout()  # Adjust layout to fit images
+    plt.show()
+
+# Example usage:
+# Assuming 'image1' and 'image2' are your 2D numpy arrays representing the images
+plot_images(result[8,:,:], blurred_scenes[2][8,:,:], 'Result Slice', 'Blurred Scene Slice')
 
 
 
 
-def enhance_edges_log(image, mask=None, sigma=2.0):
-    size = int(sigma * 4) + 1
-    output_pixels = centrosome.filter.laplacian_of_gaussian(image, mask, size, sigma)
-    return output_pixels
+import tifffile as tiff
+
+def save_as_tiff(image_slice, file_name):
+    """Save an image slice as a TIFF file."""
+    tiff.imwrite(file_name, image_slice, photometric='minisblack')
+
+# Example usage to save specific slices
+save_as_tiff(result[8, :, :], 'result_slice_8.tif')
+save_as_tiff(blurred_scenes[2][8, :, :], 'blurred_scene_slice_8.tif')
+
+
+
 
 
