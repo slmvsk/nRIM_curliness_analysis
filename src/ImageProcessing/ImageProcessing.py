@@ -132,33 +132,60 @@ plot_comparison(enhanced_stack[8,:,:], blurred_scenes[2][8,:,:], "Gaussian compa
 
 
 
-def apply_tubeness_3d_debug(image, sigma_values, threshold=0.5):
-    tubeness_image = np.zeros_like(image, dtype=np.float64)
-    for sigma in sigma_values:
-        hessian = hessian_matrix(image, sigma=sigma, order='rc')
-        eigenvalues = hessian_matrix_eigvals(hessian)
-        sorted_eigenvalues = np.sort(np.abs(eigenvalues), axis=0)
-        
-        is_tubular = (sorted_eigenvalues[-2] < 0) & (sorted_eigenvalues[-1] < 0)
-        tubeness_measure = np.sqrt(sorted_eigenvalues[-2] * sorted_eigenvalues[-1])
-        tubeness_measure[~is_tubular] = 0
-        
-        tubeness_image = np.maximum(tubeness_image, tubeness_measure)
-        
-        # Debug output
-        print("Max Tubeness at sigma =", sigma, ":", tubeness_measure.max())
+import numpy as np
+import scipy.ndimage
+
+def calculate_hessian(matrix, sigma):
+    """Calculate the Hessian matrix for each voxel in a 3D array."""
+    # Calculate the gradients
+    gradients = np.gradient(matrix, sigma, axis=(0, 1, 2))
+    hessian = np.empty((matrix.shape[0], matrix.shape[1], matrix.shape[2], 3, 3))
     
-    # Applying a global threshold might be revisited
-    tubeness_image[tubeness_image < threshold] = 0
-    return tubeness_image
+    # Compute each component of the Hessian matrix
+    for k in range(3):
+        for l in range(3):
+            hessian[..., k, l] = np.gradient(gradients[k], sigma, axis=l)
+    
+    return hessian
 
-# Usage example with debug
-sigma_values = [5, 8, 10, 12, 15]
-enhanced_stack = apply_tubeness_3d_debug(blurred_scenes[2], sigma_values)
+def tubeness(image, sigma):
+    """Calculate the tubeness measure of a 3D image using the Hessian matrix eigenvalues."""
+    # Gaussian smoothing
+    smoothed = scipy.ndimage.gaussian_filter(image, sigma)
+    
+    # Calculate the Hessian matrix
+    hessian = calculate_hessian(smoothed, sigma)
+    
+    # Compute eigenvalues for each voxel
+    eigenvalues = np.linalg.eigvalsh(hessian)
+    
+    # Select the most negative eigenvalue
+    min_eigenvalue = np.min(eigenvalues, axis=-1)
+    
+    # Tubeness measure: negative eigenvalues indicate tubular structures
+    tubeness = np.where(min_eigenvalue < 0, -min_eigenvalue, 0)
+    
+    return tubeness
 
-plot_comparison(enhanced_stack[8,:,:], blurred_scenes[2][8,:,:], "Gaussian comparison")
+# Example usage with a 3D numpy array `data`
+# data should be your actual 3D image data
+# sigma should be chosen based on the scale of the structures you're looking to enhance
+sigma = 5.0  # Gaussian smoothing parameter
+result = tubeness(blurred_scenes[2], sigma)
+
+plot_comparison(result[8,:,:], blurred_scenes[2][8,:,:], "Gaussian comparison")
 
 
+# Example to process multiple scenes
+enhanced_scenes = []
+for scene in blurred_scenes:
+    # Create a mask for the scene
+    spacing = 1.0  # Adjust this based on your image metadata
+    sigma = 2.0  # Adjust based on your specific requirements
+    
+    # Process the scene to enhance neurites
+    enhanced_scene = enhance_neurites_tubeness(blurred_scenes, mask, spacing, sigma)
+    enhanced_scenes.append(enhanced_scene)
 
 
 

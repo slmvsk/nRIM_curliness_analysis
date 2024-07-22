@@ -8,10 +8,21 @@ Enhance features
 @author: tetianasalamovska
 """
 
-
-
-
 # Mask function insert 
+
+ def __mask(self, pixel_data, mask):
+     data = numpy.zeros_like(pixel_data)
+
+     data[mask] = pixel_data[mask]
+
+     return data
+
+ def __unmask(self, data, pixel_data, mask):
+     data[~mask] = pixel_data[~mask]
+
+     return data
+ 
+    
 
  def enhance_neurites(self, image, radius, method):
      data = self.__mask(image.pixel_data, image.mask)
