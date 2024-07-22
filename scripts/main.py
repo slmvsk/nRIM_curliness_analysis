@@ -81,11 +81,15 @@ for index, scene in enumerate(blurred_scenes):
     print(f"Blurred scene {index} shape: {scene.shape}")
 
 
+if blurred_scenes:
+    print(blurred_scenes[0-10].shape)
+
 print(blurred_scenes[2].shape)
 print(adjusted_scenes[2].shape)
 
 # Example of plotting comparison for the first scene
 plot_comparison(adjusted_scenes[1][8,:,:], blurred_scenes[1][8,:,:], "Gaussian comparison")
+
 
 
 

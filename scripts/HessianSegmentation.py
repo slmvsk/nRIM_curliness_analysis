@@ -35,6 +35,11 @@ Dimension = input_image.GetImageDimension()
 HessianPixelType = itk.SymmetricSecondRankTensor[itk.F, Dimension]
 HessianImageType = itk.Image[HessianPixelType, Dimension]
 
+
+
+itk.HessianToObjectnessMeasureImageFilter.GetTypes()
+
+
 # Set up the objectness filter
 objectness_filter=itk.HessianToObjectnessMeasureImageFilter[HessianImageType, ImageType].New()
 objectness_filter.SetBrightObject(False)
