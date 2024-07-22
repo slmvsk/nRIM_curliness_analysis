@@ -90,6 +90,27 @@ print(adjusted_scenes[2].shape)
 # Example of plotting comparison for the first scene
 plot_comparison(adjusted_scenes[1][8,:,:], blurred_scenes[1][8,:,:], "Gaussian comparison")
 
+sigma = 4.0  # Gaussian smoothing parameter
+result = tubeness(blurred_scenes[2], sigma)
+
+plot_comparison(result[8,:,:], blurred_scenes[2][8,:,:])
+
+print(result.shape)
+
+from scipy.ndimage import gaussian_filter
+blurred_result = gaussian_filter(result, sigma=5)
+
+plot_comparison(blurred_result[8,:,:], blurred_scenes[2][8,:,:], "Plot comparison")
+
+
+
+
+
+
+
+
+
+
 
 
 

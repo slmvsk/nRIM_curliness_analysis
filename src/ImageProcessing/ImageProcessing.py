@@ -196,9 +196,117 @@ def plot_images(image1, image2, title1='Image 1', title2='Image 2'):
 # Example usage:
 # Assuming 'image1' and 'image2' are your 2D numpy arrays representing the images
 plot_images(result[8,:,:], blurred_scenes[2][8,:,:], 'Result Slice', 'Blurred Scene Slice')
+from scipy.ndimage import gaussian_filter
+blurred_result = gaussian_filter(result, sigma=3)
+
+plot_images(blurred_result[8,:,:], blurred_scenes[2][8,:,:], 'Result Slice', 'Blurred Scene Slice')
 
 
 
+from skimage.io import imread
+from pyclesperanto_prototype import imshow
+import pyclesperanto_prototype as cle
+import matplotlib.pyplot as plt
+
+import napari
+from napari.utils import nbscreenshot
+
+# For 3D processing, powerful graphics
+# processing units might be necessary
+cle.select_device('TX')
+backgrund_subtracted = cle.top_hat_box(blurred_result, radius_x=10, radius_y=10, radius_z=10)
+print(blurred_result.shape)
+
+print(backgrund_subtracted.shape)
+#not bad but radiuses to be chosen and maybe another method
+
+plot_images(blurred_result[8,:,:], backgrund_subtracted[8,:,:], 'Blurred result Slice', 'Subtrackted background')
+
+
+# problems with segmentation 
+segmented = cle.voronoi_otsu_labeling(backgrund_subtracted, spot_sigma=3, outline_sigma=1)
+
+print(segmented.shape)
+
+plot_images(blurred_result[8,:,:], segmented[8,:,:], 'Blurred result Slice', 'Segmented')
+
+
+###########################
+#If you do not have isotropic pixels or need to perform background corrections
+#follow the tutorials from here...
+# https://github.com/clEsperanto/pyclesperanto_prototype/blob/master/demo/segmentation/Segmentation_3D.ipynb
+###########################
+
+#skeletonize (and project like in fiji or no projection)
+
+
+from skimage.morphology import skeletonize_3d
+from skimage import img_as_ubyte
+
+def skeletonize_image(image):
+    """
+    Apply skeletonization to a 3D binary image.
+    
+    Args:
+    image (numpy.ndarray): A 3D binary image where the objects are 1's and the background is 0's.
+    
+    Returns:
+    numpy.ndarray: A 3D binary image containing the skeleton of the original image.
+    """
+    # Ensure the image is in the correct format (binary with values 0 and 1)
+    if image.dtype != np.uint8:
+        image = img_as_ubyte(image > 0)  # Convert to uint8 and threshold if necessary
+    
+    # Apply skeletonization
+    skeleton = skeletonize_3d(image)
+    return skeleton
+
+# Example usage:
+# Assume `image_3d` is your 3D numpy array that's already a binary image
+skeletonized = skeletonize_image(segmented)
+
+plot_images(blurred_result[8,:,:], skeletonized[8,:,:], 'Blurred result Slice', 'Skeletonized')
+
+print(skeletonized.shape)
+save_as_tiff(skeletonized, 'skeletonized.tif')
+save_as_tiff(scenes[2], 'scenes_2.tif')
+
+
+# validation 
+# max intensity z - projection
+
+def max_intensity_z_projection(image_3d):
+    """
+    Create a maximum intensity projection (MIP) of a 3D binary image along the z-axis.
+    
+    Args:
+    image_3d (numpy.ndarray): A 3D numpy array representing the binary image. Expected shape is (z, y, x).
+    
+    Returns:
+    numpy.ndarray: A 2D numpy array representing the maximum intensity projection along the z-axis.
+    """
+    # Validate that the image is binary (it contains only 0 and 1 values)
+    if not np.all(np.isin(image_3d, [0, 1])):
+        raise ValueError("Input image must be binary containing only 0 and 1 values.")
+
+    # Compute the maximum intensity projection by using np.max along the z-axis
+    mip = np.max(image_3d, axis=0)  # Axis 0 corresponds to the z-direction in your image stack
+    return mip
+
+
+
+mip_image = max_intensity_z_projection(skeletonized)
+
+
+print(mip_image.shape)
+plot_images(blurred_result[8,:,:], mip_image, 'Blurred result Slice', 'Skeletonized')
+
+
+
+
+#Wrtie image as tif. Ue imageJ for visualization
+from skimage.io import imsave
+imsave("skeletonized.tif", skeletonized) 
 
 import tifffile as tiff
 
