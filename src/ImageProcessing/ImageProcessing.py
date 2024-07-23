@@ -44,47 +44,6 @@ def reduce_noise(image, patch_size, patch_distance, cutoff_distance, channel_axi
     return denoised
 
 
-
-# 2D to try because takes time for 3D 
-def enhance_neurites(image, sigma):
-    """
-    Enhance neurites using an advanced method incorporating Gaussian smoothing, 
-    Hessian-based tubeness, contrast enhancement, and thresholding.
-
-    Parameters:
-    image (np.ndarray): The input image (2D).
-    sigma (float): The standard deviation for the Gaussian kernel.
-
-    Returns:
-    np.ndarray: The processed image highlighting neurites.
-    """
-    # Smooth the image with a Gaussian filter
-    smoothed_image = gaussian(image, sigma=sigma)
-
-    # Compute the Hessian matrix and its eigenvalues
-    hessian = hessian_matrix(smoothed_image, sigma=sigma)
-    eigenvalues = hessian_matrix_eigvals(hessian)
-
-    # Find the maximum negative eigenvalue
-    filtered_image = np.max(eigenvalues, axis=0)
-    filtered_image[filtered_image > 0] = 0
-    filtered_image = np.abs(filtered_image)
-
-    # Enhance contrast
-    contrast_enhanced_image = exposure.equalize_adapthist(filtered_image)
-
-    # Thresholding
-    threshold_value = threshold_otsu(contrast_enhanced_image)
-    binary_image = contrast_enhanced_image > threshold_value
-
-    # Morphological closing to remove small holes and use dilation to enhance visibility
-    final_image = morphology.dilation(morphology.closing(binary_image, morphology.disk(3)), morphology.disk(1))
-
-    return final_image
-
-# Example usage, assuming 'img' is your loaded 2D image array
-# img_enhanced = enhance_neurites(img, sigma=2)
-
 import numpy as np
 from skimage import filters, io
 from skimage.feature import hessian_matrix, hessian_matrix_eigvals
@@ -170,10 +129,10 @@ def tubeness(image, sigma):
 # Example usage with a 3D numpy array `data`
 # data should be your actual 3D image data
 # sigma should be chosen based on the scale of the structures you're looking to enhance
-sigma = 4.0  # Gaussian smoothing parameter
-result = tubeness(blurred_scenes[2], sigma)
+sigma = 5.0  # Gaussian smoothing parameter
+result = tubeness(image_nosoma, sigma)
 
-plot_comparison(result[8,:,:], blurred_scenes[2][8,:,:], "Gaussian comparison")
+plot_comparison(result[8,:,:], scenes[2][8,:,:], "Gaussian comparison")
 
 
 def plot_images(image1, image2, title1='Image 1', title2='Image 2'):
@@ -214,13 +173,13 @@ from napari.utils import nbscreenshot
 # For 3D processing, powerful graphics
 # processing units might be necessary
 cle.select_device('TX')
-backgrund_subtracted = cle.top_hat_box(blurred_result, radius_x=10, radius_y=10, radius_z=10)
-print(blurred_result.shape)
+backgrund_subtracted = cle.top_hat_box(result, radius_x=10, radius_y=10, radius_z=10)
+print(result.shape)
 
 print(backgrund_subtracted.shape)
 #not bad but radiuses to be chosen and maybe another method
 
-plot_images(blurred_result[8,:,:], backgrund_subtracted[8,:,:], 'Blurred result Slice', 'Subtrackted background')
+plot_images(result[8,:,:], backgrund_subtracted[8,:,:], 'Blurred result Slice', 'Subtrackted background')
 
 
 # problems with segmentation 
@@ -228,7 +187,7 @@ segmented = cle.voronoi_otsu_labeling(backgrund_subtracted, spot_sigma=3, outlin
 
 print(segmented.shape)
 
-plot_images(blurred_result[8,:,:], segmented[8,:,:], 'Blurred result Slice', 'Segmented')
+plot_images(result[8,:,:], segmented[8,:,:], 'Blurred result Slice', 'Segmented')
 
 
 ###########################
@@ -293,13 +252,98 @@ def max_intensity_z_projection(image_3d):
     mip = np.max(image_3d, axis=0)  # Axis 0 corresponds to the z-direction in your image stack
     return mip
 
-
-
 mip_image = max_intensity_z_projection(skeletonized)
-
 
 print(mip_image.shape)
 plot_images(blurred_result[8,:,:], mip_image, 'Blurred result Slice', 'Skeletonized')
+
+# clean skeleton !!! remove small branches wit length smaller than ? (and weird very long??? )
+
+from skimage.morphology import skeletonize, remove_small_objects
+from skimage.measure import label, regionprops
+from skimage.io import imshow
+from skimage.draw import line
+from scipy.spatial.distance import euclidean
+
+def measure_length(image_2d):
+    """
+    Calculate the Euclidean length of each branch in a skeletonized image.
+    
+    Args:
+    image_2d (numpy.ndarray): The 2D binary image of skeletonized dendrites.
+    
+    Returns:
+    list: List of lengths of each branch.
+    """
+    # Ensure the image is binary and skeletonized
+    if image_2d.max() > 1:
+        image_2d = image_2d > 0
+    skeleton = skeletonize(image_2d)
+    
+    # Label connected components
+    labeled_skeleton = label(skeleton)
+    props = regionprops(labeled_skeleton)
+    
+    lengths = []
+    for prop in props:
+        # Extract the coordinates of the branch
+        coords = prop.coords
+        branch_length = 0
+        # Calculate the Euclidean distance between consecutive pixels in the branch
+        for i in range(len(coords) - 1):
+            branch_length += euclidean(coords[i], coords[i + 1])
+        lengths.append(branch_length)
+    
+    return lengths
+
+
+measurments = measure_length(mip_image)
+
+
+def process_dendrites(image_2d, min_length, max_length):
+    """
+    Process a 2D image of dendrites to measure and filter branches by length.
+    
+    Args:
+    image_2d (numpy.ndarray): The 2D Z-projection image of dendrites, binary format.
+    min_length (int): Minimum length of branches to keep.
+    max_length (int): Maximum length of branches to keep.
+    
+    Returns:
+    numpy.ndarray: The processed image with filtered dendritic branches.
+    """
+    # Ensure the image is binary and skeletonized
+    if image_2d.max() > 1:
+        image_2d = image_2d > 0
+    skeleton = skeletonize(image_2d)
+    
+    # Label connected components
+    labeled_skeleton = label(skeleton)
+    
+    # Measure properties of labeled regions
+    props = regionprops(labeled_skeleton)
+    
+    # Filter out small and very long branches
+    for prop in props:
+        if prop.area < min_length or prop.area > max_length:
+            for coord in prop.coords:
+                skeleton[coord[0], coord[1]] = 0  # Set pixel to 0 (remove it)
+    
+    # Optionally, re-label to see the final branches
+    filtered_skeleton = label(skeleton)
+    
+    return filtered_skeleton
+
+
+
+
+# Example usage:
+clean_skeleton = process_dendrites(mip_image, min_length=5, max_length=20000)
+
+plot_images(mip_image, clean_skeleton, 'MIP', 'Clean')
+
+
+#process to curliness
 
 
 
