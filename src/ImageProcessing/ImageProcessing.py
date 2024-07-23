@@ -348,6 +348,11 @@ plot_images(mip_image, clean_skeleton, 'MIP', 'Clean')
 
 
 
+
+
+
+
+
 #Wrtie image as tif. Ue imageJ for visualization
 from skimage.io import imsave
 imsave("skeletonized.tif", skeletonized) 
