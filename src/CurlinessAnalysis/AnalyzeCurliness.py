@@ -83,7 +83,7 @@ plt.xlim([0, 1000])  # Set x-axis limits
 plt.ylim([0, 150])  # Optionally adjust the y-axis to change how density appears
 plt.show()
 
-# Plotting branch distances
+# Plotting max_dendritic_reach
 plt.figure(figsize=(6, 4))
 plt.hist(branch_distances, bins=100, color='green', alpha=0.7)
 plt.title('Histogram of max_dendritic_reach')
