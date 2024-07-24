@@ -43,58 +43,12 @@ def reduce_noise(image, patch_size, patch_distance, cutoff_distance, channel_axi
     )
     return denoised
 
-
-import numpy as np
-from skimage import filters, io
-from skimage.feature import hessian_matrix, hessian_matrix_eigvals
-
-def apply_tubeness_3d(image, sigma_values):
-    """
-    Compute the tubeness measure for a 3D image using the definition from Sato et al., 1997.
-
-    Parameters:
-        image (numpy.ndarray): The input 3D image.
-        sigma_values (list): List of sigma values for scale-space analysis.
-
-    Returns:
-        numpy.ndarray: A 3D array containing the tubeness measure.
-    """
-    # Initialize the tubeness image with zeros
-    tubeness_image = np.zeros_like(image, dtype=np.float64)
-
-    # Iterate over the range of sigma values
-    for sigma in sigma_values:
-        # Compute the Hessian matrix
-        hessian = hessian_matrix(image, sigma=sigma, order='rc')
-        # Compute the eigenvalues of the Hessian matrix
-        hessian_eigenvalues = hessian_matrix_eigvals(hessian)
-        # Sort eigenvalues by magnitude (largest in magnitude last so lambda2 is -2 and lambda3 is -1 index)
-        sorted_eigenvalues = np.sort(np.abs(hessian_eigenvalues), axis=0)
-
-        # Calculate tubeness measure
-        is_tubular = (sorted_eigenvalues[-2] < 0) & (sorted_eigenvalues[-1] < 0)
-        tubeness_measure = np.sqrt(sorted_eigenvalues[-2] * sorted_eigenvalues[-1])
-        tubeness_measure[~is_tubular] = 0
-
-        # Update the tubeness image with the maximum response across scales
-        tubeness_image = np.maximum(tubeness_image, tubeness_measure)
-
-    return tubeness_image
-
-sigma_values = [5, 6, 7, 8, 9]
-# Example usage
-enhanced_stack = apply_tubeness_3d(blurred_scenes[2], sigma_values)  # Example sigma values for scale-space analysis)
-print(blurred_scenes[2].shape)
-print(enhanced_stack.shape)
-
-plot_comparison(enhanced_stack[8,:,:], blurred_scenes[2][8,:,:], "Gaussian comparison")
 ##########################
 # Tubeness problem:
 # it wants to see image with only tubular structures, so sometimes it connects dots
 # Solution: 
 # Preprocess better, dots and small onjects doesn't give me any information (dendrite pieces)
 ##########################
-
 
 import numpy as np
 import scipy.ndimage
