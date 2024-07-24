@@ -90,7 +90,9 @@ print(enhanced_stack.shape)
 plot_comparison(enhanced_stack[8,:,:], blurred_scenes[2][8,:,:], "Gaussian comparison")
 ##########################
 # Tubeness problem:
-# it wants to see image with only tubular structures, so sometimes it connects dots 
+# it wants to see image with only tubular structures, so sometimes it connects dots
+# Solution: 
+# Preprocess better, dots and small onjects doesn't give me any information (dendrite pieces)
 ##########################
 
 
