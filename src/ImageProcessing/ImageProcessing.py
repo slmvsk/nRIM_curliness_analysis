@@ -22,18 +22,6 @@ medianfilter_image = scipy.ndimage.median_filter(scenes[1], size=5)
 
 plot_comparison(scenes[1][8,:,:], medianfilter_image[8,:,:], "Filter comparison")
 
-
-def reduce_noise(image, patch_size, patch_distance, cutoff_distance, channel_axis=None):
-    denoised = skimage.restoration.denoise_nl_means(
-        image=image,
-        patch_size=patch_size,
-        patch_distance=patch_distance,
-        h=cutoff_distance,
-        channel_axis=channel_axis,
-        fast_mode=True,
-    )
-    return denoised
-
 ##########################
 # Tubeness problem:
 # it wants to see image with only tubular structures, so sometimes it connects dots
