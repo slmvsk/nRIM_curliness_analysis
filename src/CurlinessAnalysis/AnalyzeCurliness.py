@@ -22,7 +22,9 @@ Created on Mon Jul 22 16:16:21 2024
 # Curliness will be 1 - straightness that implies that a perfectly straight branch (for ex. 15/15 = 1)
 # will have curliness equal 0 (1-1 = 0). More curved branches have higher values approaching 1
 
-
+# clean skeleton before applying or you get minus curliness because your shortest path between the start and end points of the branch
+#is too long and you get straightness more than 1 in some cases. They are just connected and 
+# algorithm sees them as 1 branch 
 
 import numpy as np
 import matplotlib.pyplot as plt
