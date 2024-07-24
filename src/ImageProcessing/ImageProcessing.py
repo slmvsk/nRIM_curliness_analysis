@@ -258,6 +258,11 @@ print(mip_image.shape)
 plot_images(blurred_result[8,:,:], mip_image, 'Blurred result Slice', 'Skeletonized')
 
 # clean skeleton !!! remove small branches wit length smaller than ? (and weird very long??? )
+# skeletonize try https://github.com/seung-lab/kimimaro
+
+
+
+
 
 from skimage.morphology import skeletonize, remove_small_objects
 from skimage.measure import label, regionprops
