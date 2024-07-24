@@ -10,6 +10,7 @@ Created on Tue Jun 25 09:33:53 2024
 from czitools.metadata_tools import czi_metadata as czimd
 import numpy as np
 from czifile import CziFile
+import pyclesperanto_prototype as cle
 
 import sys
 sys.path.append('/Users/tetianasalamovska/Documents/GitHub/nRIM_curliness_analysis')
@@ -102,6 +103,32 @@ blurred_result = gaussian_filter(result, sigma=5)
 
 plot_comparison(blurred_result[8,:,:], blurred_scenes[2][8,:,:], "Plot comparison")
 
+#median filter can be better alternative to gaussian blur 
+medianfilter_image = scipy.ndimage.median_filter(scenes[1], size=5)
+
+#print(medianfilter_image.shape)
+
+plot_comparison(scenes[1][8,:,:], medianfilter_image[8,:,:], "Filter comparison")
+
+#Tubness (includes Gaussian smoothing filter )
+sigma = 5.0  # Smoothing parameter 
+result = tubeness(image_nosoma, sigma)
+
+plot_comparison(result[8,:,:], scenes[2][8,:,:], "Gaussian comparison")
+
+#another way to plot in better quality (only 2D selected)
+plot_images(blurred_result[8,:,:], blurred_scenes[2][8,:,:], 'Result Slice', 'Blurred Scene Slice')
+
+
+# For 3D processing, powerful graphics
+# processing units might be necessary
+cle.select_device('TX')
+backgrund_subtracted = cle.top_hat_box(result, radius_x=10, radius_y=10, radius_z=10)
+print(result.shape)
+
+print(backgrund_subtracted.shape)
+#not bad but radiuses to be chosen and maybe another method
+plot_images(result[8,:,:], backgrund_subtracted[8,:,:], 'Blurred result Slice', 'Subtrackted background')
 
 
 
@@ -112,67 +139,4 @@ plot_comparison(blurred_result[8,:,:], blurred_scenes[2][8,:,:], "Plot compariso
 
 
 
-
-
-
-
-
-
-
-
-#tubness method adapted from imagej 
-
-import numpy as np
-from skimage.filters import gaussian
-from skimage.feature import hessian_matrix, hessian_matrix_eigvals
-from src.ImageProcessing.ImageProcessing import enhance_neurites
-
-# Example usage (assuming you have an image 'img' and a sigma value)
-enhanced_scenes = enhance_neurites(blurred_scenes[1], sigma=6)
-plot_comparison(adjusted_scenes[1][1,:,:], blurred_scenes[1][1,:,:], "Tubeness comparison")
-
-
-#enhanced_image = meijering(blurred_scenes[1], sigmas=range(1, 10, 2), black_ridges=True)
-
-plot_comparison(adjusted_scenes[1][1,:,:], blurred_scenes[1][1,:,:], "Comparison")
-
-import imagej
-import os
-
-# Initialize ImageJ
-ij = imagej.init('sc.fiji:fiji')  # Make sure Fiji is installed correctly and the path is recognized
-
-# Assuming 'scenes' is your list of 3D numpy arrays
-scenes = [np.random.random((100, 100, 100)) for _ in range(5)]  # Example scenes
-
-# List to hold the processed scenes
-processed_scenes = []
-
-# Iterate over each scene
-for i, scene in enumerate(scenes):
-    # Convert the numpy array to an ImageJ2 compatible image
-    image = ij.py.to_java(scene)
-
-    # Apply the Tubeness plugin
-    # Adjust 'sigma' and other parameters according to your needs
-    ij.py.run_plugin('FeatureJ', {
-        'command': 'Tubeness',
-        'sigmas': [1.0],  # List of sigmas to process with
-        'output': ['Tubeness'],
-        'input': image
-    })
-
-    # Retrieve the processed image
-    processed_image = ij.py.from_java(ij.py.get_image_plus())  # Converts the result back to a numpy array
-
-    # Append the result to the list of processed scenes
-    processed_scenes.append(processed_image)
-
-    print(f"Processed scene {i + 1}/{len(scenes)}")
-
-# Cleanup ImageJ resources
-ij.dispose()
-
-# Optionally, display or analyze the processed scenes further
-print("Processing complete. Processed scenes are stored in the 'processed_scenes' list.")
 

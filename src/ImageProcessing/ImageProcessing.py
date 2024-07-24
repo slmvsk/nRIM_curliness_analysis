@@ -6,7 +6,6 @@ Created on Thu Jul 18 07:27:03 2024
 @author: tetianasalamovska
 """
 
-
 # Apply Gaussian filter with a specific sigma
 #filtered_image = apply_gaussian_filter(adjusted_scenes[2], sigma=2)
 
@@ -14,22 +13,23 @@ import numpy as np
 from skimage.filters import gaussian, threshold_otsu
 from skimage.feature import hessian_matrix, hessian_matrix_eigvals
 from skimage import exposure, morphology
-
-
-medianfilter_image = scipy.ndimage.median_filter(scenes[1], size=5)
-
-#print(medianfilter_image.shape)
-
-plot_comparison(scenes[1][8,:,:], medianfilter_image[8,:,:], "Filter comparison")
+import scipy.ndimage
+from skimage.io import imread
+from pyclesperanto_prototype import imshow
+import matplotlib.pyplot as plt
+import napari
+from napari.utils import nbscreenshot
+import pyclesperanto_prototype as cle
 
 ##########################
 # Tubeness problem:
-# it wants to see image with only tubular structures, so sometimes it connects dots
+# 1. It wants to see image with only tubular structures, so sometimes it connects dots
+# 2. Also sigma is dependent on the scale of image so I need to make function "smart" to be
+# able to accept different scale as input and adfuct sigma?
 # Solution: 
-# Preprocess better, dots and small onjects doesn't give me any information (dendrite pieces)
+# 1. Preprocess better, dots and small onjects doesn't give me any information (dendrite pieces)
+# 2. 
 ##########################
-
-import scipy.ndimage
 
 def calculate_hessian(matrix, sigma):
     """Calculate the Hessian matrix for each voxel in a 3D array."""
@@ -64,59 +64,12 @@ def tubeness(image, sigma):
     return tubeness
 
 # Example usage with a 3D numpy array `data`
-# data should be your actual 3D image data
-# sigma should be chosen based on the scale of the structures you're looking to enhance
-sigma = 5.0  # Gaussian smoothing parameter
-result = tubeness(image_nosoma, sigma)
+# Sigma should be chosen based on the scale of the structures you're looking to enhance
+#sigma = 5.0  # Smoothing parameter 
+#result = tubeness(image_nosoma, sigma)
+#plot_comparison(result[8,:,:], scenes[2][8,:,:], "Gaussian comparison") 
+#or plot_images(blurred_result[8,:,:], blurred_scenes[2][8,:,:], 'Result Slice', 'Blurred Scene Slice')
 
-plot_comparison(result[8,:,:], scenes[2][8,:,:], "Gaussian comparison")
-
-
-def plot_images(image1, image2, title1='Image 1', title2='Image 2'):
-    """Plot two images side by side with high quality."""
-    fig, ax = plt.subplots(1, 2, figsize=(10, 5), dpi=300)  # Increase dpi for higher quality
-    
-    # Plot the first image
-    ax[0].imshow(image1, cmap='gray')
-    ax[0].set_title(title1)
-    ax[0].axis('off')  # Hide the axes
-
-    # Plot the second image
-    ax[1].imshow(image2, cmap='gray')
-    ax[1].set_title(title2)
-    ax[1].axis('off')  # Hide the axes
-
-    plt.tight_layout()  # Adjust layout to fit images
-    plt.show()
-
-# Example usage:
-# Assuming 'image1' and 'image2' are your 2D numpy arrays representing the images
-plot_images(result[8,:,:], blurred_scenes[2][8,:,:], 'Result Slice', 'Blurred Scene Slice')
-from scipy.ndimage import gaussian_filter
-blurred_result = gaussian_filter(result, sigma=3)
-
-plot_images(blurred_result[8,:,:], blurred_scenes[2][8,:,:], 'Result Slice', 'Blurred Scene Slice')
-
-
-
-from skimage.io import imread
-from pyclesperanto_prototype import imshow
-import pyclesperanto_prototype as cle
-import matplotlib.pyplot as plt
-
-import napari
-from napari.utils import nbscreenshot
-
-# For 3D processing, powerful graphics
-# processing units might be necessary
-cle.select_device('TX')
-backgrund_subtracted = cle.top_hat_box(result, radius_x=10, radius_y=10, radius_z=10)
-print(result.shape)
-
-print(backgrund_subtracted.shape)
-#not bad but radiuses to be chosen and maybe another method
-
-plot_images(result[8,:,:], backgrund_subtracted[8,:,:], 'Blurred result Slice', 'Subtrackted background')
 
 
 # problems with segmentation 

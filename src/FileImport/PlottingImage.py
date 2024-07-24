@@ -64,3 +64,25 @@ def plot_comparison(image1, image2, title):
 # Example usage:
 # Assuming adjusted_scenes[2][5,:,:] and filtered_image[5,:,:] are correctly shaped (1024, 1024)
 #plot_comparison(adjusted_scenes[2][5,:,:], filtered_image[5,:,:], "Background Correction Comparison")
+
+# this is the best one so far 
+def plot_images(image1, image2, title1='Image 1', title2='Image 2'):
+    """Plot two images side by side with high quality."""
+    fig, ax = plt.subplots(1, 2, figsize=(10, 5), dpi=300)  # Increase dpi for higher quality
+    
+    # Plot the first image
+    ax[0].imshow(image1, cmap='gray')
+    ax[0].set_title(title1)
+    ax[0].axis('off')  # Hide the axes
+
+    # Plot the second image
+    ax[1].imshow(image2, cmap='gray')
+    ax[1].set_title(title2)
+    ax[1].axis('off')  # Hide the axes
+
+    plt.tight_layout()  # Adjust layout to fit images
+    plt.show()
+
+# Example usage:
+# Assuming 'image1' and 'image2' are your 2D numpy arrays representing the images
+#plot_images(result[8,:,:], blurred_scenes[2][8,:,:], 'Result Slice', 'Blurred Scene Slice')
