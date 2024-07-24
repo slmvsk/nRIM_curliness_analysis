@@ -72,23 +72,7 @@ def tubeness(image, sigma):
 
 
 
-# problems with segmentation 
-segmented = cle.voronoi_otsu_labeling(backgrund_subtracted, spot_sigma=3, outline_sigma=1)
-
-print(segmented.shape)
-
-plot_images(result[8,:,:], segmented[8,:,:], 'Blurred result Slice', 'Segmented')
-
-
-###########################
-#If you do not have isotropic pixels or need to perform background corrections
-#follow the tutorials from here...
-# https://github.com/clEsperanto/pyclesperanto_prototype/blob/master/demo/segmentation/Segmentation_3D.ipynb
-###########################
-
 #skeletonize (and project like in fiji or no projection)
-
-
 from skimage.morphology import skeletonize_3d
 from skimage import img_as_ubyte
 
@@ -112,16 +96,20 @@ def skeletonize_image(image):
 
 # Example usage:
 # Assume `image_3d` is your 3D numpy array that's already a binary image
-skeletonized = skeletonize_image(segmented)
+#skeletonized = skeletonize_image(segmented)
+#plot_images(blurred_result[8,:,:], skeletonized[8,:,:], 'Blurred result Slice', 'Skeletonized')
+#print(skeletonized.shape)
+#save_as_tiff(skeletonized, 'skeletonized.tif')
+#save_as_tiff(scenes[2], 'scenes_2.tif')
 
-plot_images(blurred_result[8,:,:], skeletonized[8,:,:], 'Blurred result Slice', 'Skeletonized')
-
-print(skeletonized.shape)
-save_as_tiff(skeletonized, 'skeletonized.tif')
-save_as_tiff(scenes[2], 'scenes_2.tif')
+################################
 # tune parameters so the skeleton will be more accurate (some of the very low intensity or SMALL branches are not skeletonized)
+# and clean skeleton afterwards + do labeling
+################################
 
-# validation 
+# validation of skeletonization
+# ..................
+
 # max intensity z - projection
 
 def max_intensity_z_projection(image_3d):
@@ -142,11 +130,12 @@ def max_intensity_z_projection(image_3d):
     mip = np.max(image_3d, axis=0)  # Axis 0 corresponds to the z-direction in your image stack
     return mip
 
-mip_image = max_intensity_z_projection(skeletonized)
+# Example: 
+#mip_image = max_intensity_z_projection(skeletonized)
+#print(mip_image.shape)
+#plot_images(blurred_result[8,:,:], mip_image, 'Blurred result Slice', 'Skeletonized')
 
-print(mip_image.shape)
-plot_images(blurred_result[8,:,:], mip_image, 'Blurred result Slice', 'Skeletonized')
-
+#########################
 # clean skeleton !!! remove small branches wit length smaller than ? (and weird very long??? )
 # skeletonize try https://github.com/seung-lab/kimimaro
 
@@ -156,14 +145,10 @@ plot_images(blurred_result[8,:,:], mip_image, 'Blurred result Slice', 'Skeletoni
 #label skeleton 
 #measure branches 
 # cut them or remove too short and what do i do with loo long branches 
+##########################
 
 
-
-
-
-
-
-
+###############################################################################
 # fix clean skeleton function 
 from skimage.morphology import skeletonize, remove_small_objects
 from skimage.measure import label, regionprops

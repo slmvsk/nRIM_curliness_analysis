@@ -131,6 +131,39 @@ print(backgrund_subtracted.shape)
 plot_images(result[8,:,:], backgrund_subtracted[8,:,:], 'Blurred result Slice', 'Subtrackted background')
 
 
+# problems with segmentation 
+segmented = cle.voronoi_otsu_labeling(backgrund_subtracted, spot_sigma=3, outline_sigma=1)
+
+print(segmented.shape)
+
+plot_images(result[8,:,:], segmented[8,:,:], 'Blurred result Slice', 'Segmented')
+
+
+###########################
+#If you do not have isotropic pixels or need to perform background corrections
+#follow the tutorials from here...
+# https://github.com/clEsperanto/pyclesperanto_prototype/blob/master/demo/segmentation/Segmentation_3D.ipynb
+###########################
+
+# Example usage:
+# Assume `image_3d` is your 3D numpy array that's already a binary image
+skeletonized = skeletonize_image(segmented)
+
+plot_images(blurred_result[8,:,:], skeletonized[8,:,:], 'Blurred result Slice', 'Skeletonized')
+
+print(skeletonized.shape)
+save_as_tiff(skeletonized, 'skeletonized.tif')
+save_as_tiff(scenes[2], 'scenes_2.tif')
+# tune parameters so the skeleton will be more accurate (some of the very low intensity or SMALL branches are not skeletonized)
+
+# validation 
+#......
+
+mip_image = max_intensity_z_projection(skeletonized)
+
+print(mip_image.shape)
+plot_images(blurred_result[8,:,:], mip_image, 'Blurred result Slice', 'Skeletonized')
+
 
 
 
