@@ -15,21 +15,12 @@ from skimage.filters import gaussian, threshold_otsu
 from skimage.feature import hessian_matrix, hessian_matrix_eigvals
 from skimage import exposure, morphology
 
-def morphological_skeleton_3d(image):
-    return skimage.morphology.skeletonize_3d(image)
 
+medianfilter_image = scipy.ndimage.median_filter(scenes[1], size=5)
 
-from ...imageprocessing import morphological_skeleton_2d, morphological_skeleton_3d
+#print(medianfilter_image.shape)
 
-def morphologicalskeleton(image, volumetric):
-    if volumetric: 
-        return morphological_skeleton_3d(image)
-    else:
-        return morphological_skeleton_2d(image)
-
-
-def median_filter(image, window_size, mode):
-    return scipy.ndimage.median_filter(image, size=window_size, mode=mode)
+plot_comparison(scenes[1][8,:,:], medianfilter_image[8,:,:], "Filter comparison")
 
 
 def reduce_noise(image, patch_size, patch_distance, cutoff_distance, channel_axis=None):
@@ -50,7 +41,6 @@ def reduce_noise(image, patch_size, patch_distance, cutoff_distance, channel_axi
 # Preprocess better, dots and small onjects doesn't give me any information (dendrite pieces)
 ##########################
 
-import numpy as np
 import scipy.ndimage
 
 def calculate_hessian(matrix, sigma):
