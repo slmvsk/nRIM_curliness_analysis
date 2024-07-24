@@ -31,9 +31,9 @@ def analyze_dendrite_curliness(image):
     longest_path_length = []
     max_dendritic_reach = []
 
-    # Calculate branch lengths and straight-line distances
+    # Calculate measures
     for prop in properties:
-        # Branch length is the area of the region
+        # longest_path_length 
         longest_path_length.append(prop.area)
         
         # Calculate straight-line (Euclidean) distance between the end points of the skeleton
@@ -41,7 +41,7 @@ def analyze_dendrite_curliness(image):
         distance = np.sqrt((maxr - minr) ** 2 + (maxc - minc) ** 2)
         max_dendritic_reach.append(distance)
 
-    # Calculate straightness and curliness
+    # Straightness 
     longest_path_length = np.array(longest_path_length)
     max_dendritic_reach = np.array(max_dendritic_reach)
     straightness = max_dendritic_reach / longest_path_length
