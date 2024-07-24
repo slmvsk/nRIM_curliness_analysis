@@ -93,5 +93,6 @@ plt.xlim([0, 300])  # Set x-axis limits for example
 plt.ylim([0, 150])  # Optionally adjust the y-axis to change how density appears
 plt.show()
 
+# Plotting mean curliness across groups 
 
 
