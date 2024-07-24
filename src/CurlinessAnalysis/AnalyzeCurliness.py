@@ -17,7 +17,11 @@ Created on Mon Jul 22 16:16:21 2024
 # Straightness = max. Dendritic reach / longest single path length 
 # max. dendritic reach is the shortest path between the start and end points of the branch
 # longest single path length is  the actual path length measured along the branch, 
-# which will be longer than the branch distance for any curved path.
+# which will be longer than the branch distance for any curved path! 
+
+# Curliness will be 1 - straightness that implies that a perfectly straight branch (for ex. 15/15 = 1)
+# will have curliness equal 0 (1-1 = 0). More curved branches have higher values approaching 1
+
 
 
 import numpy as np
@@ -64,6 +68,8 @@ def analyze_dendrite_curliness(image):
 # Example usage
 mean_straightness, mean_curliness, sem_curliness, branch_distances, branch_lengths = analyze_dendrite_curliness(mip_image)
 print(f"Mean Straightness: {mean_straightness}")
+print(f"Mean Curliness: {mean_curliness}")
+
 
 # Plotting longest_path_length
 plt.figure(figsize=(6, 4))
