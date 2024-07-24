@@ -15,6 +15,9 @@ Created on Mon Jul 22 16:16:21 2024
 # ))
 
 # Straightness = max. Dendritic reach / longest single path length 
+# max. dendritic reach is the shortest path between the start and end points of the branch
+# longest single path length is  the actual path length measured along the branch, 
+# which will be longer than the branch distance for any curved path.
 
 
 import numpy as np
