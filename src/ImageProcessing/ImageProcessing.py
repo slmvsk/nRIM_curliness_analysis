@@ -229,7 +229,7 @@ plot_images(blurred_result[8,:,:], skeletonized[8,:,:], 'Blurred result Slice', 
 print(skeletonized.shape)
 save_as_tiff(skeletonized, 'skeletonized.tif')
 save_as_tiff(scenes[2], 'scenes_2.tif')
-
+# tune parameters so the skeleton will be more accurate (some of the very low intensity or SMALL branches are not skeletonized)
 
 # validation 
 # max intensity z - projection
@@ -260,10 +260,21 @@ plot_images(blurred_result[8,:,:], mip_image, 'Blurred result Slice', 'Skeletoni
 # clean skeleton !!! remove small branches wit length smaller than ? (and weird very long??? )
 # skeletonize try https://github.com/seung-lab/kimimaro
 
+# i can label skeletons across all slices and then recognise where they intersect and where one 
+# branch ends??? 
+
+#label skeleton 
+#measure branches 
+# cut them or remove too short and what do i do with loo long branches 
 
 
 
 
+
+
+
+
+# fix clean skeleton function 
 from skimage.morphology import skeletonize, remove_small_objects
 from skimage.measure import label, regionprops
 from skimage.io import imshow
