@@ -149,7 +149,10 @@ def max_intensity_z_projection(image_3d):
 
 
 ###############################################################################
-# fix clean skeleton function 
+# fix clean skeleton function
+# it should measure length of labeled skeleton and remove small objects 
+# separate large objects? 
+
 from skimage.morphology import skeletonize, remove_small_objects
 from skimage.measure import label, regionprops
 from skimage.io import imshow
@@ -238,15 +241,9 @@ plot_images(mip_image, clean_skeleton, 'MIP', 'Clean')
 
 
 
-
-
-
-
-
-
-#Wrtie image as tif. Ue imageJ for visualization
+#Write image as tif. Ue imageJ for visualization
 from skimage.io import imsave
-imsave("skeletonized.tif", skeletonized) 
+imsave("skeletonized.tif", mip_image) 
 
 import tifffile as tiff
 
@@ -255,7 +252,7 @@ def save_as_tiff(image_slice, file_name):
     tiff.imwrite(file_name, image_slice, photometric='minisblack')
 
 # Example usage to save specific slices
-save_as_tiff(result[8, :, :], 'result_slice_8.tif')
+save_as_tiff(mip_image, 'mip_python.tif')
 save_as_tiff(blurred_scenes[2][8, :, :], 'blurred_scene_slice_8.tif')
 
 
