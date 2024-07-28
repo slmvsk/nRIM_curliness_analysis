@@ -55,7 +55,7 @@ def get_matching_files(folder_with_data, **kwargs):
 
 
 # Example usage
-folder_with_data = '/Users/tetianasalamovska/Desktop/zeis'
+#folder_with_data = '/Users/tetianasalamovska/Desktop/zeis'
 
 
 # Print all file names to debug
@@ -64,11 +64,11 @@ folder_with_data = '/Users/tetianasalamovska/Desktop/zeis'
 
 
 # Call the function without any descriptors (will return all files in the folder)
-file_list = get_matching_files(folder_with_data)
-print(file_list)
+#file_list = get_matching_files(folder_with_data)
+#print(file_list)
 
 
 # Example: Adjust parameters based on your file naming convention
-file_list = get_matching_files(folder_with_data, EXPERIMENT='IHCT', ID='THT53', MAGN='40x3x', SEPARATOR='_')
-print("Matching Files:", file_list)
+#file_list = get_matching_files(folder_with_data, EXPERIMENT='IHCT', ID='THT53', MAGN='40x3x', SEPARATOR='_')
+#print("Matching Files:", file_list)
 
