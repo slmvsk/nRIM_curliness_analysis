@@ -15,7 +15,7 @@ import pyclesperanto_prototype as cle
 import sys
 sys.path.append('/Users/tetianasalamovska/Documents/GitHub/nRIM_curliness_analysis')
 
-
+from src.FileImport.DesctiptorsBasedFileSearch import get_matching_files
 from src.FileImport.PlottingImage import plot_slice_from_stack, plot_comparison
 from src.ImageProcessing.NormilizeIntensity import normalize_intensity, validate_image_adjustment, process_scenes
 
@@ -35,12 +35,11 @@ if scenes:
 
 #print selected metadata ??? 
 czi_scaling = czimd.CziScaling(file_path)
+print(czi_scaling)
 czi_channels = czimd.CziChannelInfo(file_path)
-czi_bbox = czimd.CziBoundingBox(file_path)
+print(czi_channels)
 czi_objectives = czimd.CziObjectives(file_path)
-czi_detectors = czimd.CziDetector(file_path)
-czi_microscope = czimd.CziMicroscope(file_path)
-czi_sample = czimd.CziSampleInfo(file_path)
+print(czi_objectives)
 
 #centerposX = []
 #centerposY = []

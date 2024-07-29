@@ -28,12 +28,6 @@ def read_czi_stack(file_path):
         
          # Get the dimensions of the CZI file
         czi_dimensions = czimd.CziDimensions(file_path)
-        print("SizeS: ", czi_dimensions.SizeS)
-        print("SizeT: ", czi_dimensions.SizeT)
-        print("SizeZ: ", czi_dimensions.SizeZ)
-        print("SizeC: ", czi_dimensions.SizeC)
-        print("SizeY: ", czi_dimensions.SizeY)
-        print("SizeX: ", czi_dimensions.SizeX)
         
         num_scenes = czi_dimensions.SizeS if czi_dimensions.SizeS else 1
         #Convert the entire image to a numpy array
@@ -63,3 +57,4 @@ def read_czi_stack(file_path):
 
 # Read CZI file
 #scenes, metadata = read_czi_stack(file_path)
+
