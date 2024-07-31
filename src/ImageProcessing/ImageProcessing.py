@@ -31,6 +31,7 @@ import pyclesperanto_prototype as cle
 # 2. 
 ##########################
 
+
 def calculate_hessian(matrix, sigma):
     """Calculate the Hessian matrix for each voxel in a 3D array."""
     # Calculate the gradients
@@ -63,6 +64,14 @@ def tubeness(image, sigma):
     
     return tubeness
 
+#validation of tubness 
+#normalize intensity and substract tubeness image from original
+# ......
+
+
+
+
+
 # Example usage with a 3D numpy array `data`
 # Sigma should be chosen based on the scale of the structures you're looking to enhance
 #sigma = 5.0  # Smoothing parameter 
@@ -72,7 +81,7 @@ def tubeness(image, sigma):
 
 
 
-#skeletonize (and project like in fiji or no projection)
+#skeletonize (and project like in fiji)
 from skimage.morphology import skeletonize_3d
 from skimage import img_as_ubyte
 
@@ -107,7 +116,7 @@ def skeletonize_image(image):
 # and clean skeleton afterwards + do labeling
 ################################
 
-# validation of skeletonization
+# validation of skeletonization 
 # ..................
 
 # max intensity z - projection

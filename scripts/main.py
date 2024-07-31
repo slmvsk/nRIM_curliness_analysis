@@ -41,9 +41,6 @@ print(czi_channels)
 czi_objectives = czimd.CziObjectives(file_path)
 print(czi_objectives)
 
-#centerposX = []
-#centerposY = []
-
 # normalizing intensities min 0 max 65535 for 16 bit 
 adjusted_scenes = process_scenes(scenes)
 
@@ -60,6 +57,32 @@ else:
     print("Specified slice index is out of range.")
 
 # remove somatas function apply (finish writing)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #from src.ImageProcessing.ImageProcessing import gaussian_filter
 import cv2

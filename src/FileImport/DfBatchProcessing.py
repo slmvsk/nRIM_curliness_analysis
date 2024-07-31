@@ -108,13 +108,7 @@ def createDataframeFromFileList(folder_path, file_list):
 
         for scene_idx, scene_data in enumerate(scenes):
             for slice_idx in range(scene_data.shape[0]):  # Assuming scene_data is 3D with shape (20, height, width)
-                records.append({
-                    "filename": filename,
-                    "file_index": 0,  # Assuming all scenes are from the same file, hence index 0
-                    "scene_index": scene_idx,
-                    "slice_index": slice_idx,
-                    "scene_data": scene_data[slice_idx, :, :],  # Extract the 2D slice data
-                })
+                records.append([filename, 0, scene_idx, slice_idx, scene_data[slice_idx, :, :]])
     
     df = pd.DataFrame(records)
     return df
