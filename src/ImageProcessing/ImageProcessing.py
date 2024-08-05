@@ -63,7 +63,7 @@ def tubeness(image, sigma):
     smoothed = scipy.ndimage.gaussian_filter(image, sigma)
     
     # Calculate the Hessian matrix
-    hessian = calculate_hessian(smoothed, sigma)
+    hessian = calculate_hessian(smoothed, sigma) #replace with smoothed if previous step is active 
     
     # Compute eigenvalues for each voxel
     eigenvalues = np.linalg.eigvalsh(hessian)
@@ -81,11 +81,35 @@ def tubeness(image, sigma):
 # ......
 
 
-# trying to make tubness smart 
 
+def estimate_sigma_based_on_scale(image, scale_factor=1.0):
+    """
+    Estimate an appropriate sigma for the tubeness function based on the image scale.
+    
+    Parameters:
+        image (ndarray): The input 3D image array.
+        scale_factor (float): A multiplier for scaling sigma according to the image resolution.
+    
+    Returns:
+        float: The estimated sigma value.
+    """
+    # Example estimation based on image size and scale factor
+    median_dim = np.median(image.shape)
+    sigma = median_dim * 0.005 * scale_factor    
+    return sigma
 
+# Example usage:
+  # Replace this with your actual 3D image
+sigma = estimate_sigma_based_on_scale(nosoma_scenes[8], scale_factor=0.9)
+tubeness_measure = tubeness(nosoma_scenes[8], sigma)
 
+plot_images(tubeness_measure[8,:,:], nosoma_scenes[8][8,:,:], 'Original', 'No Somata')
 
+plot_images(result[8,:,:], nosoma_scenes[8][8,:,:], 'Original', 'No Somata')
+
+# more or less but 1. needs validation as described below 
+# and needs batch processing memory-efficient optimisation like 
+# remove somata function has 
 
 
 
@@ -103,8 +127,8 @@ def tubeness(image, sigma):
 
 # Example usage with a 3D numpy array `data`
 # Sigma should be chosen based on the scale of the structures you're looking to enhance
-#sigma = 5.0  # Smoothing parameter 
-#result = tubeness(image_nosoma, sigma)
+sigma = 4.0  # Smoothing parameter 
+result = tubeness(nosoma_scenes[8], sigma)
 #plot_comparison(result[8,:,:], scenes[2][8,:,:], "Gaussian comparison") 
 #or plot_images(blurred_result[8,:,:], blurred_scenes[2][8,:,:], 'Result Slice', 'Blurred Scene Slice')
 

@@ -27,6 +27,7 @@ def processFile(file_name):
     #del normalized_scenes  # Free memory used by the normalized scenes
     
     # Step 4: Apply tubeness filter
+    # sigma = 
     tubeness_scenes = apply_tubeness_filter(nosoma_scenes)
     del nosoma_scenes  # Free memory used by the nosoma scenes
     
