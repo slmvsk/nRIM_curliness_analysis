@@ -140,7 +140,8 @@ def max_intensity_z_projection(image_3d):
     return mip
 
 # Example: 
-#mip_image = max_intensity_z_projection(skeletonized)
+
+#mip_image = max_intensity_z_projection(skeleton)
 #print(mip_image.shape)
 #plot_images(blurred_result[8,:,:], mip_image, 'Blurred result Slice', 'Skeletonized')
 
