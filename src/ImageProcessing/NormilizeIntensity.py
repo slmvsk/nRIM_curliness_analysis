@@ -5,6 +5,9 @@ Created on Sat Jul  6 15:52:36 2024
 
 @author: tetianasalamovska
 """
+
+# if converting to 8 bit, do it here 
+
 import numpy as np
 from skimage import exposure
 
@@ -34,7 +37,7 @@ def normalize_intensity(image_stack):
 
     return adjusted_stack
 
-def process_scenes(scenes):
+def normalizeScenes(scenes):
     """
     Apply normalization to each 3D numpy array in a list and validate each one.
 
@@ -47,11 +50,11 @@ def process_scenes(scenes):
     adjusted_scenes = []
     for scene in scenes:
         adjusted_scene = normalize_intensity(scene)
-        validate_image_adjustment(scene, adjusted_scene)
+        validateImageAdjustment(scene, adjusted_scene)
         adjusted_scenes.append(adjusted_scene)
     return adjusted_scenes
 
-def validate_image_adjustment(scene, adjusted_scene):
+def validateImageAdjustment(scene, adjusted_scene):
     print("Scene shape:", scene.shape)
     scene_min, scene_max = np.min(scene), np.max(scene)
     print("Scene - min, max:", scene_min, scene_max)
@@ -74,4 +77,5 @@ def validate_image_adjustment(scene, adjusted_scene):
         raise ValueError(f"Shape mismatch: Original shape {scene.shape} doesn't match adjusted shape {adjusted_scene.shape}")
 
 # Assuming 'scenes' is your list of 11 3D numpy arrays
-#adjusted_scenes = process_scenes(scenes)
+#adjusted_scenes = normalizeScenes(scenes)
+

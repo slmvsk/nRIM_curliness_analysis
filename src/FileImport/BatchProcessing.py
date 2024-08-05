@@ -7,160 +7,56 @@ Created on Thu Jul 25 14:29:08 2024
 """
 #IN PROGRESS (NOT A FUNCTION)
 
-
-# •	Pandas DataFrame: For managing and comparing large datasets efficiently, consider using a pandas DataFrame. This can allow you to quickly access metadata and link scenes by index.
-
-# using dictionaries and file handling 
-#this is the first thing to do because i need to adapt functions for batch processing
-# and also be able to compare different images in the end 
-# i need image list that witll have index name type size value so basically list of numpy arrays like I have 
-# 1 scene image but for a lot of images, so indexes will go up, like my created df
-# and then I need to convert list to numpy array 
-# and then we process each "slice" in the stack?? using indexes
-
+def processFile(file_name):
+    # Step 1: Read the file as a list of 3D numpy arrays (scenes)
+    scenes, metadata = readCziFile(file_name)
     
-from czitools.metadata_tools import czi_metadata as czimd
-import numpy as np
-from czifile import CziFile
-import os
-import pandas as pd
-import numpy as np
-
-# update this function in its file 
-def readCziFile(file_path):
-    """
-    Reads a ZEISS CZI file and returns a list of 3D numpy arrays (one per scene) 
-    and metadata.
     
-    Parameters:
-    - file_path (str): Path to the CZI file
+    #Step 1.5 for memory efficiency:
+    # Convert to 8 bit
     
-    Returns:
-    - scenes (list of numpy arrays): List of 3D numpy arrays representing image data for each scene (z-stack)
-    - metadata (dict): Metadata associated with the CZI file
-    """
-    with CziFile(file_path) as czi:
-        
-         # Get the dimensions of the CZI file
-        czi_dimensions = czimd.CziDimensions(file_path)
-        
-        num_scenes = czi_dimensions.SizeS if czi_dimensions.SizeS else 1
-        #Convert the entire image to a numpy array
-        full_image = czi.asarray()
-        # Determine the shape of the full image array
-        print("Full image shape: ", full_image.shape)
-        
-        # Initialize list to store 3D numpy arrays for each scene
-        scenes = []
-        # allscenes = metadatadict_czi['ImageDocument']['Metadata']['Information']['Image']['Dimensions']['S']['Scenes']['Scene']
-
-        # Extract scenes assuming shape (1, 1, S, 1, 1, Z, Y, X, 1)
-        for scene_idx in range(num_scenes):
-            scene_data = full_image[0, 0, scene_idx, 0, 0, :, :, :, 0]
-            scenes.append(scene_data)
-        
-        # Extract metadata using czitools
-        metadata = czimd.CziMetadata(file_path) #all metadata
-        
-
-    return scenes, metadata 
-
-scenes, metadata = readCziFile('/Users/tetianasalamovska/Desktop/zeis/IHCT_THT53_40x3x_IHCT08_slice6_stack_positions_A488_laser08_speed6.czi')
-#np.save('array0.npy', scenes[0])
-
-
-# so my base function returnes scenes as list of 3D numpy arrays and metadata (all metadata for all scenes)
-# my next function should iterate this function for all images in folder that match file names that are stored in "file_list"
-# and organize to store all of theseas indexed images in dataframe from which i can call specific slices (for example image with index 1, scene index 10, slice index
-# 19) and I want also into this dataframe incude some specific metadata extracted from all metadata as additional columns 
-
-
-
-
-
-
-metadata_dict=extract_metadata(metadata)
-
-
-print(f"Type of metadata: {type(metadata)}")
-print(f"Metadata content (string): {metadata}")
-print(f"Metadata content: {metadata}")
-
-
-# WRITE A FUNCTION TO CREATE METADATA DICT LATER 
-# RIGHT NOW CONCENTRATE ON CREATING INDEXED DF WITHOUT METADATA TO ANALYSE FEW IMAGES AT THE SAME TIME
-# AND LEARN HOW TO CALL SLICES FROM DF AND HOW TO HANDLE IT USING "FILE_NAMES"
-# HERE 
-
-
-import os
-def createDataframeFromFileList(folder_path, file_list):
-    records = []
-
-    for file_idx, filename in enumerate(file_list):
-        czi_file_path = os.path.join(folder_path, filename)
-        scenes, metadata = readCziFile(czi_file_path)  # Ignore metadata for this function
-
-        for scene_idx, scene_data in enumerate(scenes):
-            records.append({
-                "filename": filename,
-                "file_index": file_idx,  # Correctly index each file
-                "scene_index": scene_idx,
-                "scene_data": scene_data,  # Store the entire 3D scene data
-            })
     
-    df = pd.DataFrame(records)
-    return df
+    # Step 2: Normalize intensity 
+    normalized_scenes = normalizeScenes(scenes)
+    del scenes  # Free memory used by the original scenes
+    
+    # Step 3: Remove soma
+    nosoma_scenes = removeSomaFromScenes(normalized_scenes, xy_resolution=1)
+    # validate (just plotting)
+    plot_images(normalized_scenes[8][1,:,:], nosoma_scenes[8][1,:,:], 'Original', 'No Somata')
+    #del normalized_scenes  # Free memory used by the normalized scenes
+    
+    # Step 4: Apply tubeness filter
+    tubeness_scenes = apply_tubeness_filter(nosoma_scenes)
+    del nosoma_scenes  # Free memory used by the nosoma scenes
+    
+    # Step 5: Binarize and skeletonize
+    skeleton_scenes = binarize_and_skeletonize(tubeness_scenes)
+    del tubeness_scenes  # Free memory used by the tubeness scenes
+    
+    # Step 6: Clean skeleton
+    clean_skeleton_scenes = clean_skeleton(skeleton_scenes)
+    del skeleton_scenes  # Free memory used by the skeleton scenes
+    
+    # Step 7: Z-projection
+    z_projected_skeletons = z_project(clean_skeleton_scenes)
+    del clean_skeleton_scenes  # Free memory used by the clean skeleton scenes
+    
+    # Step 8: Store or return the final result
+    store_skeleton(z_projected_skeletons, file_name)
+    del z_projected_skeletons  # Free memory used by the final result
 
-
-folder_path = '/Users/tetianasalamovska/Desktop/zeis'
-# file_list from function that finds files 
-
-# Create the DataFrame
-df = createDataframeFromFileList(folder_path, file_list)
-
-# Save the DataFrame to CSV
-csv_file = '/Users/tetianasalamovska/Desktop/zeis/file.csv'
-df.to_csv(csv_file, index=False)
-
-print(f"DataFrame saved to {csv_file}") # indexes correctly 
-#df = df.drop(0).reset_index(drop=True)
-
-
-# Example: Get data for file_index 0, scene_index 2
-filtered_df = df[(df['file_index'] == 0) & (df['scene_index'] == 2)]
-
-# Example: Get all slices for a specific filename
-specific_file_df = df[df['filename'] == 'example_filename.czi']
-
-# Access specific slice data
-slice_data = filtered_df[filtered_df['slice_index'] == 5]['scene_data'].values[0]  # Get 2D data for slice 5
-
-
-
-# iterating example
-for filename in df['filename'].unique():
-    file_data = df[df['filename'] == filename]
-    for scene_index in file_data['scene_index'].unique():
-        scene_data = file_data[file_data['scene_index'] == scene_index]
-        for slice_index in scene_data['slice_index']:
-            slice_data = scene_data[scene_data['slice_index'] == slice_index]['scene_data'].values[0]
-            # Process the slice_data
+    print(f"Finished processing file: {file_name}")
+    
 
 
 
 
 
+def release_memory(variable):
+    del variable
 
-# Usage
-directory = '/Users/tetianasalamovska/Desktop/zeis'
-data_index = load_images(directory, file_list)
-df = create_dataframe(data_index)
-print("hi")
-print(df.info())  # Check the first few rows of the DataFrame
 
-csv_file = '/Users/tetianasalamovska/Desktop/zeis/file.csv'
-df.to_csv(csv_file, index=False)
 
 
 

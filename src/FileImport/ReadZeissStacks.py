@@ -12,7 +12,7 @@ from czitools.metadata_tools import czi_metadata as czimd
 import numpy as np
 from czifile import CziFile
 
-def read_czi_stack(file_path):
+def readCziFile(file_path):
     """
     Reads a ZEISS CZI file and returns a list of 3D numpy arrays (one per scene) 
     and metadata.
@@ -37,23 +37,18 @@ def read_czi_stack(file_path):
         
         # Initialize list to store 3D numpy arrays for each scene
         scenes = []
-        
+        # allscenes = metadatadict_czi['ImageDocument']['Metadata']['Information']['Image']['Dimensions']['S']['Scenes']['Scene']
+
         # Extract scenes assuming shape (1, 1, S, 1, 1, Z, Y, X, 1)
         for scene_idx in range(num_scenes):
             scene_data = full_image[0, 0, scene_idx, 0, 0, :, :, :, 0]
             scenes.append(scene_data)
-            
-        # Extract relevant metadata using czitools
-        metadata = czimd.CziMetadata(file_path)
-        #metadata_dict = {
-            #"Series count": num_scenes,
-            #"SizeX": czi_dimensions.SizeX,
-            #"SizeY": czi_dimensions.SizeY,
-            #"SizeZ": czi_dimensions.SizeZ,
-            # add more relevant
-        #}
+        
+        # Extract metadata using czitools
+        metadata = czimd.CziMetadata(file_path) #all metadata
+        
 
-    return scenes, metadata
+    return scenes, metadata 
 
 # Read CZI file
 #scenes, metadata = read_czi_stack(file_path)

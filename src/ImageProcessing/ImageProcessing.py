@@ -21,11 +21,23 @@ import napari
 from napari.utils import nbscreenshot
 import pyclesperanto_prototype as cle
 
+
+# max z projection of nosoma_image + size-based filter function 
+
+#
+#
+#
+
+
+
+
+
+
 ##########################
 # Tubeness problem:
 # 1. It wants to see image with only tubular structures, so sometimes it connects dots
 # 2. Also sigma is dependent on the scale of image so I need to make function "smart" to be
-# able to accept different scale as input and adfuct sigma?
+# able to accept different scale as input and adjust sigma?
 # Solution: 
 # 1. Preprocess better, dots and small onjects doesn't give me any information (dendrite pieces)
 # 2. 
@@ -67,6 +79,23 @@ def tubeness(image, sigma):
 #validation of tubness 
 #normalize intensity and substract tubeness image from original
 # ......
+
+
+# trying to make tubness smart 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

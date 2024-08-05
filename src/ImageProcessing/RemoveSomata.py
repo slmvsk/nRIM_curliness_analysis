@@ -28,7 +28,7 @@ def findOptimalThreshold(img, metric_th=0.85):
         metric = np.var(thresholds) / np.mean(thresholds)
         metrics.append(metric)
         if metric > metric_th:
-            optimal_th = th_level
+            optimal_th = th_lvl
             break
     else:
         # If no threshold level meets the threshold metric, pick the one with the highest metric
@@ -55,6 +55,59 @@ def removeSomafromStack(image_stack, xy_resolution):
         image_stack_filtered[:, :, i][bg_mask[:, :, i]] = 0
 
     return image_stack_filtered
+
+#debugging step 
+def removeSomaFromAllScenes(scenes, xy_resolution):
+    """
+    Iterate over all scenes in a file, apply the removeSomafromStack function to each scene,
+    and release memory after processing each scene.
+    
+    Parameters:
+        scenes (list): List of 3D numpy arrays where each array represents a scene.
+        xy_resolution (float): Resolution scaling factor in the XY plane.
+    
+    Returns:
+        list: A list of 3D numpy arrays with somas removed.
+    """
+    processed_scenes = []
+    
+    for i, scene in enumerate(scenes):
+        print(f"Processing scene {i+1}/{len(scenes)}")
+        
+        # Check if scene is valid
+        if scene.size == 0:
+            print(f"Scene {i+1} is empty or invalid!")
+            continue
+        
+        try:
+            # Apply the removeSomafromStack function to the current scene
+            processed_scene = removeSomafromStack(scene, xy_resolution)
+            processed_scenes.append(processed_scene)
+            print(f"Processed scene {i+1} successfully added to the list.")
+              
+        except Exception as e:
+            print(f"Error processing scene {i+1}: {e}")
+            continue
+        # Release memory for the current scene
+        del scene
+    print(f"Total processed scenes: {len(processed_scenes)}")
+    return processed_scenes
+
+nosoma_scenes = removeSomaFromAllScenes(normalized_scenes, xy_resolution=1)
+print(f"Number of scenes processed and returned: {len(nosoma_scenes)}")
+
+
+# Optionally, inspect the first scene to ensure it's not empty
+if len(nosoma_scenes) > 0:
+    print(f"Shape of the first processed scene: {nosoma_scenes[0].shape}")
+else:
+    print("No scenes were processed.")
+
+
+
+
+
+
 ####################################
 # yes it is for 0ne scene only, but all my functions will be for 1 scene and then 
 # I will just iterate over all of the scenes and files?????????????????
@@ -71,7 +124,7 @@ def removeSomafromStack(image_stack, xy_resolution):
 
 #image_nosoma = removeSomafromStack(scenes[5], xy_resolution=1.0)
 
-#plot_images(scenes[5][8,:,:], image_nosoma[8,:,:], 'Original', 'No soma)
+#plot_images(scenes[5][8,:,:], image_nosoma[8,:,:], 'Original', 'No soma')
 
 
 
