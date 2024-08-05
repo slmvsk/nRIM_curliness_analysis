@@ -6,6 +6,28 @@ Created on Tue Jun 25 09:33:53 2024
 @author: tetianasalamovska
 """
 
+
+################## from other function (to be imported)
+
+
+# Call the function without any descriptors (will return all files in the folder)
+files_list = get_matching_files(folder_with_data)
+print(file_list)
+folder_with_data = '/Users/tetianasalamovska/Desktop/zeis'
+
+# Example: Adjust parameters based on your file naming convention
+file_list = getMatchingFilesList(
+    folder_with_data,
+    EXPERIMENT='IHCT',
+    MAGN_LIST=['40x2x', '40x3x'],
+    ID='THT53',
+    SEPARATOR='_',
+    EXTENSION='.czi'
+)
+print("Matching Files:", file_list)
+
+
+
 # main.py
 from czitools.metadata_tools import czi_metadata as czimd
 import numpy as np

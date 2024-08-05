@@ -24,7 +24,7 @@ import numpy as np
 from czifile import CziFile
 import os
 import pandas as pd
-
+import numpy as np
 
 # update this function in its file 
 def readCziFile(file_path):
@@ -66,7 +66,9 @@ def readCziFile(file_path):
     return scenes, metadata 
 
 scenes, metadata = readCziFile('/Users/tetianasalamovska/Desktop/zeis/IHCT_THT53_40x3x_IHCT08_slice6_stack_positions_A488_laser08_speed6.czi')
-print(metadata)
+#np.save('array0.npy', scenes[0])
+
+
 # so my base function returnes scenes as list of 3D numpy arrays and metadata (all metadata for all scenes)
 # my next function should iterate this function for all images in folder that match file names that are stored in "file_list"
 # and organize to store all of theseas indexed images in dataframe from which i can call specific slices (for example image with index 1, scene index 10, slice index
@@ -91,24 +93,21 @@ print(f"Metadata content: {metadata}")
 # HERE 
 
 
-
-
-
-
-
 import os
-import pandas as pd
-
 def createDataframeFromFileList(folder_path, file_list):
     records = []
 
-    for filename in file_list:
+    for file_idx, filename in enumerate(file_list):
         czi_file_path = os.path.join(folder_path, filename)
         scenes, metadata = readCziFile(czi_file_path)  # Ignore metadata for this function
 
         for scene_idx, scene_data in enumerate(scenes):
-            for slice_idx in range(scene_data.shape[0]):  # Assuming scene_data is 3D with shape (20, height, width)
-                records.append([filename, 0, scene_idx, slice_idx, scene_data[slice_idx, :, :]])
+            records.append({
+                "filename": filename,
+                "file_index": file_idx,  # Correctly index each file
+                "scene_index": scene_idx,
+                "scene_data": scene_data,  # Store the entire 3D scene data
+            })
     
     df = pd.DataFrame(records)
     return df
@@ -125,7 +124,7 @@ csv_file = '/Users/tetianasalamovska/Desktop/zeis/file.csv'
 df.to_csv(csv_file, index=False)
 
 print(f"DataFrame saved to {csv_file}") # indexes correctly 
-
+#df = df.drop(0).reset_index(drop=True)
 
 
 # Example: Get data for file_index 0, scene_index 2
@@ -151,17 +150,6 @@ for filename in df['filename'].unique():
 
 
 
-
-################## from other function (to be imported)
-
-# Call the function without any descriptors (will return all files in the folder)
-files_list = get_matching_files(folder_with_data)
-print(file_list)
-
-
-# Example: Adjust parameters based on your file naming convention
-file_list = get_matching_files(folder_with_data, EXPERIMENT='IHCT', MAGN=[40x3x, 40x2x], ID='THT53', SEPARATOR='_')
-print("Matching Files:", file_list)
 
 
 # Usage
