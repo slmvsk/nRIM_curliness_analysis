@@ -639,33 +639,6 @@ cleaned_scenes = cleanMipSkeleton(mip_scenes, length_percentiles=(70, 100))
 plot_images(cleaned_scenes[4], mip_scenes[4], 'Cleaned Skeleton', 'Original MIP')
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #########################
 # clean skeleton !!! remove small branches wit length smaller than ? (and weird very long??? )
 # skeletonize try https://github.com/seung-lab/kimimaro
@@ -678,94 +651,6 @@ plot_images(cleaned_scenes[4], mip_scenes[4], 'Cleaned Skeleton', 'Original MIP'
 # cut them or remove too short and what do i do with loo long branches 
 ##########################
 
-
-###############################################################################
-# fix clean skeleton function
-# it should measure length of labeled skeleton and remove small objects 
-# separate large objects? 
-
-from skimage.morphology import skeletonize, remove_small_objects
-from skimage.measure import label, regionprops
-from skimage.io import imshow
-from skimage.draw import line
-from scipy.spatial.distance import euclidean
-
-def measure_length(image_2d):
-    """
-    Calculate the Euclidean length of each branch in a skeletonized image.
-    
-    Args:
-    image_2d (numpy.ndarray): The 2D binary image of skeletonized dendrites.
-    
-    Returns:
-    list: List of lengths of each branch.
-    """
-    # Ensure the image is binary and skeletonized
-    if image_2d.max() > 1:
-        image_2d = image_2d > 0
-    skeleton = skeletonize(image_2d)
-    
-    # Label connected components
-    labeled_skeleton = label(skeleton)
-    props = regionprops(labeled_skeleton)
-    
-    lengths = []
-    for prop in props:
-        # Extract the coordinates of the branch
-        coords = prop.coords
-        branch_length = 0
-        # Calculate the Euclidean distance between consecutive pixels in the branch
-        for i in range(len(coords) - 1):
-            branch_length += euclidean(coords[i], coords[i + 1])
-        lengths.append(branch_length)
-    
-    return lengths
-
-
-measurments = measure_length(mip_image)
-
-
-def process_dendrites(image_2d, min_length, max_length):
-    """
-    Process a 2D image of dendrites to measure and filter branches by length.
-    
-    Args:
-    image_2d (numpy.ndarray): The 2D Z-projection image of dendrites, binary format.
-    min_length (int): Minimum length of branches to keep.
-    max_length (int): Maximum length of branches to keep.
-    
-    Returns:
-    numpy.ndarray: The processed image with filtered dendritic branches.
-    """
-    # Ensure the image is binary and skeletonized
-    if image_2d.max() > 1:
-        image_2d = image_2d > 0
-    skeleton = skeletonize(image_2d)
-    
-    # Label connected components
-    labeled_skeleton = label(skeleton)
-    
-    # Measure properties of labeled regions
-    props = regionprops(labeled_skeleton)
-    
-    # Filter out small and very long branches
-    for prop in props:
-        if prop.area < min_length or prop.area > max_length:
-            for coord in prop.coords:
-                skeleton[coord[0], coord[1]] = 0  # Set pixel to 0 (remove it)
-    
-    # Optionally, re-label to see the final branches
-    filtered_skeleton = label(skeleton)
-    
-    return filtered_skeleton
-
-
-
-
-# Example usage:
-clean_skeleton = process_dendrites(mip_image, min_length=5, max_length=20000)
-
-plot_images(mip_image, clean_skeleton, 'MIP', 'Clean')
 
 
 #process to curliness
