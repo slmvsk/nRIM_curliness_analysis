@@ -5,7 +5,7 @@ Created on Thu Jul 25 14:29:08 2024
 
 @author: tetianasalamovska
 """
-#IN PROGRESS (NOT A FUNCTION)
+#IN PROGRESS 
 
 def processFile(file_name):
     # Step 1: Read the file as a list of 3D numpy arrays (scenes)
@@ -28,8 +28,14 @@ def processFile(file_name):
     
     # Step 4: Apply tubeness filter
     # sigma = 
-    tubeness_scenes = apply_tubeness_filter(nosoma_scenes)
+    tubeness_scenes = tubenessForAllScenes(nosoma_scenes, scale_factor=0.9)
     del nosoma_scenes  # Free memory used by the nosoma scenes
+    
+    #Step 4.1: Validate tubeness
+    #validation = subtract_tubeness_from_nosoma(nosoma_scenes[8], tubeness_scenes[8])
+    #plot_images(tubeness_scenes[8][8,:,:], nosoma_scenes[8][8,:,:], 'Tubeness', 'No Somata')
+    #plot_images(validation[8,:,:], nosoma_scenes[8][8,:,:], 'Substracted', 'No Somata')
+    # Inside the function can be changed to see the opposite substraction
     
     # Step 5: Binarize and skeletonize
     skeleton_scenes = binarize_and_skeletonize(tubeness_scenes)

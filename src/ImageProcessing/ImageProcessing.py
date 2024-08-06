@@ -81,7 +81,6 @@ def tubeness(image, sigma):
 # ......
 
 
-
 def estimate_sigma_based_on_scale(image, scale_factor=1.0):
     """
     Estimate an appropriate sigma for the tubeness function based on the image scale.
@@ -100,10 +99,9 @@ def estimate_sigma_based_on_scale(image, scale_factor=1.0):
 
 # Example usage:
   # Replace this with your actual 3D image
-sigma = estimate_sigma_based_on_scale(nosoma_scenes[8], scale_factor=0.9)
-tubeness_measure = tubeness(nosoma_scenes[8], sigma)
+sigma = estimate_sigma_based_on_scale(nosoma_scenes[5], scale_factor=0.9)
+tubeness_measure = tubeness(nosoma_scenes[5], sigma)
 
-plot_images(tubeness_measure[8,:,:], nosoma_scenes[8][8,:,:], 'Original', 'No Somata')
 
 plot_images(result[8,:,:], nosoma_scenes[8][8,:,:], 'Original', 'No Somata')
 
@@ -111,7 +109,97 @@ plot_images(result[8,:,:], nosoma_scenes[8][8,:,:], 'Original', 'No Somata')
 # and needs batch processing memory-efficient optimisation like 
 # remove somata function has 
 
+#adjusting only sigma itself gives the same output 
+# maybe remove this function to estimate sigma or make it based on the width of 
+# dendrites or make formula to find the best scale factor 
 
+
+def tubenessForAllScenes(scenes, scale_factor=1.0):
+    """
+    Iterate over all scenes in a file, apply the tubeness function to each scene,
+    and release memory after processing each scene.
+    
+    Parameters:
+        scenes (list): List of 3D numpy arrays where each array represents a scene.
+        scale_factor (float): Scaling factor for sigma estimation.
+    
+    Returns:
+        list: A list of 3D numpy arrays with tubeness measure applied.
+    """
+    processed_scenes = []
+    
+    for i, scene in enumerate(scenes):
+        print(f"Processing scene {i+1}/{len(scenes)}")
+        
+        if scene.size == 0:
+            print(f"Scene {i+1} is empty or invalid!")
+            continue
+        
+        try:
+            sigma = estimate_sigma_based_on_scale(scene, scale_factor)
+            processed_scene = tubeness(scene, sigma)
+            processed_scenes.append(processed_scene)
+            
+        except Exception as e:
+            print(f"Error processing scene {i+1}: {e}")
+            continue
+        
+        del scene
+        gc.collect()
+    
+    return processed_scenes
+
+tubeness_scenes = tubenessForAllScenes(nosoma_scenes, scale_factor=0.9)
+
+plot_images(tubeness_scenes[6][8,:,:], nosoma_scenes[6][8,:,:], 'Original', 'No Somata')
+
+##################################### try to SAVE AS TIFF to see if it is only plotting bug 
+############################################################################################
+# Validation of tubeness 
+import numpy as np
+from skimage import exposure
+
+def normalize_intensity_zero(image):
+    """Normalize the intensity of a 3D image."""
+    image_normalized = exposure.rescale_intensity(image, out_range=(0, 1))
+    return image_normalized
+
+def subtract_tubeness_from_nosoma(nosoma, tubeness):
+    """
+    Normalize the intensity of a single 3D nosoma image and a 3D tubeness image,
+    and subtract the tubeness image from the nosoma image.
+    
+    Parameters:
+        nosoma (ndarray): 3D numpy array with somas removed.
+        tubeness (ndarray): 3D numpy array with tubeness measured.
+    
+    Returns:
+        ndarray: A 3D numpy array after subtraction.
+    """
+    # Normalize both images
+    nosoma_normalized = normalize_intensity_zero(nosoma)
+    tubeness_normalized = normalize_intensity_zero(tubeness)
+    
+    # Subtract the tubeness image from the nosoma image
+    result = nosoma_normalized - tubeness_normalized # swap to see if there are extra tubeness
+    
+    # Clip values to keep them in a valid range
+    result = np.clip(result, 0, 1)
+    
+    # Release memory
+    del nosoma, tubeness
+    gc.collect()
+    
+    return result
+
+# Example usage:
+# Assuming `nosoma` and `tubeness` are 3D numpy arrays
+validation = subtract_tubeness_from_nosoma(nosoma_scenes[8], tubeness_scenes[8])
+
+plot_images(tubeness_scenes[8][8,:,:], nosoma_scenes[8][8,:,:], 'Original', 'No Somata')
+plot_images(validation[8,:,:], nosoma_scenes[8][8,:,:], 'Original', 'No Somata')
+#seems to work nicely, on specific images there are more "leftovers" 
+# sometimes there is an extra tubeness 
 
 
 
@@ -306,7 +394,7 @@ plot_images(mip_image, clean_skeleton, 'MIP', 'Clean')
 
 #Write image as tif. Ue imageJ for visualization
 from skimage.io import imsave
-imsave("skeletonized.tif", mip_image) 
+imsave("tttt.tif", tubeness_scenes[6]) 
 
 import tifffile as tiff
 
@@ -315,7 +403,7 @@ def save_as_tiff(image_slice, file_name):
     tiff.imwrite(file_name, image_slice, photometric='minisblack')
 
 # Example usage to save specific slices
-save_as_tiff(mip_image, 'mip_python.tif')
+save_as_tiff(tubeness_scenes[6], 'tubeness_python.tif')
 save_as_tiff(blurred_scenes[2][8, :, :], 'blurred_scene_slice_8.tif')
 
 
