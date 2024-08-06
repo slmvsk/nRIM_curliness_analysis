@@ -124,7 +124,7 @@ def getMatchingFilesList(folder_with_data, **kwargs):
     return file_name_list
 
 # Example usage
-#folder_with_data = '/Users/tetianasalamovska/Desktop/zeis'
+folder_with_data = '/Users/tetianasalamovska/Desktop/zeis'
 #file_list = getMatchingFilesList(
     #folder_with_data,
     #EXPERIMENT='IHCT',

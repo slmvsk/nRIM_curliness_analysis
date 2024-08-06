@@ -406,7 +406,7 @@ plot_images(tubeness_scenes[5][8,:,:], mip_image, 'Blurred result Slice', 'Skele
 
 import gc
 
-def mip_scenes(skeletonized_scenes):
+def do_mip_scenes(skeletonized_scenes):
     """
     Apply maximum intensity Z projection to each scene in a list of skeletonized 3D images.
 

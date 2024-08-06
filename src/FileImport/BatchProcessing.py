@@ -19,7 +19,7 @@ def processFile(file_name):
     del scenes  # Free memory used by the original scenes
     
     # Step 3: Remove soma
-    nosoma_scenes = removeSomaFromScenes(normalized_scenes, xy_resolution=1)
+    nosoma_scenes = removeSomaFromAllScenes(normalized_scenes, xy_resolution=1)
     # validate (just plotting)
     plot_images(normalized_scenes[8][1,:,:], nosoma_scenes[8][1,:,:], 'Original', 'No Somata')
     #del normalized_scenes  # Free memory used by the normalized scenes
@@ -40,7 +40,7 @@ def processFile(file_name):
     del tubeness_scenes  # Free memory used by the tubeness scenes
     
     # Step 6: Z-projection
-    mip_scenes = mip_scenes(skeletonized_scenes)
+    mip_scenes = do_mip_scenes(skeletonized_scenes)
     del skeletonized_scenes  # Free memory used by the clean skeleton scenes
     
     # Step 7: Clean skeleton
@@ -54,12 +54,71 @@ def processFile(file_name):
     cleaned_scenes = cleanMipSkeleton(mip_scenes, length_percentiles=(70, 100))
     del mip_scenes  # Free memory used by the skeleton scenes
     
-    # Step 8: Store or return the final result
-    store_skeleton(z_projected_skeletons, file_name)
-    del z_projected_skeletons  # Free memory used by the final result
-
     print(f"Finished processing file: {file_name}")
     
+    return cleaned_scenes
+
+
+
+
+
+
+
+
+import pandas as pd
+
+def batch_process_files(file_list, process_function, folder_path):
+    """
+    Batch processes files and compiles results into a pandas DataFrame.
+    
+    Args:
+    file_list (list): List of file names to be processed.
+    process_function (function): Function to process each file.
+    folder_path (str): Path to the folder containing the files.
+    
+    Returns:
+    pd.DataFrame: DataFrame containing results from all processed files.
+    """
+    # List to store DataFrame rows before concatenation
+    all_rows = []
+
+    for file_name in file_list:
+        # Construct full file path
+        file_path = os.path.join(folder_path, file_name)
+        
+        # Process the file
+        cleaned_scenes = processFile(file_path)
+        
+        # Collect each scene's data in all_rows list
+        for scene_index, cleaned_scene in enumerate(cleaned_scenes):
+            all_rows.append({
+                "file_name": file_name,
+                "scene_index": scene_index,
+                "cleaned_scene": cleaned_scene
+            })
+        
+        print(f"Finished processing {file_name}")
+    
+    # Convert list of dicts to DataFrame
+    results_df = pd.DataFrame(all_rows)
+    
+    return results_df
+
+# Example usage
+folder_with_data = '/Users/tetianasalamovska/Desktop/zeis'
+file_list = getMatchingFilesList(
+    folder_with_data,
+    EXPERIMENT='IHCT',
+    MAGN_LIST=['40x2x', '40x3x'],
+    ID='THT53',
+    SEPARATOR='_',
+    EXTENSION='.czi'
+)
+
+
+dataframe_results = batch_process_files(file_list, processFile, folder_with_data)
+ 
+
 
 
 def release_memory(variable):
