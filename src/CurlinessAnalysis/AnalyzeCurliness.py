@@ -95,4 +95,72 @@ plt.show()
 
 # Plotting mean curliness across groups 
 
+############################# dataframe is an input 
+
+import numpy as np
+import pandas as pd
+from skimage import measure
+
+def analyze_dendrite_curliness_batch(dataframe):
+    # Initialize lists to hold results
+    mean_straightness = []
+    mean_curliness = []
+    sem_curliness = []
+    file_names = []
+    scene_indices = []
+
+    # Process each image in the dataframe
+    for index, row in dataframe.iterrows():
+        image = row['cleaned_scene']
+        labeled_skeleton = measure.label(image)
+        properties = measure.regionprops(labeled_skeleton)
+
+        longest_path_length = []
+        max_dendritic_reach = []
+
+        for prop in properties:
+            longest_path_length.append(prop.area)
+            minr, minc, maxr, maxc = prop.bbox
+            distance = np.sqrt((maxr - minr) ** 2 + (maxc - minc) ** 2)
+            max_dendritic_reach.append(distance)
+
+        longest_path_length = np.array(longest_path_length)
+        max_dendritic_reach = np.array(max_dendritic_reach)
+        straightness = max_dendritic_reach / longest_path_length
+        curliness = 1 - straightness
+
+        mean_straightness.append(np.mean(straightness))
+        mean_curliness.append(np.mean(curliness))
+        std_curliness = np.std(curliness)
+        sem_curliness.append(std_curliness / np.sqrt(len(longest_path_length)))
+        file_names.append(row['file_name'])
+        scene_indices.append(row['scene_index'])
+
+    # Create a new DataFrame with the results
+    results_df = pd.DataFrame({
+        'file_name': file_names,
+        'scene_index': scene_indices,
+        'mean_straightness': mean_straightness,
+        'mean_curliness': mean_curliness,
+        'sem_curliness': sem_curliness
+    })
+
+    return results_df
+
+# Assuming 'dataframe_results' is your DataFrame that contains all the processed images.
+curliness_df = analyze_dendrite_curliness_batch(dataframe_results)
+print(curliness_df.head())
+curliness_df.to_csv('/Users/tetianasalamovska/Desktop/zeis/curliness_df.csv', index=False)
+
+
+
+
+
+
+
+
+
+
+
+
 
