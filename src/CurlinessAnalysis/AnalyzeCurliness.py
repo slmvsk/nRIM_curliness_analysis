@@ -152,8 +152,8 @@ curliness_df = analyze_dendrite_curliness_batch(dataframe_results)
 print(curliness_df.head())
 curliness_df.to_csv('/Users/tetianasalamovska/Desktop/zeis/curliness_df.csv', index=False)
 
-
-
+########### Box counting method is the best measure (fractality)
+# look into curliness (how it identifies branches......)
 
 
 
