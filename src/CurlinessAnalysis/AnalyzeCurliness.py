@@ -169,6 +169,11 @@ curliness_df.to_csv('/Users/tetianasalamovska/Desktop/zeis/curliness_df.csv', in
 
 ########### Box counting method is the best measure (fractality)
 # look into curliness (how it identifies branches......)
+# try lkshm code with distance matrix 
+# label skeletons to see how it identifies dendrites 
+ 
+
+
 
 
 
