@@ -30,9 +30,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from skimage import measure, io, morphology
 from scipy.ndimage import distance_transform_edt
+import numpy as np
+from skimage import measure
 
 def analyze_dendrite_curliness(image):
-
     # Label the skeleton
     labeled_skeleton = measure.label(image)
     properties = measure.regionprops(labeled_skeleton)
@@ -43,34 +44,48 @@ def analyze_dendrite_curliness(image):
     # Calculate measures
     for prop in properties:
         # longest_path_length 
-        longest_path_length.append(prop.area)
+        longest_path_length.append(prop.area)  # Assuming area as a proxy for path length
         
         # Calculate straight-line (Euclidean) distance between the end points of the skeleton
         minr, minc, maxr, maxc = prop.bbox
         distance = np.sqrt((maxr - minr) ** 2 + (maxc - minc) ** 2)
         max_dendritic_reach.append(distance)
 
-    # Straightness 
+    # Output each branch's measures
+    for length, reach in zip(longest_path_length, max_dendritic_reach):
+        print(f"Branch: Length = {length}, Max Reach = {reach}")
+
+    # Convert lists to arrays for numerical operations
     longest_path_length = np.array(longest_path_length)
     max_dendritic_reach = np.array(max_dendritic_reach)
+
+    # Calculate straightness and curliness
     straightness = max_dendritic_reach / longest_path_length
-    # Straightness = max. Dendritic reach / longest single path length 
-    # Curliness inverse 
     curliness = 1 - straightness
 
-    # Output curliness measures
+    # Calculate average, std, and sem of curliness
     mean_straightness = np.mean(straightness)
     mean_curliness = np.mean(curliness)
     std_curliness = np.std(curliness)
     sem_curliness = std_curliness / np.sqrt(len(longest_path_length))
 
-    return mean_straightness, mean_curliness, sem_curliness, longest_path_length, max_dendritic_reach
+    return mean_straightness, mean_curliness, sem_curliness, longest_path_length.tolist(), max_dendritic_reach.tolist()
+
 
 
 # Example usage
 mean_straightness, mean_curliness, sem_curliness, branch_distances, branch_lengths = analyze_dendrite_curliness(mip_image)
-print(f"Mean Straightness: {mean_straightness}")
-print(f"Mean Curliness: {mean_curliness}")
+# Retrieve the image data for scene index 2
+# We assume that 'file_name' or another identifier may be needed if there are multiple entries for the same scene index.
+# Here, I'm directly accessing by index if the scene index is used as a row index. If not, you'd filter by conditions.
+image_data = dataframe_results[dataframe_results['scene_index'] == 2]['cleaned_scene'].iloc[0]
+
+# Now apply the analyze function
+mean_straightness, mean_curliness, sem_curliness, longest_path_length, max_dendritic_reach = analyze_dendrite_curliness(image_data)
+print("Mean Straightness:", mean_straightness)
+print("Mean Curliness:", mean_curliness)
+print("Longest Path Length:", longest_path_length)
+print("Maximum Dendritic Reach:", max_dendritic_reach)
 
 
 # Plotting longest_path_length
@@ -154,7 +169,6 @@ curliness_df.to_csv('/Users/tetianasalamovska/Desktop/zeis/curliness_df.csv', in
 
 ########### Box counting method is the best measure (fractality)
 # look into curliness (how it identifies branches......)
-
 
 
 
