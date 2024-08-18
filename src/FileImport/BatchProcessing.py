@@ -188,7 +188,7 @@ def fetch_and_plot_images(df, file_name_1, scene_index_1, file_name_2, scene_ind
 
 # Usage example
 fetch_and_plot_images(dataframe_results, 
-                      '/Users/tetianasalamovska/Desktop/zeis/IHCT_THT53_40x2x_IHCT08_slice6_stack_positions_A488_laser08_speed6.czi', 8, 
+                      '/Users/tetianasalamovska/Desktop/zeis/IHCT_THT53_40x2x_IHCT08_slice6_stack_positions_A488_laser08_speed6.czi', 2, 
                       '/Users/tetianasalamovska/Desktop/zeis/IHCT_THT53_40x2x_IHCT08_slice6_stack_positions_A488_laser08_speed6.czi', 9)
 
 

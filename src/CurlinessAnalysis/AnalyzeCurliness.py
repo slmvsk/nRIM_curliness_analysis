@@ -67,14 +67,15 @@ def analyze_dendrite_curliness(image):
     mean_straightness = np.mean(straightness)
     mean_curliness = np.mean(curliness)
     std_curliness = np.std(curliness)
+    median_curliness = np.median(curliness)
     sem_curliness = std_curliness / np.sqrt(len(longest_path_length))
 
-    return mean_straightness, mean_curliness, sem_curliness, longest_path_length.tolist(), max_dendritic_reach.tolist()
+    return curliness, median_curliness, mean_straightness, mean_curliness, sem_curliness, longest_path_length.tolist(), max_dendritic_reach.tolist()
 
 
 
 # Example usage
-mean_straightness, mean_curliness, sem_curliness, branch_distances, branch_lengths = analyze_dendrite_curliness(mip_image)
+curliness, median_curliness, mean_straightness, mean_curliness, sem_curliness, branch_distances, branch_lengths = analyze_dendrite_curliness(mip_image)
 # Retrieve the image data for scene index 2
 # We assume that 'file_name' or another identifier may be needed if there are multiple entries for the same scene index.
 # Here, I'm directly accessing by index if the scene index is used as a row index. If not, you'd filter by conditions.
@@ -83,29 +84,29 @@ image_data = dataframe_results[dataframe_results['scene_index'] == 2]['cleaned_s
 # Now apply the analyze function
 mean_straightness, mean_curliness, sem_curliness, longest_path_length, max_dendritic_reach = analyze_dendrite_curliness(image_data)
 print("Mean Straightness:", mean_straightness)
-print("Mean Curliness:", mean_curliness)
+print("Mean Curliness:", median_curliness)
 print("Longest Path Length:", longest_path_length)
 print("Maximum Dendritic Reach:", max_dendritic_reach)
 
 
 # Plotting longest_path_length
 plt.figure(figsize=(6, 4))
-plt.hist(branch_lengths, bins=100, color='blue', alpha=0.7)
+plt.hist(curliness, bins=100, color='blue', alpha=0.7)
 plt.title('Histogram of longest_path_length')
 plt.xlabel('Length')
 plt.ylabel('Frequency')
-plt.xlim([0, 1000])  # Set x-axis limits
-plt.ylim([0, 150])  # Optionally adjust the y-axis to change how density appears
+plt.xlim([0, 1])  # Set x-axis limits
+plt.ylim([0, 6])  # Optionally adjust the y-axis to change how density appears
 plt.show()
 
 # Plotting max_dendritic_reach
 plt.figure(figsize=(6, 4))
-plt.hist(branch_distances, bins=100, color='green', alpha=0.7)
+plt.hist(branch_distances, bins=10000, color='green', alpha=0.7)
 plt.title('Histogram of max_dendritic_reach')
 plt.xlabel('max_reach')
 plt.ylabel('Frequency')
 plt.xlim([0, 300])  # Set x-axis limits for example 
-plt.ylim([0, 150])  # Optionally adjust the y-axis to change how density appears
+plt.ylim([0, 50])  # Optionally adjust the y-axis to change how density appears
 plt.show()
 
 # Plotting mean curliness across groups 
