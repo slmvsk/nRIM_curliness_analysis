@@ -325,16 +325,17 @@ def skeleton_to_graph(skeleton):
 
 
 
-def plot_graph(G, title='Graph Representation of Skeleton'):
-    pos = {node: (node[1], -node[0]) for node in G.nodes()}  # Position map
-    nx.draw(G, pos, node_size=5, node_color='red', edge_color='blue')
-    plt.title(title)
-    plt.gca().invert_yaxis()  # Invert y-axis to match image coordinates
+def plot_graph(G):
+    pos = {node: (node[1], -node[0]) for node in G.nodes()}  # Flip y-axis for display
+    nx.draw(G, pos, node_size=0.01, edge_color='black', node_color='red', with_labels=False)
+    plt.gca().set_aspect('equal', adjustable='datalim')
     plt.show()
 
+plot_graph(G)
 
 # Convert skeleton to graph
 G = skeleton_to_graph(image_data)
+
 
 # Plot graph to validate its accuracy
 plot_graph(G)
@@ -348,9 +349,33 @@ for node, data in G.nodes(data=True):
 
 
 
+import numpy as np
+import networkx as netx
+from skimage.morphology import skeletonize
+from skimage.io import imread
 
 
+def build_basic_graph(skeleton):
+    G = netx.Graph()
+    rows, cols = np.where(skeleton > 0)  # Assuming skeleton is a binary image
 
+    # First, add all nodes with their positions
+    for y, x in zip(rows, cols):
+        G.add_node((y, x), pos=(x, y))  # Map (y, x) to (x, y) for visualization purposes
+
+    # Now add edges based on 8-connectivity
+    for y, x in zip(rows, cols):
+        # Consider 8 neighboring pixels
+        for dy, dx in [(-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (-1, 1), (1, -1), (1, 1)]:
+            ny, nx = y + dy, x + dx
+            if 0 <= ny < skeleton.shape[0] and 0 <= nx < skeleton.shape[1] and skeleton[ny, nx]:
+                if (ny, nx) in G.nodes:
+                    # Only add an edge if the neighbor is also a node
+                    G.add_edge((y, x), (ny, nx))
+
+    return G
+
+G = build_basic_graph(image_data)
 
 
 
