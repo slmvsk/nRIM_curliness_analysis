@@ -297,65 +297,80 @@ visualize_and_analyze_curliness(image_data, curliness)
 # which involves representing the skeleton as a graph where junctions 
 # are nodes and paths between them are edges !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-from skan import csr
-import networkx as nx
 import numpy as np
-from skimage.morphology import skeletonize
+import networkx as netx
 
 def skeleton_to_graph(skeleton):
-    """ Convert a skeleton into a graph using skan. """
-    # Generate the skeleton summary statistics using skan
-    skeleton_object = csr.Skeleton(skeleton)
-    summary = csr.summarize(skeleton_object)
-    print("Columns in summary DataFrame:", summary.columns)  # Debugging line to check available columns
-
-    # Create a graph from the skeleton
-    G = nx.Graph()
-    for idx, row in summary.iterrows():
-        # Retrieve coordinates for each node
-        node1, node2 = row['node-id-src'], row['node-id-dst']
-        coord1 = (row['coord-src-0'], row['coord-src-1'])  # Adjust index if 3D: 'coord-src-2'
-        coord2 = (row['coord-dst-0'], row['coord-dst-1'])  # Adjust index if 3D: 'coord-dst-2'
+    G = netx.Graph()
+    
+    # Iterate through each point in the skeleton
+    rows, cols = np.where(skeleton)  # Find all skeleton points
+    for y, x in zip(rows, cols):
+        # Create a unique identifier for the node using its coordinates
+        node_id = (y, x)
+        if node_id not in G:
+            G.add_node(node_id, pos=(x, y))  # Store positions in 'pos' attribute using Cartesian (x, y) format
         
-        # Add nodes with coordinates
-        if node1 not in G:
-            G.add_node(node1, coords=coord1)
-        if node2 not in G:
-            G.add_node(node2, coords=coord2)
-
-        # Add edge with weight
-        G.add_edge(node1, node2, weight=row['branch-distance'])
+        # Check for direct neighbors (8-connectivity)
+        neighbors = [(y + dy, x + dx) for dy in (-1, 0, 1) for dx in (-1, 0, 1) if (dy, dx) != (0, 0)]
+        for ny, nx in neighbors:
+            neighbor_id = (ny, nx)
+            if 0 <= ny < skeleton.shape[0] and 0 <= nx < skeleton.shape[1] and skeleton[ny, nx]:
+                if neighbor_id not in G:
+                    G.add_node(neighbor_id, pos=(nx, ny))
+                if not G.has_edge(node_id, neighbor_id):
+                    G.add_edge(node_id, neighbor_id)
 
     return G
 
-def analyze_dendrite_curliness(image):
-    """ Analyze the curliness of dendrites in a skeletonized image. """
-    # Ensure image is binary and skeletonized
-    G = skeleton_to_graph(image)
-    
-    path_lengths = []
-    max_reaches = []
 
-    # Iterate over edges in the graph to calculate path lengths and Euclidean distances
-    for (node1, node2, data) in G.edges(data=True):
-        path_length = data['weight']
-        coords1 = G.nodes[node1]['coords']
-        coords2 = G.nodes[node2]['coords']
-        euclidean_distance = np.linalg.norm(np.array(coords1) - np.array(coords2))
-        
-        path_lengths.append(path_length)
-        max_reaches.append(euclidean_distance)
 
-    straightness = np.array(max_reaches) / np.array(path_lengths)
-    curliness = 1 - straightness
+def plot_graph(G, title='Graph Representation of Skeleton'):
+    pos = {node: (node[1], -node[0]) for node in G.nodes()}  # Position map
+    nx.draw(G, pos, node_size=5, node_color='red', edge_color='blue')
+    plt.title(title)
+    plt.gca().invert_yaxis()  # Invert y-axis to match image coordinates
+    plt.show()
 
-    return {
-        'curliness': curliness,
-        'straightness': np.mean(straightness),
-        'mean_curliness': np.mean(curliness),
-        'std_curliness': np.std(curliness),
-        'sem_curliness': np.std(curliness) / np.sqrt(len(path_lengths))
-    }
+
+# Convert skeleton to graph
+G = skeleton_to_graph(image_data)
+
+# Plot graph to validate its accuracy
+plot_graph(G)
+
+
+# Print node positions to validate
+for node, data in G.nodes(data=True):
+    print(f"Node {node} has position {data['pos']}")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # Example usage:
 # Load your binary image data
