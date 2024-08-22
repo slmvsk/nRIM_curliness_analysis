@@ -35,10 +35,22 @@ from scipy.ndimage import distance_transform_edt
 import numpy as np
 from skimage import measure
 
+#break points 
+# clean skeleton, keep this method
+# Yoe did regionprop for 3D skeletons 
+# min branch length as par
+# curliness
+# color by id 
+# change lim values for distyributions 
+# maybe do more strict thresholding if 3d regionprop doestnt work
+# 
+# if the image before skeletonizing have loops (tubmess)
+
+
 def analyze_dendrite_curliness(image):
     # Label the skeleton
     labeled_skeleton = measure.label(image)
-    properties = measure.regionprops(labeled_skeleton)
+    properties = measure.regionprops(labeled_skeleton) # give parameters 
 
     longest_path_length = []
     max_dendritic_reach = []
@@ -72,7 +84,7 @@ def analyze_dendrite_curliness(image):
     median_curliness = np.median(curliness)
     sem_curliness = std_curliness / np.sqrt(len(longest_path_length))
 
-    return curliness, median_curliness, mean_straightness, mean_curliness, sem_curliness, longest_path_length.tolist(), max_dendritic_reach.tolist()
+    return properties, curliness, median_curliness, mean_straightness, mean_curliness, sem_curliness, longest_path_length.tolist(), max_dendritic_reach.tolist()
 
 
 
@@ -81,10 +93,11 @@ curliness, median_curliness, mean_straightness, mean_curliness, sem_curliness, b
 # Retrieve the image data for scene index 2
 # We assume that 'file_name' or another identifier may be needed if there are multiple entries for the same scene index.
 # Here, I'm directly accessing by index if the scene index is used as a row index. If not, you'd filter by conditions.
-image_data = dataframe_results[dataframe_results['scene_index'] == 2]['cleaned_scene'].iloc[0]
+image_data = dataframe_results[dataframe_results['scene_index'] == 10]['cleaned_scene'].iloc[0]
+
 
 # Now apply the analyze function
-curliness, median_curliness, mean_straightness, mean_curliness, sem_curliness, longest_path_length, max_dendritic_reach = analyze_dendrite_curliness(image_data)
+properties, curliness, median_curliness, mean_straightness, mean_curliness, sem_curliness, longest_path_length, max_dendritic_reach = analyze_dendrite_curliness(image_data)
 print("Mean Straightness:", mean_straightness)
 print("Mean Curliness:", median_curliness)
 print("Longest Path Length:", longest_path_length)
