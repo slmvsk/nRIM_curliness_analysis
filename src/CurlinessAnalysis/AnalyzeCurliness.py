@@ -87,6 +87,58 @@ def analyze_dendrite_curliness(image):
     return properties, curliness, median_curliness, mean_straightness, mean_curliness, sem_curliness, longest_path_length.tolist(), max_dendritic_reach.tolist()
 
 
+###########
+# 3d 
+from skimage.measure import label, regionprops
+import numpy as np
+
+def analyze_dendrite_curliness_3d(image):
+    # Label the 3D skeleton
+    labeled_skeleton = label(image)
+    properties = regionprops(labeled_skeleton)
+
+    longest_path_length = []
+    max_dendritic_reach = []
+
+    # Calculate measures for each region
+    for prop in properties:
+        # Use volume as a proxy for path length in 3D
+        longest_path_length.append(prop.area)  # Replace with prop.volume for true 3D measure
+        
+        # Calculate straight-line (Euclidean) distance between the end points of the 3D bounding box
+        minr, minc, mins, maxr, maxc, maxs = prop.bbox  # mins and maxs are the min and max along the z-axis
+        distance = np.sqrt((maxr - minr) ** 2 + (maxc - minc) ** 2 + (maxs - mins) ** 2)
+        max_dendritic_reach.append(distance)
+
+    # Output each branch's measures
+    for length, reach in zip(longest_path_length, max_dendritic_reach):
+        print(f"Branch: Length = {length}, Max Reach = {reach}")
+
+    # Convert lists to arrays for numerical operations
+    longest_path_length = np.array(longest_path_length)
+    max_dendritic_reach = np.array(max_dendritic_reach)
+
+    # Calculate straightness and curliness
+    straightness = max_dendritic_reach / longest_path_length
+    curliness = 1 - straightness
+
+    # Calculate average, std, and sem of curliness
+    mean_straightness = np.mean(straightness)
+    mean_curliness = np.mean(curliness)
+    std_curliness = np.std(curliness)
+    median_curliness = np.median(curliness)
+    sem_curliness = std_curliness / np.sqrt(len(longest_path_length))
+
+    return properties, curliness, median_curliness, mean_straightness, mean_curliness, sem_curliness, longest_path_length.tolist(), max_dendritic_reach.tolist()
+
+# Example usage
+# Assuming 'image_3d' is your loaded 3D skeletonized image
+# properties, curl
+
+
+
+
+
 
 # Example usage
 curliness, median_curliness, mean_straightness, mean_curliness, sem_curliness, branch_distances, branch_lengths = analyze_dendrite_curliness(mip_image)

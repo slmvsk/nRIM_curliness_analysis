@@ -17,7 +17,15 @@ import numpy as np
 from skimage.filters import threshold_multiotsu
 from skimage import img_as_float
 
-def findOptimalThreshold(img, metric_th=0.85):
+
+# use median filtering here 
+
+
+
+
+
+
+def findOptimalThreshold(img, metric_th=0.9):
     """Determine the optimal number of threshold levels based on a target metric threshold."""
     metrics = []
     optimal_th = 1
@@ -47,7 +55,7 @@ def removeSomafromStack(image_stack, xy_resolution):
     quant_a = np.digitize(img_float, bins=thresholds)
     
     # Create background mask
-    bg_mask = quant_a <= th_lvl * 0.3 # * 0.3 is fine 
+    bg_mask = quant_a <= th_lvl * 0.2 # * 0.3 is fine 
     
     # Filter image stack: set background regions to zero
     image_stack_filtered = np.copy(image_stack)
@@ -108,6 +116,8 @@ else:
 
 
 
+
+
 ####################################
 # yes it is for 0ne scene only, but all my functions will be for 1 scene and then 
 # I will just iterate over all of the scenes and files?????????????????
@@ -122,9 +132,9 @@ else:
 # `xy_resolution` is a parameter that you might use to adjust algorithm behavior based on image resolution
 
 
-#image_nosoma = removeSomafromStack(scenes[5], xy_resolution=1.0)
+image_nosoma = removeSomafromStack(normalized_scenes[5], xy_resolution=1.0)
 
-#plot_images(scenes[5][8,:,:], image_nosoma[8,:,:], 'Original', 'No soma')
+plot_images(normalized_scenes[5][8,:,:], image_nosoma[8,:,:], 'Original', 'No soma')
 
 
 

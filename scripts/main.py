@@ -37,6 +37,10 @@ import pyclesperanto_prototype as cle
 import sys
 sys.path.append('/Users/tetianasalamovska/Documents/GitHub/nRIM_curliness_analysis')
 
+
+
+from src.ImageProcessing.RemoveSomata import findOptimalThreshold, removeSomafromStack, removeSomaFromAllScenes
+from src.ImageProcessing.VerifyAndPlotIntensity import verify_and_plot_intensity
 from src.FileImport.DesctiptorsBasedFileSearch import get_matching_files
 from src.FileImport.PlottingImage import plot_slice_from_stack, plot_comparison
 from src.ImageProcessing.NormilizeIntensity import normalizeScenes, validate_image_adjustment, process_scenes
