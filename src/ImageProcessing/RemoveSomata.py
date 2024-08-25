@@ -19,7 +19,34 @@ from skimage import img_as_float
 
 
 # use median filtering here 
+from skimage.filters import median
+from skimage.morphology import ball
+import numpy as np
 
+def apply_median_filter_to_scenes(scenes, radius=1):
+    """
+    Apply a 3D median filter to each scene in a list of 3D numpy arrays.
+
+    Parameters:
+        scenes (list of numpy.ndarray): List of 3D numpy arrays representing different scenes.
+        radius (int): Radius of the ball-shaped structuring element used for the median filter.
+
+    Returns:
+        list of numpy.ndarray: List of filtered 3D numpy arrays.
+    """
+    filtered_scenes = []
+    struct_element = ball(radius)  # Create a ball structuring element for 3D median filtering
+
+    for scene in scenes:
+        filtered_scene = median(scene, struct_element)
+        filtered_scenes.append(filtered_scene)
+
+    return filtered_scenes
+
+# Example usage:
+# Assuming 'scenes' is your list of 3D numpy arrays
+#radius = 2  # You can adjust the radius based on your specific noise characteristics and image resolution
+#filtered_scenes = apply_median_filter_to_scenes(scenes, radius)
 
 
 
@@ -63,6 +90,48 @@ def removeSomafromStack(image_stack, xy_resolution):
         image_stack_filtered[:, :, i][bg_mask[:, :, i]] = 0
 
     return image_stack_filtered
+
+
+
+from skimage import img_as_float
+from skimage.filters import threshold_multiotsu
+from skimage.filters import median
+from skimage.morphology import ball  # Use ball for 3D structuring element
+import numpy as np
+
+def removeSomafromStack(image_stack, xy_resolution):
+    """Remove somas from an image stack based on intensity thresholds."""
+    img_float = img_as_float(image_stack)  # Ensure the image is in floating point
+    n_slices = image_stack.shape[2]
+    
+    # Apply a 3D median filter to the entire stack
+    # Use a small ball as the structuring element; you might adjust the size based on your specific needs
+    img_filtered = median(img_float, ball(1))  # ball(1) provides a reasonable balance in 3D
+
+    # Determine the optimal threshold on the filtered middle slice
+    th_lvl = findOptimalThreshold(img_filtered[:, :, n_slices // 2])
+
+    # Apply multi-level thresholding
+    thresholds = threshold_multiotsu(img_filtered[:, :, n_slices // 2], classes=th_lvl)
+    quant_a = np.digitize(img_filtered, bins=thresholds)
+    
+    # Create background mask
+    bg_mask = quant_a <= th_lvl * 0.2  # More aggressive background masking
+    
+    # Filter image stack: set background regions to zero
+    image_stack_filtered = np.copy(image_stack)  # Copy the original stack to maintain original data type
+    for i in range(n_slices):
+        image_stack_filtered[:, :, i][bg_mask[:, :, i]] = 0
+
+    return image_stack_filtered
+
+
+nosoma_img = removeSomafromStack(normalized_scenes[5], xy_resolution=1)
+img_filtered = median(normalized_scenes[5], ball(3))  # ball(1) provides a reasonable balance in 3D
+nosoma_img_med = removeSomafromStack(img_filtered, xy_resolution=1)
+plot_images(img_filtered[8,:,:], nosoma_img_med[8,:,:], 'Original', 'No soma')
+
+
 
 #debugging step 
 def removeSomaFromAllScenes(scenes, xy_resolution):
@@ -112,62 +181,12 @@ else:
     print("No scenes were processed.")
 
 
-# playing around here >>>>>>>>>>>>>>>>>>
 
-def findOptimalThreshold(img, metric_th=0.9):
-    """Determine the optimal number of threshold levels based on a target metric threshold."""
-    # Apply a median filter to reduce noise before thresholding
-    img_filtered = median(img, disk(3))  # disk(3) provides a reasonable balance
-    metrics = []
-    optimal_th = 1
-    for th_lvl in range(1, 11):  # Test from 1 to 10 levels
-        thresholds = threshold_multiotsu(img_filtered, classes=th_lvl)
-        # Calculate a metric for these thresholds
-        metric = np.var(thresholds) / np.mean(thresholds)
-        metrics.append(metric)
-        if metric > metric_th:
-            optimal_th = th_lvl
-            break
-    else:
-        optimal_th = np.argmax(metrics) + 1
-    return optimal_th
-
-def removeSomafromStack(image_stack, xy_resolution):
-    """Remove somas from an image stack based on intensity thresholds."""
-    img_float = img_as_float(image_stack)  # Ensure the image is in floating point
-    n_slices = image_stack.shape[2]
-    
-    # Median filtering before thresholding
-    filtered_slices = [median(img_float[:, :, i], disk(3)) for i in range(n_slices)]  # Apply median filter slice by slice
-    filtered_stack = np.stack(filtered_slices, axis=2)
-
-    # Find optimal threshold level based on the median-filtered middle slice
-    th_lvl = findOptimalThreshold(filtered_stack[:, :, n_slices // 2], 0.9)
-    
-    # Apply multi-level thresholding
-    thresholds = threshold_multiotsu(filtered_stack[:, :, n_slices // 2], classes=th_lvl)
-    quant_a = np.digitize(filtered_stack, bins=thresholds)
-    
-    # Create background mask
-    bg_mask = quant_a <= th_lvl * 0.2  # More aggressive background masking
-    
-    # Filter image stack: set background regions to zero
-    image_stack_filtered = np.copy(image_stack)
-    for i in range(n_slices):
-        image_stack_filtered[:, :, i][bg_mask[:, :, i]] = 0
-
-    return image_stack_filtered
 
 
 from skimage.filters import median, gaussian
 from skimage.morphology import disk
 
-# Apply median filtering
-denoised_image = median(mormalized_scenes[5][:,:,8], disk(3))  # disk size depends on noise level
-
-# Contrast enhancement
-from skimage.exposure import equalize_adapthist
-contrast_enhanced = equalize_adapthist(denoised_image)
 
 
 ####################################
@@ -184,9 +203,7 @@ contrast_enhanced = equalize_adapthist(denoised_image)
 # `xy_resolution` is a parameter that you might use to adjust algorithm behavior based on image resolution
 
 
-image_nosoma = removeSomafromStack(normalized_scenes[5], xy_resolution=1.0)
-
-plot_images(normalized_scenes[5][8,:,:], image_nosoma[8,:,:], 'Original', 'No soma')
+plot_images(normalized_scenes[5][8,:,:], nosoma_img[8,:,:], 'Original', 'No soma')
 
 
 
