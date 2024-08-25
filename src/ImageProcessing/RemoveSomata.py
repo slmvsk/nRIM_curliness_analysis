@@ -17,11 +17,11 @@ import numpy as np
 from skimage.filters import threshold_multiotsu
 from skimage import img_as_float
 
-
 # use median filtering here 
+
+# no need 
 from skimage.filters import median
 from skimage.morphology import ball
-import numpy as np
 
 def apply_median_filter_to_scenes(scenes, radius=1):
     """
@@ -50,9 +50,59 @@ def apply_median_filter_to_scenes(scenes, radius=1):
 
 
 
+import matplotlib.pyplot as plt
+import numpy as np
+from skimage import img_as_float
+from skimage.io import imread
+
+test_img = normalized_scenes[2]
 
 
-def findOptimalThreshold(img, metric_th=0.9):
+# Assuming 'test_img' is your 3D image stack loaded into the workspace
+slice_index = test_img.shape[0] // 2  # Choosing the middle slice
+img_slice = img_as_float(test_img[slice_index, :, :])  # Convert to float for consistent processing
+
+# Calculate histogram
+hist, bins = np.histogram(img_slice.flatten(), bins=256, range=[0,1])
+
+# Plot the histogram
+plt.figure(figsize=(10, 4))
+plt.plot(bins[:-1], hist, lw=2)
+plt.title('Histogram of Pixel Intensities for Middle Slice')
+plt.xlabel('Pixel Intensity')
+plt.ylabel('Frequency')
+plt.grid(True)
+plt.show()
+
+# Manually determined threshold based on histogram analysis
+threshold_values = [0.3, 0.6]  # Example thresholds
+
+# Initialize a segmented stack
+segmented_stack = np.zeros_like(test_img)
+
+# Apply thresholds to each slice
+for i in range(test_img.shape[0]):
+    img_float = img_as_float(test_img[i, :, :])
+    segmented_stack[i, :, :] = np.digitize(img_float, bins=threshold_values)
+
+# Optionally visualize one of the segmented slices to verify the segmentation
+plt.figure(figsize=(10, 4))
+plt.imshow(segmented_stack[slice_index, :, :], cmap='gray')
+plt.title('Segmented Middle Slice')
+plt.axis('off')
+plt.show()
+
+
+
+
+
+
+
+
+
+
+
+def findOptimalThreshold(img, metric_th=0.95):
     """Determine the optimal number of threshold levels based on a target metric threshold."""
     metrics = []
     optimal_th = 1
@@ -92,45 +142,10 @@ def removeSomafromStack(image_stack, xy_resolution):
     return image_stack_filtered
 
 
-
-from skimage import img_as_float
-from skimage.filters import threshold_multiotsu
-from skimage.filters import median
-from skimage.morphology import ball  # Use ball for 3D structuring element
-import numpy as np
-
-def removeSomafromStack(image_stack, xy_resolution):
-    """Remove somas from an image stack based on intensity thresholds."""
-    img_float = img_as_float(image_stack)  # Ensure the image is in floating point
-    n_slices = image_stack.shape[2]
-    
-    # Apply a 3D median filter to the entire stack
-    # Use a small ball as the structuring element; you might adjust the size based on your specific needs
-    img_filtered = median(img_float, ball(1))  # ball(1) provides a reasonable balance in 3D
-
-    # Determine the optimal threshold on the filtered middle slice
-    th_lvl = findOptimalThreshold(img_filtered[:, :, n_slices // 2])
-
-    # Apply multi-level thresholding
-    thresholds = threshold_multiotsu(img_filtered[:, :, n_slices // 2], classes=th_lvl)
-    quant_a = np.digitize(img_filtered, bins=thresholds)
-    
-    # Create background mask
-    bg_mask = quant_a <= th_lvl * 0.2  # More aggressive background masking
-    
-    # Filter image stack: set background regions to zero
-    image_stack_filtered = np.copy(image_stack)  # Copy the original stack to maintain original data type
-    for i in range(n_slices):
-        image_stack_filtered[:, :, i][bg_mask[:, :, i]] = 0
-
-    return image_stack_filtered
-
-
-nosoma_img = removeSomafromStack(normalized_scenes[5], xy_resolution=1)
-img_filtered = median(normalized_scenes[5], ball(3))  # ball(1) provides a reasonable balance in 3D
-nosoma_img_med = removeSomafromStack(img_filtered, xy_resolution=1)
-plot_images(img_filtered[8,:,:], nosoma_img_med[8,:,:], 'Original', 'No soma')
-
+nosoma_img = removeSomafromStack(normalized_scenes[4], xy_resolution=1)
+#img_filtered = median(normalized_scenes[8], ball(3))  # ball(2) provides a reasonable balance in 3D
+#nosoma_img_med = removeSomafromStack(img_filtered, xy_resolution=1)
+plot_images(normalized_scenes[4][8,:,:], nosoma_img[8,:,:], 'Original', 'No soma')
 
 
 #debugging step 
@@ -180,12 +195,87 @@ if len(nosoma_scenes) > 0:
 else:
     print("No scenes were processed.")
 
+### NEXT STEP IS TO REMOVE SMALL OBJECTS ################################
+# adapting clean skeleton function here before skeletonizing and tubeness 
+
+import matplotlib.pyplot as plt
+
+from skimage import data
+from skimage import color, morphology
+
+image = color.rgb2gray(data.hubble_deep_field())[:500, :500]
+
+footprint = morphology.disk(2)
+res = morphology.white_tophat(nosoma_img[8,:,:], footprint)
+
+fig, ax = plt.subplots(ncols=3, figsize=(20, 8))
+ax[0].set_title('Original')
+ax[0].imshow(nosoma_img[8,:,:], cmap='gray')
+ax[1].set_title('White tophat')
+ax[1].imshow(res, cmap='gray')
+ax[2].set_title('Complementary')
+ax[2].imshow(nosoma_img[8,:,:] - res, cmap='gray')
+
+plt.show()
+
+
+
+# Display the original image
+plt.figure(figsize=(10, 10))  # Large display size
+plt.imshow(nosoma_img[8,:,:], cmap='gray')
+plt.title('Original')
+plt.axis('off')  # Hide the axes
+plt.show()
+
+# Display the white tophat transformed image
+plt.figure(figsize=(10, 10))  # Large display size
+plt.imshow(res, cmap='gray')
+plt.title('White Tophat')
+plt.axis('off')  # Hide the axes
+plt.show()
+
+# Display the complementary image
+complementary = nosoma_img[8,:,:] - res
+plt.figure(figsize=(10, 10))  # Large display size
+plt.imshow(complementary, cmap='gray')
+plt.title('Complementary')
+plt.axis('off')  # Hide the axes
+plt.show()
+
+# opening by reconstruction wtf sorry  ###########
+from skimage.morphology import opening, reconstruction, disk, erosion
+
+# Apply an opening by reconstruction
+seed = erosion(complementary, disk(3))  # Adjust the size of the disk as needed
+reconstructed = reconstruction(seed, complementary, method='dilation')
+
+plt.figure(figsize=(10, 10))  # Large display size
+plt.imshow(reconstructed, cmap='gray')
+plt.title('?')
+plt.axis('off')  # Hide the axes
+plt.show()
+
+#Area opening removes all connected components (clusters of pixels) that have fewer pixels than a specified threshold. Unlike a standard opening, which defines structure by shape, area opening targets small objects based on size.
+from skimage.morphology import area_opening
+
+# Apply area opening ## seems better 
+cleaned_image = area_opening(reconstructed, area_threshold=100)  # Adjust the threshold as needed
+
+plt.figure(figsize=(10, 10))  # Large display size
+plt.imshow(cleaned_image, cmap='gray')
+plt.title('?')
+plt.axis('off')  # Hide the axes
+plt.show()
+
+############## try to apply all of that before removing soma and thresholding 
 
 
 
 
-from skimage.filters import median, gaussian
-from skimage.morphology import disk
+
+
+
+
 
 
 
@@ -213,7 +303,12 @@ plot_images(normalized_scenes[5][8,:,:], nosoma_img[8,:,:], 'Original', 'No soma
 # try Z-projection 
 #mip_image = max_intensity_z_projection(image_nosoma)
 
+from skimage import restoration, exposure
 
+
+# Applying contrast stretching
+p2, p98 = np.percentile(nosoma_img, (0.5, 99.5))
+contrast_stretched = exposure.rescale_intensity(nosoma_img, in_range=(p2, p98))
 
 
 

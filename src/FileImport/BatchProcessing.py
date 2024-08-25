@@ -19,7 +19,7 @@ def processFile(file_name):
     del scenes  # Free memory used by the original scenes
     
     # Step 3: Remove soma
-    filtered_scenes = apply_median_filter_to_scenes(scenes, radius=3) #recommended 
+    #filtered_scenes = apply_median_filter_to_scenes(scenes, radius=3) #recommended 
     nosoma_scenes = removeSomaFromAllScenes(normalized_scenes, xy_resolution=1)
     # validate (just plotting)
     plot_images(normalized_scenes[8][1,:,:], nosoma_scenes[8][1,:,:], 'Original', 'No Somata')

@@ -399,9 +399,9 @@ def max_intensity_z_projection(image_3d):
 
 # Example: 
 
-mip_image = max_intensity_z_projection(skeletonized_scenes[5])
+mip_image_test = max_intensity_z_projection(cleaned_image_3d)
 #print(mip_image.shape)
-plot_images(tubeness_scenes[5][8,:,:], mip_image, 'Blurred result Slice', 'Skeletonized')
+plot_images(normalized_scenes[2][8,:,:], mip_image_test, 'Blurred result Slice', 'Skeletonized')
 
 
 import gc
