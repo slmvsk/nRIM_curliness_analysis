@@ -101,7 +101,7 @@ plt.title('Segmented Middle Slice')
 plt.axis('off')
 plt.show()
 
-################## putting all the above to the function again #######################
+################## putting all above to the function again #######################
 
 # use this function for now for good segmentation 
 
@@ -129,62 +129,6 @@ def apply_thresholds_to_stack(image_stack, thresholds):
 # Example usage
 threshold_values = [0.25, 0.45]  # Example thresholds
 segmented_stack = apply_thresholds_to_stack(test_img, threshold_values)
-
-
-
-
-
-
-
-
-
-def findOptimalThreshold(img, metric_th=0.95):
-    """Determine the optimal number of threshold levels based on a target metric threshold."""
-    metrics = []
-    optimal_th = 1
-    for th_lvl in range(1, 11):  # Test from 1 to 10 levels
-        thresholds = threshold_multiotsu(img, classes=th_lvl)
-        # Calculate a metric for these thresholds; here we use a simple placeholder
-        # In practice, you'd want a metric that evaluates segmentation quality
-        metric = np.var(thresholds) / np.mean(thresholds)
-        metrics.append(metric)
-        if metric > metric_th:
-            optimal_th = th_lvl
-            break
-    else:
-        # If no threshold level meets the threshold metric, pick the one with the highest metric
-        optimal_th = np.argmax(metrics) + 1
-    return optimal_th
-
-
-def removeSomafromStack(image_stack, xy_resolution):
-    """Remove somas from an image stack based on intensity thresholds."""
-    img_float = img_as_float(image_stack)  # Ensure the image is in floating point
-    n_slices = image_stack.shape[2]
-    th_lvl = findOptimalThreshold(image_stack[:, :, n_slices // 2])
-    
-    # Apply multi-level thresholding
-    thresholds = threshold_multiotsu(img_float[:, :, n_slices // 2], classes=th_lvl)
-    quant_a = np.digitize(img_float, bins=thresholds)
-    
-    # Create background mask
-    bg_mask = quant_a <= th_lvl * 0.2 # * 0.3 is fine 
-    
-    # Filter image stack: set background regions to zero
-    image_stack_filtered = np.copy(image_stack)
-    for i in range(n_slices):
-        image_stack_filtered[:, :, i][bg_mask[:, :, i]] = 0
-
-    return image_stack_filtered
-
-
-nosoma_img = removeSomafromStack(normalized_scenes[4], xy_resolution=1)
-#img_filtered = median(normalized_scenes[8], ball(3))  # ball(2) provides a reasonable balance in 3D
-#nosoma_img_med = removeSomafromStack(img_filtered, xy_resolution=1)
-plot_images(normalized_scenes[4][8,:,:], nosoma_img[8,:,:], 'Original', 'No soma')
-
-
-
 
 #debugging step 
 def removeSomaFromAllScenes(scenes, thresholds):
@@ -230,6 +174,12 @@ nosoma_scenes = removeSomaFromAllScenes(normalized_scenes, thresholds)
 print(f"Number of scenes processed and returned: {len(nosoma_scenes)}")
 
 
+
+
+
+
+
+
 # Optionally, inspect the first scene to ensure it's not empty
 if len(nosoma_scenes) > 0:
     print(f"Shape of the first processed scene: {nosoma_scenes[0].shape}")
@@ -238,7 +188,52 @@ else:
     
 plot_images(normalized_scenes[7][8,:,:], nosoma_scenes[7][8,:,:], 'Original', 'No soma')
 
+# code used before (finding optimal levels) 
+def findOptimalThreshold(img, metric_th=0.95):
+    """Determine the optimal number of threshold levels based on a target metric threshold."""
+    metrics = []
+    optimal_th = 1
+    for th_lvl in range(1, 11):  # Test from 1 to 10 levels
+        thresholds = threshold_multiotsu(img, classes=th_lvl)
+        # Calculate a metric for these thresholds; here we use a simple placeholder
+        # In practice, you'd want a metric that evaluates segmentation quality
+        metric = np.var(thresholds) / np.mean(thresholds)
+        metrics.append(metric)
+        if metric > metric_th:
+            optimal_th = th_lvl
+            break
+    else:
+        # If no threshold level meets the threshold metric, pick the one with the highest metric
+        optimal_th = np.argmax(metrics) + 1
+    return optimal_th
+
+
+def removeSomafromStack(image_stack, xy_resolution):
+    """Remove somas from an image stack based on intensity thresholds."""
+    img_float = img_as_float(image_stack)  # Ensure the image is in floating point
+    n_slices = image_stack.shape[2]
+    th_lvl = findOptimalThreshold(image_stack[:, :, n_slices // 2])
     
+    # Apply multi-level thresholding
+    thresholds = threshold_multiotsu(img_float[:, :, n_slices // 2], classes=th_lvl)
+    quant_a = np.digitize(img_float, bins=thresholds)
+    
+    # Create background mask
+    bg_mask = quant_a <= th_lvl * 0.2 # * 0.3 is fine 
+    
+    # Filter image stack: set background regions to zero
+    image_stack_filtered = np.copy(image_stack)
+    for i in range(n_slices):
+        image_stack_filtered[:, :, i][bg_mask[:, :, i]] = 0
+
+    return image_stack_filtered
+
+
+nosoma_img = removeSomafromStack(normalized_scenes[4], xy_resolution=1)
+#img_filtered = median(normalized_scenes[8], ball(3))  # ball(2) provides a reasonable balance in 3D
+#nosoma_img_med = removeSomafromStack(img_filtered, xy_resolution=1)
+plot_images(normalized_scenes[4][8,:,:], nosoma_img[8,:,:], 'Original', 'No soma')
+ 
     
     
 
