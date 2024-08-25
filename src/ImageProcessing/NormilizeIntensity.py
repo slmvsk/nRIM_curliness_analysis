@@ -86,6 +86,73 @@ def validateImageAdjustment(scene, adjusted_scene):
 # then plot averaged intensities on 1 plot colourcoded and compare the output 
 
 
+import numpy as np
+from skimage import exposure, img_as_float
 
+def adjust_image_histogram(image, low_high_percentiles=(0.05, 0.95)):
+    """
+    Adjust the histogram of an image based on low and high percentiles.
+    
+    Parameters:
+    image (numpy.ndarray): Input 2D image.
+    low_high_percentiles (tuple): Low and high percentiles to stretch the intensity range.
+    
+    Returns:
+    numpy.ndarray: Image with adjusted histogram.
+    """
+    # Convert image to float for percentile calculation
+    image_float = img_as_float(image)
+    
+    # Calculate low and high percentile values
+    p_low, p_high = np.percentile(image_float, [low_high_percentiles[0]*100, low_high_percentiles[1]*100])
+    
+    # Adjust the intensity range based on the percentile values
+    adjusted_image = exposure.rescale_intensity(image_float, in_range=(p_low, p_high))
+    
+    return adjusted_image
+
+def normalize_intensity_stack(image_stack, low_high_percentiles=(0.05, 0.95)):
+    """
+    Normalize the intensities of a 3D image stack slice by slice.
+    
+    Parameters:
+    image_stack (numpy.ndarray): A 3D image stack.
+    low_high_percentiles (tuple): Percentiles to use for intensity normalization.
+    
+    Returns:
+    numpy.ndarray: 3D image stack with adjusted intensities for each slice.
+    """
+    # Determine the maximum possible intensity based on the data type
+    if image_stack.dtype == np.uint8:
+        max_val = 255
+    elif image_stack.dtype == np.uint16:
+        max_val = 65535
+    else:
+        raise ValueError("Unsupported image data type")
+
+    adjusted_stack = np.zeros_like(image_stack)
+
+    # Process each slice in the stack
+    for i in range(image_stack.shape[2]):  # Z-axis is the third dimension
+        adjusted_stack[:, :, i] = adjust_image_histogram(image_stack[:, :, i], low_high_percentiles)
+
+    return adjusted_stack
+
+# Example usage with a hypothetical 3D image stack
+normalized_images = normalize_intensity_stack(test_img)
+
+# Visualize the effect on a middle slice
+
+plt.figure(figsize=(12, 6))
+plt.subplot(1, 2, 1)
+plt.imshow(test_img[test_img.shape[0] // 2], cmap='gray')
+plt.title('Original Middle Slice')
+plt.axis('off')
+
+plt.subplot(1, 2, 2)
+plt.imshow(normalized_images[normalized_images.shape[0] // 2], cmap='gray')
+plt.title('Normalized Middle Slice')
+plt.axis('off')
+plt.show()
 
 
