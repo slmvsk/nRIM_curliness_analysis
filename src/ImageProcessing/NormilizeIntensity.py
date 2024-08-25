@@ -79,3 +79,13 @@ def validateImageAdjustment(scene, adjusted_scene):
 # Assuming 'scenes' is your list of 11 3D numpy arrays
 #adjusted_scenes = normalizeScenes(scenes)
 
+
+
+############### normalize contrast intensities 
+# i need not only normalize between images but also for every stack between Z dimension!!!
+# then plot averaged intensities on 1 plot colourcoded and compare the output 
+
+
+
+
+

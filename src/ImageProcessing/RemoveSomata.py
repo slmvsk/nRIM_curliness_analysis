@@ -185,7 +185,6 @@ plot_images(normalized_scenes[4][8,:,:], nosoma_img[8,:,:], 'Original', 'No soma
 
 
 
-thresholds = [0.25, 0.45]  # Example thresholds
 
 #debugging step 
 def removeSomaFromAllScenes(scenes, thresholds):
@@ -224,6 +223,9 @@ def removeSomaFromAllScenes(scenes, thresholds):
     print(f"Total processed scenes: {len(processed_scenes)}")
     return processed_scenes
 
+
+thresholds = [0.2, 0.45]  # Example thresholds
+
 nosoma_scenes = removeSomaFromAllScenes(normalized_scenes, thresholds)
 print(f"Number of scenes processed and returned: {len(nosoma_scenes)}")
 
@@ -234,13 +236,12 @@ if len(nosoma_scenes) > 0:
 else:
     print("No scenes were processed.")
     
-plot_images(normalized_scenes[4][8,:,:], nosoma_img[8,:,:], 'Original', 'No soma')
+plot_images(normalized_scenes[7][8,:,:], nosoma_scenes[7][8,:,:], 'Original', 'No soma')
 
     
     
     
-    
-    
+
 
 ### NEXT STEP IS TO REMOVE SMALL OBJECTS ################################
 # adapting clean skeleton function here before skeletonizing and tubeness 

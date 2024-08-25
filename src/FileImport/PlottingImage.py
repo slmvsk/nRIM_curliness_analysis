@@ -86,3 +86,20 @@ def plot_images(image1, image2, title1='Image 1', title2='Image 2'):
 # Example usage:
 # Assuming 'image1' and 'image2' are your 2D numpy arrays representing the images
 #plot_images(result[8,:,:], blurred_scenes[2][8,:,:], 'Result Slice', 'Blurred Scene Slice')
+
+#borrowed
+def show(image_to_show, labels=False):
+    """
+    This function generates three projections: in X-, Y- and Z-direction and shows them.
+    """
+    projection_x = cle.maximum_x_projection(image_to_show)
+    projection_y = cle.maximum_y_projection(image_to_show)
+    projection_z = cle.maximum_z_projection(image_to_show)
+
+    fig, axs = plt.subplots(1, 3, figsize=(15, 15))
+    cle.imshow(projection_x, plot=axs[0], labels=labels)
+    cle.imshow(projection_y, plot=axs[1], labels=labels)
+    cle.imshow(projection_z, plot=axs[2], labels=labels)
+
+#show(input_gpu)
+#print(input_gpu.shape)
