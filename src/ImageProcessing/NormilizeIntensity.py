@@ -32,7 +32,7 @@ def adjust_image_histogram(image, min_max_thr=(0.1, 0.99)): #0.05, 0.99 gpt sug
     # Convert image to float for percentile calculation
     image_float = img_as_float(image)
     
-    # Calculate low and high percentile values
+    # Calculate percentile values
     min_th, max_th = np.percentile(image_float, [min_max_thr[0]*100, min_max_thr[1]*100])
     
     # Adjust the intensity range based on the percentile values
@@ -64,7 +64,7 @@ def normalize_intensity_stack(image_stack):
     adjusted_stack = np.zeros_like(image_stack, dtype=np.float32)
 
     # Calculate the percentile values for intensity rescaling
-    min_th, max_th = np.percentile(image_stack, [1, 99])  # Use the entire stack to calculate global percentiles
+    min_th, max_th = np.percentile(image_stack, [1, 99])  # Use global percentiles for stack or for all images in the list? 
 
     for i in range(image_stack.shape[0]):  # Access each slice in the stack
         img = image_stack[i, :, :]
