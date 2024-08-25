@@ -75,7 +75,7 @@ plt.grid(True)
 plt.show()
 
 # Manually determined threshold based on histogram analysis
-threshold_values = [0.3, 0.6]  # Example thresholds
+threshold_values = [0.3, 0.45]  # Example thresholds
 
 # Initialize a segmented stack
 segmented_stack = np.zeros_like(test_img)
