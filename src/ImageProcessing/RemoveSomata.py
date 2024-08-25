@@ -55,7 +55,7 @@ import numpy as np
 from skimage import img_as_float
 from skimage.io import imread
 
-test_img = normalized_scenes[2]
+test_img = normalized_scenes[7]
 
 
 # Assuming 'test_img' is your 3D image stack loaded into the workspace
@@ -74,8 +74,10 @@ plt.ylabel('Frequency')
 plt.grid(True)
 plt.show()
 
+
+
 # Manually determined threshold based on histogram analysis
-threshold_values = [0.3, 0.45]  # Example thresholds
+threshold_values = [0.25, 0.45]  # Example thresholds
 
 # Initialize a segmented stack
 segmented_stack = np.zeros_like(test_img)
@@ -92,7 +94,41 @@ plt.title('Segmented Middle Slice')
 plt.axis('off')
 plt.show()
 
+# Optionally visualize one of the segmented slices to verify the segmentation
+plt.figure(figsize=(10, 4))
+plt.imshow(test_img[10, :, :], cmap='gray')
+plt.title('Segmented Middle Slice')
+plt.axis('off')
+plt.show()
 
+################## putting all the above to the function again #######################
+
+# use this function for now for good segmentation 
+
+def apply_thresholds_to_stack(image_stack, thresholds):
+    """
+    Apply given threshold values to segment a 3D image stack.
+    
+    Parameters:
+        image_stack (ndarray): A 3D numpy array representing the image stack.
+        thresholds (list): A list of threshold values to segment the image.
+    
+    Returns:
+        ndarray: A 3D numpy array of the segmented image stack.
+    """
+    # Initialize a segmented stack
+    segmented_stack = np.zeros_like(image_stack)
+    
+    # Apply thresholds to each slice
+    for i in range(image_stack.shape[0]):
+        img_float = img_as_float(image_stack[i, :, :])
+        segmented_stack[i, :, :] = np.digitize(img_float, bins=thresholds)
+    
+    return segmented_stack
+
+# Example usage
+threshold_values = [0.25, 0.45]  # Example thresholds
+segmented_stack = apply_thresholds_to_stack(test_img, threshold_values)
 
 
 
@@ -148,8 +184,11 @@ nosoma_img = removeSomafromStack(normalized_scenes[4], xy_resolution=1)
 plot_images(normalized_scenes[4][8,:,:], nosoma_img[8,:,:], 'Original', 'No soma')
 
 
+
+thresholds = [0.25, 0.45]  # Example thresholds
+
 #debugging step 
-def removeSomaFromAllScenes(scenes, xy_resolution):
+def removeSomaFromAllScenes(scenes, thresholds):
     """
     Iterate over all scenes in a file, apply the removeSomafromStack function to each scene,
     and release memory after processing each scene.
@@ -173,7 +212,7 @@ def removeSomaFromAllScenes(scenes, xy_resolution):
         
         try:
             # Apply the removeSomafromStack function to the current scene
-            processed_scene = removeSomafromStack(scene, xy_resolution)
+            processed_scene = apply_thresholds_to_stack(scene, thresholds) #changed to manual temporary 
             processed_scenes.append(processed_scene)
             print(f"Processed scene {i+1} successfully added to the list.")
               
@@ -185,7 +224,7 @@ def removeSomaFromAllScenes(scenes, xy_resolution):
     print(f"Total processed scenes: {len(processed_scenes)}")
     return processed_scenes
 
-nosoma_scenes = removeSomaFromAllScenes(normalized_scenes, xy_resolution=1)
+nosoma_scenes = removeSomaFromAllScenes(normalized_scenes, thresholds)
 print(f"Number of scenes processed and returned: {len(nosoma_scenes)}")
 
 
@@ -194,6 +233,14 @@ if len(nosoma_scenes) > 0:
     print(f"Shape of the first processed scene: {nosoma_scenes[0].shape}")
 else:
     print("No scenes were processed.")
+    
+plot_images(normalized_scenes[4][8,:,:], nosoma_img[8,:,:], 'Original', 'No soma')
+
+    
+    
+    
+    
+    
 
 ### NEXT STEP IS TO REMOVE SMALL OBJECTS ################################
 # adapting clean skeleton function here before skeletonizing and tubeness 
