@@ -228,93 +228,111 @@ def removeSomafromStack(image_stack, xy_resolution):
         image_stack_filtered[:, :, i][bg_mask[:, :, i]] = 0
 
     return image_stack_filtered
-nosoma_img = removeSomafromStack(normalized_scenes[4], xy_resolution=1)
+#nosoma_img = removeSomafromStack(normalized_scenes[4], xy_resolution=1)
 #img_filtered = median(normalized_scenes[8], ball(3))  # ball(2) provides a reasonable balance in 3D
 #nosoma_img_med = removeSomafromStack(img_filtered, xy_resolution=1)
-plot_images(normalized_scenes[4][8,:,:], nosoma_img[8,:,:], 'Original', 'No soma')
+#plot_images(normalized_scenes[4][8,:,:], nosoma_img[8,:,:], 'Original', 'No soma')
  
     
-    
+
 
 
 ### NEXT STEP IS TO REMOVE SMALL OBJECTS ################################
 # adapting clean skeleton function here before skeletonizing and tubeness 
 
+# this one of the optoions ( number 2nd priority)
 import matplotlib.pyplot as plt
-
 from skimage import data
 from skimage import color, morphology
 
-image = color.rgb2gray(data.hubble_deep_field())[:500, :500]
-
 footprint = morphology.disk(2)
-res = morphology.white_tophat(nosoma_img[8,:,:], footprint)
+res = morphology.white_tophat(nosoma_scenes[4][8,:,:], footprint)
 
 fig, ax = plt.subplots(ncols=3, figsize=(20, 8))
 ax[0].set_title('Original')
-ax[0].imshow(nosoma_img[8,:,:], cmap='gray')
+ax[0].imshow(nosoma_scenes[4][8,:,:], cmap='gray')
 ax[1].set_title('White tophat')
 ax[1].imshow(res, cmap='gray')
 ax[2].set_title('Complementary')
-ax[2].imshow(nosoma_img[8,:,:] - res, cmap='gray')
-
+ax[2].imshow(nosoma_scenes[4][8,:,:] - res, cmap='gray')
 plt.show()
-
-
-
 # Display the original image
 plt.figure(figsize=(10, 10))  # Large display size
-plt.imshow(nosoma_img[8,:,:], cmap='gray')
+plt.imshow(nosoma_scenes[4][8,:,:], cmap='gray')
 plt.title('Original')
 plt.axis('off')  # Hide the axes
 plt.show()
-
 # Display the white tophat transformed image
 plt.figure(figsize=(10, 10))  # Large display size
 plt.imshow(res, cmap='gray')
 plt.title('White Tophat')
 plt.axis('off')  # Hide the axes
 plt.show()
-
 # Display the complementary image
-complementary = nosoma_img[8,:,:] - res
+complementary = nosoma_scenes[4][8,:,:] - res
 plt.figure(figsize=(10, 10))  # Large display size
 plt.imshow(complementary, cmap='gray')
 plt.title('Complementary')
 plt.axis('off')  # Hide the axes
 plt.show()
 
-# opening by reconstruction wtf sorry  ###########
-from skimage.morphology import opening, reconstruction, disk, erosion
+# complementary is fine result but now i need to remove small objects literaly 
 
-# Apply an opening by reconstruction
-seed = erosion(complementary, disk(3))  # Adjust the size of the disk as needed
-reconstructed = reconstruction(seed, complementary, method='dilation')
 
-plt.figure(figsize=(10, 10))  # Large display size
-plt.imshow(reconstructed, cmap='gray')
-plt.title('?')
-plt.axis('off')  # Hide the axes
-plt.show()
-
+# ignore for now (good option)
 #Area opening removes all connected components (clusters of pixels) that have fewer pixels than a specified threshold. Unlike a standard opening, which defines structure by shape, area opening targets small objects based on size.
-from skimage.morphology import area_opening
-
+#from skimage.morphology import area_opening
 # Apply area opening ## seems better 
-cleaned_image = area_opening(reconstructed, area_threshold=100)  # Adjust the threshold as needed
+#cleaned_image = area_opening(nosoma_scenes[4][8,:,:], area_threshold=100)  # Adjust the threshold as needed
+#plt.figure(figsize=(10, 10))  # Large display size
+#plt.imshow(cleaned_image, cmap='gray')
+#plt.title('?')
+#plt.axis('off')  # Hide the axes
+#plt.show()
+#try to apply all of that before removing soma and thresholding 
+
+
+#another method 
+from skimage import morphology, measure, filters
+from skan import csr
+
+from skimage.measure import label, regionprops
+import numpy as np
+import matplotlib.pyplot as plt
+#########HERE FIX
+def remove_small_objects_3d(image, min_size=1):
+    """ Remove small objects from a 3D binary image with debugging """
+    # Ensure the image is binary
+    if image.max() > 1:
+        image = img_as_bool(image)
+    
+    # Label the image and analyze properties
+    labeled_image = label(image, connectivity=3)
+    props = regionprops(labeled_image)
+    
+    # Debug: print sizes of objects found
+    sizes = [prop.area for prop in props]
+    print("Sizes of objects found:", sizes)
+
+    cleaned_image = morphology.remove_small_objects(image, min_size=min_size, connectivity=3)
+    return cleaned_image
+
+# Usage example
+cleaned_nosoma = remove_small_objects_3d(nosoma_scenes[4], min_size=1)
 
 plt.figure(figsize=(10, 10))  # Large display size
-plt.imshow(cleaned_image, cmap='gray')
-plt.title('?')
+plt.imshow(cleaned_nosoma[8,:,:], cmap='gray')
+plt.title('Cleaned Image')
 plt.axis('off')  # Hide the axes
 plt.show()
 
-############## try to apply all of that before removing soma and thresholding 
+cleaned_nosoma = remove_small_objects_3d(nosoma_scenes[4], min_size=1)
 
-
-
-
-
+plt.figure(figsize=(10, 10))  # Large display size
+plt.imshow(cleaned_nosoma[8,:,:], cmap='gray')
+plt.title('?')
+plt.axis('off')  # Hide the axes
+plt.show()
 
 
 
