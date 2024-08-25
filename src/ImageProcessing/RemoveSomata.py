@@ -168,12 +168,13 @@ def removeSomaFromAllScenes(scenes, thresholds):
     return processed_scenes
 
 
-thresholds = [0.2, 0.45]  # Example thresholds
+thresholds = [0.3, 0.5]  # Example thresholds
 
 nosoma_scenes = removeSomaFromAllScenes(normalized_scenes, thresholds)
 print(f"Number of scenes processed and returned: {len(nosoma_scenes)}")
 
-
+plot_images(normalized_scenes[8][8,:,:], nosoma_scenes[8][8,:,:], 'Original', 'No soma')
+# fine enough 
 
 
 
@@ -188,7 +189,9 @@ else:
     
 plot_images(normalized_scenes[7][8,:,:], nosoma_scenes[7][8,:,:], 'Original', 'No soma')
 
-# code used before (finding optimal levels) 
+
+
+# code USED BEFORE FOR AUTOMATIC THRESHOLDING (finding optimal levels) 
 def findOptimalThreshold(img, metric_th=0.95):
     """Determine the optimal number of threshold levels based on a target metric threshold."""
     metrics = []
@@ -206,8 +209,6 @@ def findOptimalThreshold(img, metric_th=0.95):
         # If no threshold level meets the threshold metric, pick the one with the highest metric
         optimal_th = np.argmax(metrics) + 1
     return optimal_th
-
-
 def removeSomafromStack(image_stack, xy_resolution):
     """Remove somas from an image stack based on intensity thresholds."""
     img_float = img_as_float(image_stack)  # Ensure the image is in floating point
@@ -227,8 +228,6 @@ def removeSomafromStack(image_stack, xy_resolution):
         image_stack_filtered[:, :, i][bg_mask[:, :, i]] = 0
 
     return image_stack_filtered
-
-
 nosoma_img = removeSomafromStack(normalized_scenes[4], xy_resolution=1)
 #img_filtered = median(normalized_scenes[8], ball(3))  # ball(2) provides a reasonable balance in 3D
 #nosoma_img_med = removeSomafromStack(img_filtered, xy_resolution=1)
