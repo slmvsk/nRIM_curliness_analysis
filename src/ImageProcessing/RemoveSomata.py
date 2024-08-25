@@ -112,10 +112,62 @@ else:
     print("No scenes were processed.")
 
 
+# playing around here >>>>>>>>>>>>>>>>>>
+
+def findOptimalThreshold(img, metric_th=0.9):
+    """Determine the optimal number of threshold levels based on a target metric threshold."""
+    # Apply a median filter to reduce noise before thresholding
+    img_filtered = median(img, disk(3))  # disk(3) provides a reasonable balance
+    metrics = []
+    optimal_th = 1
+    for th_lvl in range(1, 11):  # Test from 1 to 10 levels
+        thresholds = threshold_multiotsu(img_filtered, classes=th_lvl)
+        # Calculate a metric for these thresholds
+        metric = np.var(thresholds) / np.mean(thresholds)
+        metrics.append(metric)
+        if metric > metric_th:
+            optimal_th = th_lvl
+            break
+    else:
+        optimal_th = np.argmax(metrics) + 1
+    return optimal_th
+
+def removeSomafromStack(image_stack, xy_resolution):
+    """Remove somas from an image stack based on intensity thresholds."""
+    img_float = img_as_float(image_stack)  # Ensure the image is in floating point
+    n_slices = image_stack.shape[2]
+    
+    # Median filtering before thresholding
+    filtered_slices = [median(img_float[:, :, i], disk(3)) for i in range(n_slices)]  # Apply median filter slice by slice
+    filtered_stack = np.stack(filtered_slices, axis=2)
+
+    # Find optimal threshold level based on the median-filtered middle slice
+    th_lvl = findOptimalThreshold(filtered_stack[:, :, n_slices // 2], 0.9)
+    
+    # Apply multi-level thresholding
+    thresholds = threshold_multiotsu(filtered_stack[:, :, n_slices // 2], classes=th_lvl)
+    quant_a = np.digitize(filtered_stack, bins=thresholds)
+    
+    # Create background mask
+    bg_mask = quant_a <= th_lvl * 0.2  # More aggressive background masking
+    
+    # Filter image stack: set background regions to zero
+    image_stack_filtered = np.copy(image_stack)
+    for i in range(n_slices):
+        image_stack_filtered[:, :, i][bg_mask[:, :, i]] = 0
+
+    return image_stack_filtered
 
 
+from skimage.filters import median, gaussian
+from skimage.morphology import disk
 
+# Apply median filtering
+denoised_image = median(mormalized_scenes[5][:,:,8], disk(3))  # disk size depends on noise level
 
+# Contrast enhancement
+from skimage.exposure import equalize_adapthist
+contrast_enhanced = equalize_adapthist(denoised_image)
 
 
 ####################################
