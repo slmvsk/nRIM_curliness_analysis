@@ -16,80 +16,54 @@ Created on Sat Jul  6 15:52:36 2024
 import numpy as np
 from skimage import exposure, img_as_float
 
+# 3D (using this one) 
 
-# 2D test
-def adjust_image_histogram(image, min_max_thr=(0.1, 0.99)): #0.05, 0.99 gpt sug
-    """
-    Adjust the histogram of an image based on low and high percentiles.
-    
-    Parameters:
-    image (numpy.ndarray): Input 2D image.
-    min_max_thr (tuple): Lower and higher "percentiles" to stretch the intensity range.
-    
-    Returns:
-    numpy.ndarray: Image with adjusted histogram.
-    """
-    # Convert image to float for percentile calculation
-    image_float = img_as_float(image)
-    
-    # Calculate percentile values
-    min_th, max_th = np.percentile(image_float, [min_max_thr[0]*100, min_max_thr[1]*100])
-    
-    # Adjust the intensity range based on the percentile values
-    adjusted_image = exposure.rescale_intensity(image_float, in_range=(min_th), max_th))
-    
-    return adjusted_image
-
+import numpy as np
 from skimage import exposure
 
-
-# 3D (using this one) 
-def normalize_intensity_stack(image_stack):
+def linear_contrast_stretching(image_stack):
     """
-    Normalize intensity of an individual image stack.
+    Apply linear contrast stretching to an entire 3D image stack globally.
 
     Parameters:
-    - image_stack (numpy.ndarray): A 3D numpy array.
+    - image_stack (numpy.ndarray): A 3D numpy array (Z, Y, X) of an image stack.
 
     Returns:
-    - numpy.ndarray: Adjusted image stack with enhanced contrast.
+    - numpy.ndarray: Contrast stretched 3D image stack.
     """
+    # Determine the data type and set the output range accordingly
     if image_stack.dtype == np.uint8:
-        max_val = 255
+        output_range = (0, 255)
     elif image_stack.dtype == np.uint16:
-        max_val = 65535
+        output_range = (0, 65535)
     else:
         raise ValueError("Unsupported image data type")
 
-    adjusted_stack = np.zeros_like(image_stack, dtype=np.float32)
 
-    # Calculate the percentile values for intensity rescaling
-    min_th, max_th = np.percentile(image_stack, [1, 99])  # Use global percentiles for stack or for all images in the list? 
+    # Convert the image stack to floating point to handle intensity scaling
+    image_stack_float = img_as_float(image_stack)
 
-    for i in range(image_stack.shape[0]):  # Access each slice in the stack
-        img = image_stack[i, :, :]
-        adjusted_img = exposure.rescale_intensity(img, in_range=(min_th, max_th), out_range=(0, max_val))
-        adjusted_stack[i, :, :] = adjusted_img
+    # Calculate global percentiles across the entire stack to handle outliers
+    # Exclude the top and bottom 1% of data to reduce the impact of outliers
+    min_th, max_th = np.percentile(image_stack_float, [1, 99])
 
-    return adjusted_stack.astype(image_stack.dtype)  # Ensure the output has the same dtype as the input
+    # Apply contrast stretching across the stack
+    adjusted_stack = np.zeros_like(image_stack_float)
+    for i in range(image_stack.shape[0]):  # Adjust each slice
+        adjusted_stack[i, :, :] = exposure.rescale_intensity(
+            image_stack_float[i, :, :], in_range=(min_th, max_th), out_range=output_range
+        )
 
-# Example usage with a hypothetical 3D image stack
-#normalized_images = normalize_intensity_stack(test_img)
+    return adjusted_stack.astype(image_stack.dtype)  # Convert back to original data type
 
-# Visualize the effect on a middle slice
 
-plt.figure(figsize=(12, 6))
-plt.subplot(1, 2, 1)
-plt.imshow(test_img[test_img.shape[0] // 2], cmap='gray')
-plt.title('Original Middle Slice')
-plt.axis('off')
 
-plt.subplot(1, 2, 2)
-plt.imshow(normalized_images[normalized_images.shape[0] // 2], cmap='gray')
-plt.title('Normalized Middle Slice')
-plt.axis('off')
-plt.show()
+# Example usage:
+enhanced_stack = linear_contrast_stretching(scenes[4])
 
+# Optionally visualize or further process `enhanced_stack`
+plot_image_histogram(enhanced_stack[8,:,:])
+plot_images(normalized_scenes[4][8,:,:], enhanced_stack[8,:,:], 'Original', 'No soma')
 
 
 # putting together 
@@ -105,7 +79,7 @@ def normalizeScenes(scenes):
     """
     adjusted_scenes = []
     for scene in scenes:
-        adjusted_scene = normalize_intensity_stack(scene) #fixed
+        adjusted_scene = linear_contrast_stretching(scene) #fixed
         validateImageAdjustment(scene, adjusted_scene)
         adjusted_scenes.append(adjusted_scene)
     return adjusted_scenes
@@ -133,23 +107,46 @@ def validateImageAdjustment(scene, adjusted_scene):
         raise ValueError(f"Shape mismatch: Original shape {scene.shape} doesn't match adjusted shape {adjusted_scene.shape}")
 
 # Assuming 'scenes' is your list of 11 3D numpy arrays
-#normalized_scenes = normalizeScenes(scenes)
+normalized_scenes = normalizeScenes(scenes)
 
 
-#plot_images(normalized_scenes[3][8,:,:], scenes[3][8,:,:], 'nm', 'orig')
+plot_images(normalized_scenes[5][8,:,:], scenes[5][8,:,:], 'nm', 'orig')
+
+# equalization do not use, i need to preserve intensities in the images to threshold
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+def plot_image_histogram(image, bins=256, title='Image Histogram', max_intensity=70000):
+    """
+    Plot the histogram of an image.
+
+    Parameters:
+        image (numpy.ndarray): A 2D numpy array representing the grayscale image.
+        bins (int): Number of histogram bins.
+        title (str): Title of the histogram plot.
+        max_intensity (int): Maximum intensity to include in the histogram.
+    """
+    # Calculate histogram
+    histogram, bin_edges = np.histogram(image, bins=bins, range=[0, max_intensity])
+
+    # Configure plot
+    plt.figure(figsize=(10, 5))
+    plt.title(title)
+    plt.xlabel('Pixel Intensity')
+    plt.ylabel('Pixel Count')
+
+    # Plot the histogram
+    plt.bar(bin_edges[:-1], histogram, width=np.diff(bin_edges), edgecolor='black', align='edge')
+
+    # Display the plot
+    plt.show()
+
+# Example usage with your image data:
 
 
-
-
-
-
-
-
-
-
-
-
-
+# Example usage
+plot_image_histogram(normalized_scenes[9][8,:,:])
 
 
 
