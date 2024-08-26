@@ -77,7 +77,7 @@ plt.show()
 
 
 # Manually determined threshold based on histogram analysis
-threshold_values = [0.25, 0.45]  # Example thresholds
+threshold_values = [0.2, 0.45]  # Example thresholds
 
 # Initialize a segmented stack
 segmented_stack = np.zeros_like(test_img)
@@ -127,8 +127,8 @@ def apply_thresholds_to_stack(image_stack, thresholds):
     return segmented_stack
 
 # Example usage
-threshold_values = [0.25, 0.45]  # Example thresholds
-segmented_stack = apply_thresholds_to_stack(test_img, threshold_values)
+threshold_values = [0.3, 0.5]  # Example thresholds
+segmented_stack = apply_thresholds_to_stack(scenes[4], threshold_values)
 
 #debugging step 
 def removeSomaFromAllScenes(scenes, thresholds):
@@ -168,13 +168,19 @@ def removeSomaFromAllScenes(scenes, thresholds):
     return processed_scenes
 
 
-thresholds = [0.3, 0.5]  # Example thresholds
+thresholds = [0.1, 0.9]  # Example thresholds
 
 nosoma_scenes = removeSomaFromAllScenes(normalized_scenes, thresholds)
 print(f"Number of scenes processed and returned: {len(nosoma_scenes)}")
 
-plot_images(normalized_scenes[8][8,:,:], nosoma_scenes[8][8,:,:], 'Original', 'No soma')
+plot_images(normalized_scenes[4][8,:,:], segmented_stack[8,:,:], 'Original', 'No soma')
 # fine enough 
+plt.hist(segmented_stack[8,:,:].ravel(), bins=256, color='black')
+
+
+
+
+
 
 
 
@@ -228,10 +234,10 @@ def removeSomafromStack(image_stack, xy_resolution):
         image_stack_filtered[:, :, i][bg_mask[:, :, i]] = 0
 
     return image_stack_filtered
-#nosoma_img = removeSomafromStack(normalized_scenes[4], xy_resolution=1)
+nosoma_stack = removeSomafromStack(equalized_image, xy_resolution=1)
 #img_filtered = median(normalized_scenes[8], ball(3))  # ball(2) provides a reasonable balance in 3D
 #nosoma_img_med = removeSomafromStack(img_filtered, xy_resolution=1)
-#plot_images(normalized_scenes[4][8,:,:], nosoma_img[8,:,:], 'Original', 'No soma')
+plot_images(normalized_scenes[4][8,:,:], nosoma_img[8,:,:], 'Original', 'No soma')
  
     
 
@@ -300,7 +306,7 @@ from skimage.measure import label, regionprops
 import numpy as np
 import matplotlib.pyplot as plt
 #########HERE FIX
-def remove_small_objects_3d(image, min_size=1):
+def remove_small_objects_3d(image, min_size=50):
     """ Remove small objects from a 3D binary image with debugging """
     # Ensure the image is binary
     if image.max() > 1:
@@ -318,7 +324,7 @@ def remove_small_objects_3d(image, min_size=1):
     return cleaned_image
 
 # Usage example
-cleaned_nosoma = remove_small_objects_3d(nosoma_scenes[4], min_size=1)
+cleaned_nosoma = remove_small_objects_3d(segmented_stack, min_size=50)
 
 plt.figure(figsize=(10, 10))  # Large display size
 plt.imshow(cleaned_nosoma[8,:,:], cmap='gray')
@@ -333,6 +339,53 @@ plt.imshow(cleaned_nosoma[8,:,:], cmap='gray')
 plt.title('?')
 plt.axis('off')  # Hide the axes
 plt.show()
+
+
+import matplotlib.pyplot as plt
+from skimage import exposure, io
+from skimage.filters import threshold_otsu
+
+# Load an example image
+
+# Display the histogram of the image
+fig, ax = plt.subplots(1, 2, figsize=(12, 6))
+ax[0].imshow(normalized_scenes[4][8,:,:], cmap='gray')
+ax[0].set_title('Original Image')
+ax[0].axis('off')
+
+# Histogram and threshold line
+hist, bins_center = exposure.histogram(normalized_scenes[4][8,:,:])
+ax[1].plot(bins_center, hist, lw=2)
+ax[1].set_title('Histogram of Pixel Intensities')
+
+# Apply Otsu's method to find an optimal threshold
+thresh = threshold_otsu(normalized_scenes[4][8,:,:])
+ax[1].axvline(thresh, color='r', ls='--')
+
+ax[1].text(thresh+0.02, max(hist)/2, f'Threshold: {thresh}', color='red')
+
+# Apply threshold
+binary_image = image > thresh
+fig, ax2 = plt.subplots(figsize=(6, 6))
+ax2.imshow(binary_image, cmap='gray')
+ax2.set_title('Binary Image After Thresholding')
+ax2.axis('off')
+
+plt.show()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
