@@ -16,68 +16,12 @@ Created on Thu Jul 18 00:40:39 2024
 import numpy as np
 from skimage.filters import threshold_multiotsu
 from skimage import img_as_float
-
-# use median filtering here 
-
-# no need 
-from skimage.filters import median
-from skimage.morphology import ball
-
-def apply_median_filter_to_scenes(scenes, radius=1):
-    """
-    Apply a 3D median filter to each scene in a list of 3D numpy arrays.
-
-    Parameters:
-        scenes (list of numpy.ndarray): List of 3D numpy arrays representing different scenes.
-        radius (int): Radius of the ball-shaped structuring element used for the median filter.
-
-    Returns:
-        list of numpy.ndarray: List of filtered 3D numpy arrays.
-    """
-    filtered_scenes = []
-    struct_element = ball(radius)  # Create a ball structuring element for 3D median filtering
-
-    for scene in scenes:
-        filtered_scene = median(scene, struct_element)
-        filtered_scenes.append(filtered_scene)
-
-    return filtered_scenes
-
-# Example usage:
-# Assuming 'scenes' is your list of 3D numpy arrays
-#radius = 2  # You can adjust the radius based on your specific noise characteristics and image resolution
-#filtered_scenes = apply_median_filter_to_scenes(scenes, radius)
-
-
-
 import matplotlib.pyplot as plt
-import numpy as np
-from skimage import img_as_float
-from skimage.io import imread
-
-test_img = normalized_scenes[7]
-
-
-# Assuming 'test_img' is your 3D image stack loaded into the workspace
-slice_index = test_img.shape[0] // 2  # Choosing the middle slice
-img_slice = img_as_float(test_img[slice_index, :, :])  # Convert to float for consistent processing
-
-# Calculate histogram
-hist, bins = np.histogram(img_slice.flatten(), bins=256, range=[0,1])
-
-# Plot the histogram
-plt.figure(figsize=(10, 4))
-plt.plot(bins[:-1], hist, lw=2)
-plt.title('Histogram of Pixel Intensities for Middle Slice')
-plt.xlabel('Pixel Intensity')
-plt.ylabel('Frequency')
-plt.grid(True)
-plt.show()
 
 
 
 # Manually determined threshold based on histogram analysis
-threshold_values = [0.2, 0.45]  # Example thresholds
+threshold_values = [0.2, 0.6]  # Example thresholds
 
 # Initialize a segmented stack
 segmented_stack = np.zeros_like(test_img)
@@ -127,8 +71,8 @@ def apply_thresholds_to_stack(image_stack, thresholds):
     return segmented_stack
 
 # Example usage
-threshold_values = [0.3, 0.5]  # Example thresholds
-segmented_stack = apply_thresholds_to_stack(scenes[4], threshold_values)
+threshold_values = [0.22, 0.45]  # Example thresholds
+segmented_stack = apply_thresholds_to_stack(normalized_scenes[4], threshold_values)
 
 #debugging step 
 def removeSomaFromAllScenes(scenes, thresholds):
@@ -168,17 +112,18 @@ def removeSomaFromAllScenes(scenes, thresholds):
     return processed_scenes
 
 
-thresholds = [0.1, 0.9]  # Example thresholds
-
 nosoma_scenes = removeSomaFromAllScenes(normalized_scenes, thresholds)
 print(f"Number of scenes processed and returned: {len(nosoma_scenes)}")
 
 plot_images(normalized_scenes[4][8,:,:], segmented_stack[8,:,:], 'Original', 'No soma')
 # fine enough 
-plt.hist(segmented_stack[8,:,:].ravel(), bins=256, color='black')
 
 
-
+plt.figure(figsize=(10, 4))
+plt.hist(segmented_stack[8,:,:], cmap='gray')
+plt.title('Segmented Middle Slice')
+plt.axis('off')
+plt.show()
 
 
 
