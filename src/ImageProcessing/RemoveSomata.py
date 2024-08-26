@@ -132,7 +132,7 @@ if len(nosoma_scenes) > 0:
 else:
     print("No scenes were processed.")
     
-plot_images(normalized_scenes[7][8,:,:], nosoma_scenes[7][8,:,:], 'Original', 'No soma')
+plot_images(binary_image[8,:,:], nosoma_scenes[9][8,:,:], 'Original', 'No soma')
 
 
 
@@ -252,7 +252,7 @@ from skimage.measure import label, regionprops
 from skimage import morphology
 
 
-
+# frstly remove small obj and then binarise?
 import numpy as np
 
 def convert_to_binary(image):
@@ -270,29 +270,24 @@ def convert_to_binary(image):
 
 # Example usage
 # Assuming `image` is your numpy array with values 0, 1, 2
-binary_image = convert_to_binary(your_image)
+binary_image = convert_to_binary(nosoma_scenes[9])
 
 
 
 
-def remove_small_objects_3d(image, min_size=50):
+def remove_small_objects_3d(binary_image, min_size=50):
     """
-    Convert a 3-nary image to binary and remove small objects from a 3D binary image with debugging.
-    
+    Remove small objects from a 3D binary image (values 0 and 1) based on their size.
+
     Parameters:
-        image (numpy.ndarray): A 3D numpy array with values 0, 1, 2.
+        binary_image (numpy.ndarray): A 3D binary numpy array with values 0 and 1.
         min_size (int): The minimum size of objects to keep.
-    
+
     Returns:
         numpy.ndarray: A 3D binary image with small objects removed.
-    """    
-    # Label the binary image and analyze properties
+    """
+    # Label the binary image
     labeled_image = label(binary_image, connectivity=3)
-    props = regionprops(labeled_image)
-    
-    # Debug: print sizes of objects found
-    sizes = [prop.area for prop in props]
-    print("Sizes of objects found:", sizes)
 
     # Remove small objects
     cleaned_image = morphology.remove_small_objects(labeled_image, min_size=min_size, connectivity=3)
@@ -301,8 +296,11 @@ def remove_small_objects_3d(image, min_size=50):
     binary_cleaned_image = np.where(cleaned_image > 0, 1, 0)
     
     return binary_cleaned_image
+
+# this is 3d connectivity 
+
 # Usage example
-cleaned_nosoma = remove_small_objects_3d(nosoma_scenes[9], min_size=50)
+cleaned_nosoma = remove_small_objects_3d(binary_image, min_size=10000)
 
 plt.figure(figsize=(10, 10))  # Large display size
 plt.imshow(cleaned_nosoma[8,:,:], cmap='gray')
