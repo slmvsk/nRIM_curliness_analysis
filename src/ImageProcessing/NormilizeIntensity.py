@@ -158,7 +158,7 @@ def plot_image_histogram(image, bins=256, title='Image Histogram', max_intensity
 
 
 # Example usage
-plot_image_histogram(nosoma_scenes[7][8,:,:])
+plot_image_histogram(binary_image[8,:,:])
 
 
 
