@@ -13,8 +13,6 @@ Created on Sat Jul  6 15:52:36 2024
 # then plot averaged intensities on 1 plot colourcoded and compare the output 
 # i am normalizing for individual images, manually adjusting "thresholds" that are %les 
 
-import numpy as np
-from skimage import exposure, img_as_float
 
 # 3D (using this one) 
 
@@ -45,7 +43,7 @@ def linear_contrast_stretching(image_stack):
 
     # Calculate global percentiles across the entire stack to handle outliers
     # Exclude the top and bottom 1% of data to reduce the impact of outliers
-    min_th, max_th = np.percentile(image_stack_float, [1, 99])
+    min_th, max_th = np.percentile(image_stack_float, [0.1, 99.9])
 
     # Apply contrast stretching across the stack
     adjusted_stack = np.zeros_like(image_stack_float)
@@ -57,12 +55,32 @@ def linear_contrast_stretching(image_stack):
     return adjusted_stack.astype(image_stack.dtype)  # Convert back to original data type
 
 
+# diagnostic 
+print("Min pixel value:", np.min(scenes[4]))
+print("Max pixel value:", np.max(scenes[4]))
+
+# Contrast stretching
+p2, p98 = np.percentile(scenes[2], (2, 98))
+img_rescale = exposure.rescale_intensity(scenes[2], in_range=(p2, p98))
+
+# Adaptive Equalization
+img_adapteq = exposure.equalize_adapthist(scenes[2], clip_limit=0.03)
+
+
+
+
+
+
+
 
 # Example usage:
-enhanced_stack = linear_contrast_stretching(scenes[4])
+min_th, max_th, enhanced_stack = linear_contrast_stretching(scenes[4])
+print(min_th, max_th)
+
+
 
 # Optionally visualize or further process `enhanced_stack`
-plot_image_histogram(enhanced_stack[8,:,:])
+plot_image_histogram(img_adapteq[8,:,:])
 plot_images(normalized_scenes[4][8,:,:], enhanced_stack[8,:,:], 'Original', 'No soma')
 
 
@@ -110,7 +128,10 @@ def validateImageAdjustment(scene, adjusted_scene):
 normalized_scenes = normalizeScenes(scenes)
 
 
-plot_images(normalized_scenes[5][8,:,:], scenes[5][8,:,:], 'nm', 'orig')
+
+
+
+plot_images(normalized_scenes[9][8,:,:], scenes[9][8,:,:], 'nm', 'orig')
 
 # equalization do not use, i need to preserve intensities in the images to threshold
 
