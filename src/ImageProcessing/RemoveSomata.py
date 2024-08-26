@@ -71,8 +71,8 @@ def apply_thresholds_to_stack(image_stack, thresholds):
     return segmented_stack
 
 # Example usage
-threshold_values = [0.22, 0.45]  # Example thresholds
-segmented_stack = apply_thresholds_to_stack(normalized_scenes[4], threshold_values)
+thresholds = [0.22, 0.45]  # Example thresholds
+segmented_stack = apply_thresholds_to_stack(normalized_scenes[9], threshold_values)
 
 #debugging step 
 def removeSomaFromAllScenes(scenes, thresholds):
@@ -115,15 +115,9 @@ def removeSomaFromAllScenes(scenes, thresholds):
 nosoma_scenes = removeSomaFromAllScenes(normalized_scenes, thresholds)
 print(f"Number of scenes processed and returned: {len(nosoma_scenes)}")
 
-plot_images(normalized_scenes[4][8,:,:], segmented_stack[8,:,:], 'Original', 'No soma')
+plot_images(normalized_scenes[9][8,:,:], segmented_stack[8,:,:], 'Original', 'No soma')
 # fine enough 
 
-
-plt.figure(figsize=(10, 4))
-plt.hist(segmented_stack[8,:,:], cmap='gray')
-plt.title('Segmented Middle Slice')
-plt.axis('off')
-plt.show()
 
 
 
@@ -251,25 +245,64 @@ from skimage.measure import label, regionprops
 import numpy as np
 import matplotlib.pyplot as plt
 #########HERE FIX
+
+#i have 3nary image, convert to binary 
+import numpy as np
+from skimage.measure import label, regionprops
+from skimage import morphology
+
+
+
+import numpy as np
+
+def convert_to_binary(image):
+    """
+    Convert an image with values 0, 1, 2 to a binary image with values 0, 1.
+
+    Parameters:
+        image (numpy.ndarray): A numpy array representing the image.
+
+    Returns:
+        numpy.ndarray: A binary image with values 0, 1.
+    """
+    binary_image = np.where(image > 0, 1, 0)
+    return binary_image
+
+# Example usage
+# Assuming `image` is your numpy array with values 0, 1, 2
+binary_image = convert_to_binary(your_image)
+
+
+
+
 def remove_small_objects_3d(image, min_size=50):
-    """ Remove small objects from a 3D binary image with debugging """
-    # Ensure the image is binary
-    if image.max() > 1:
-        image = img_as_bool(image)
+    """
+    Convert a 3-nary image to binary and remove small objects from a 3D binary image with debugging.
     
-    # Label the image and analyze properties
-    labeled_image = label(image, connectivity=3)
+    Parameters:
+        image (numpy.ndarray): A 3D numpy array with values 0, 1, 2.
+        min_size (int): The minimum size of objects to keep.
+    
+    Returns:
+        numpy.ndarray: A 3D binary image with small objects removed.
+    """    
+    # Label the binary image and analyze properties
+    labeled_image = label(binary_image, connectivity=3)
     props = regionprops(labeled_image)
     
     # Debug: print sizes of objects found
     sizes = [prop.area for prop in props]
     print("Sizes of objects found:", sizes)
 
-    cleaned_image = morphology.remove_small_objects(image, min_size=min_size, connectivity=3)
-    return cleaned_image
-
+    # Remove small objects
+    cleaned_image = morphology.remove_small_objects(labeled_image, min_size=min_size, connectivity=3)
+    
+    # Convert the cleaned labeled image back to binary
+    binary_cleaned_image = np.where(cleaned_image > 0, 1, 0)
+    
+    return binary_cleaned_image
 # Usage example
-cleaned_nosoma = remove_small_objects_3d(segmented_stack, min_size=50)
+cleaned_nosoma = remove_small_objects_3d(nosoma_scenes[9], min_size=50)
 
 plt.figure(figsize=(10, 10))  # Large display size
 plt.imshow(cleaned_nosoma[8,:,:], cmap='gray')
