@@ -70,15 +70,6 @@ img_adapteq = exposure.equalize_adapthist(scenes[2], clip_limit=0.03)
 
 
 
-
-
-
-# Example usage:
-min_th, max_th, enhanced_stack = linear_contrast_stretching(scenes[4])
-print(min_th, max_th)
-
-
-
 # Optionally visualize or further process `enhanced_stack`
 plot_image_histogram(img_adapteq[8,:,:])
 plot_images(normalized_scenes[4][8,:,:], enhanced_stack[8,:,:], 'Original', 'No soma')
@@ -138,7 +129,7 @@ plot_images(normalized_scenes[9][8,:,:], scenes[9][8,:,:], 'nm', 'orig')
 import numpy as np
 import matplotlib.pyplot as plt
 
-def plot_image_histogram(image, bins=256, title='Image Histogram', max_intensity=70000):
+def plot_image_histogram(image, bins=256, title='Image Histogram', max_intensity=7):
     """
     Plot the histogram of an image.
 
@@ -167,7 +158,7 @@ def plot_image_histogram(image, bins=256, title='Image Histogram', max_intensity
 
 
 # Example usage
-plot_image_histogram(normalized_scenes[9][8,:,:])
+plot_image_histogram(nosoma_scenes[7][8,:,:])
 
 
 
