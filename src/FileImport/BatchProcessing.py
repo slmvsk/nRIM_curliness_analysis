@@ -6,6 +6,8 @@ Created on Thu Jul 25 14:29:08 2024
 @author: tetianasalamovska
 """
 #IN PROGRESS 
+import scipy
+import gc
 
 def processFile(file_name):
     # Step 1: Read the file as a list of 3D numpy arrays (scenes)
@@ -20,14 +22,14 @@ def processFile(file_name):
     
     # Step 3: Remove soma
     #filtered_scenes = apply_median_filter_to_scenes(scenes, radius=3) #recommended 
-    nosoma_scenes = removeSomaFromAllScenes(normalized_scenes, xy_resolution=1)
+    nosoma_scenes_cleaned = removeSomaFromAllScenes(normalized_scenes, xy_resolution=1)
     # validate (just plotting)
     plot_images(normalized_scenes[8][1,:,:], nosoma_scenes[8][1,:,:], 'Original', 'No Somata')
     #del normalized_scenes  # Free memory used by the normalized scenes
     
     # Step 4: Apply tubeness filter
     # sigma = 
-    tubeness_scenes = tubenessForAllScenes(nosoma_scenes, scale_factor=0.9)
+    tubeness_scenes = tubenessForAllScenes(processed_scenes, scale_factor=0.9)
     del nosoma_scenes  # Free memory used by the nosoma scenes
     
     #Step 4.1: Validate tubeness

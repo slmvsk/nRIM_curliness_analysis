@@ -18,38 +18,11 @@ from skimage.filters import threshold_multiotsu
 from skimage import img_as_float
 import matplotlib.pyplot as plt
 
-
-
-# Manually determined threshold based on histogram analysis
-threshold_values = [0.2, 0.6]  # Example thresholds
-
-# Initialize a segmented stack
-segmented_stack = np.zeros_like(test_img)
-
-# Apply thresholds to each slice
-for i in range(test_img.shape[0]):
-    img_float = img_as_float(test_img[i, :, :])
-    segmented_stack[i, :, :] = np.digitize(img_float, bins=threshold_values)
-
-# Optionally visualize one of the segmented slices to verify the segmentation
-plt.figure(figsize=(10, 4))
-plt.imshow(segmented_stack[slice_index, :, :], cmap='gray')
-plt.title('Segmented Middle Slice')
-plt.axis('off')
-plt.show()
-
-# Optionally visualize one of the segmented slices to verify the segmentation
-plt.figure(figsize=(10, 4))
-plt.imshow(test_img[10, :, :], cmap='gray')
-plt.title('Segmented Middle Slice')
-plt.axis('off')
-plt.show()
-
 ################## putting all above to the function again #######################
 
 # use this function for now for good segmentation 
 
-def apply_thresholds_to_stack(image_stack, thresholds):
+def apply_thresholds(image_stack, thresholds):
     """
     Apply given threshold values to segment a 3D image stack.
     
@@ -71,8 +44,11 @@ def apply_thresholds_to_stack(image_stack, thresholds):
     return segmented_stack
 
 # Example usage
-thresholds = [0.22, 0.45]  # Example thresholds
-segmented_stack = apply_thresholds_to_stack(normalized_scenes[9], threshold_values)
+thresholds = [0.25]  # Example thresholds
+segmented_stack = apply_thresholds(blurred_scenes[2], thresholds)
+plot_images(segmented_stack[15,:,:], blurred_scenes[2][15,:,:], 'th', 'blurr')
+
+
 
 #debugging step 
 def removeSomaFromAllScenes(scenes, thresholds):
@@ -112,16 +88,11 @@ def removeSomaFromAllScenes(scenes, thresholds):
     return processed_scenes
 
 
-nosoma_scenes = removeSomaFromAllScenes(normalized_scenes, thresholds)
+nosoma_scenes = removeSomaFromAllScenes(blurred_scenes, thresholds)
 print(f"Number of scenes processed and returned: {len(nosoma_scenes)}")
 
-plot_images(normalized_scenes[9][8,:,:], segmented_stack[8,:,:], 'Original', 'No soma')
+plot_images(normalized_scenes[9][18,:,:], nosoma_scenes[9][18,:,:], 'Original', 'No soma')
 # fine enough 
-
-
-
-
-
 
 
 
@@ -133,6 +104,99 @@ else:
     print("No scenes were processed.")
     
 plot_images(binary_image[8,:,:], nosoma_scenes[9][8,:,:], 'Original', 'No soma')
+
+
+
+
+# clean 
+
+
+
+
+
+
+
+
+import numpy as np
+from skimage.morphology import binary_closing, ball
+
+import numpy as np
+from skimage.morphology import binary_closing, ball
+
+def apply_closing(image, radius=2):
+    """
+    Apply morphological closing to a 3D image.
+    
+    Parameters:
+        image (numpy.ndarray): The 3D binary image to process.
+        radius (int): The radius of the structuring element used for closing.
+    
+    Returns:
+        numpy.ndarray: The 3D image after applying morphological closing.
+    """
+    # Create a spherical structuring element
+    structuring_element = ball(radius)
+    
+    # Apply morphological closing
+    closed_image = binary_closing(image, footprint=structuring_element)
+    
+    return closed_image
+
+
+
+# Example usage:
+# Assuming 'scenes' is your list of 3D numpy arrays
+radius_value = 4  # Adjust the radius value as needed
+closed_scene = apply_closing(segmented_stack, radius=radius_value)
+plot_images(segmented_stack[17,:,:], closed_scene[17,:,:], 'th', 'closed')
+
+
+ import numpy as np
+from skimage.morphology import binary_opening, ball
+
+def apply_opening(image, radius=2):
+    """
+    Apply morphological opening to a 3D image.
+    
+    Parameters:
+        image (numpy.ndarray): The 3D binary image to process.
+        radius (int): The radius of the structuring element used for opening.
+    
+    Returns:
+        numpy.ndarray: The 3D image after applying morphological opening.
+    """
+    # Create a spherical structuring element
+    structuring_element = ball(radius)
+    
+    # Apply morphological opening
+    opened_image = binary_opening(image, footprint=structuring_element)
+    
+    return opened_image
+
+# Example usage:
+# Assuming 'image' is your 3D binary numpy array
+radius_value = 3  # Adjust the radius value as needed
+opened_image = apply_opening(cleaned_scenes[6], radius=radius_value)
+plot_images(cleaned_scenes[6][17,:,:], scenes[6][17,:,:], 'clean', 'opened')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -176,7 +240,7 @@ def removeSomafromStack(image_stack, xy_resolution):
 nosoma_stack = removeSomafromStack(equalized_image, xy_resolution=1)
 #img_filtered = median(normalized_scenes[8], ball(3))  # ball(2) provides a reasonable balance in 3D
 #nosoma_img_med = removeSomafromStack(img_filtered, xy_resolution=1)
-plot_images(normalized_scenes[4][8,:,:], nosoma_img[8,:,:], 'Original', 'No soma')
+plot_images(normalized_scenes[9][18,:,:], nosoma_scenes[9][18,:,:], 'Original', 'No soma')
  
     
 
@@ -252,25 +316,7 @@ from skimage.measure import label, regionprops
 from skimage import morphology
 
 
-# frstly remove small obj and then binarise?
-import numpy as np
-
-def convert_to_binary(image):
-    """
-    Convert an image with values 0, 1, 2 to a binary image with values 0, 1.
-
-    Parameters:
-        image (numpy.ndarray): A numpy array representing the image.
-
-    Returns:
-        numpy.ndarray: A binary image with values 0, 1.
-    """
-    binary_image = np.where(image > 0, 1, 0)
-    return binary_image
-
-# Example usage
-# Assuming `image` is your numpy array with values 0, 1, 2
-binary_image = convert_to_binary(nosoma_scenes[9])
+from scipy.ndimage import gaussian_filter
 
 
 
@@ -291,19 +337,65 @@ def remove_small_objects_3d(binary_image, min_size=50):
 
     # Remove small objects
     cleaned_image = morphology.remove_small_objects(labeled_image, min_size=min_size, connectivity=3)
-    
-    # Convert the cleaned labeled image back to binary
-    binary_cleaned_image = np.where(cleaned_image > 0, 1, 0)
-    
-    return binary_cleaned_image
+    cleaned = np.where(cleaned_image > 0, 1, 0)
+        
+    return cleaned
+
+
 
 # this is 3d connectivity 
 
 # Usage example
-cleaned_nosoma = remove_small_objects_3d(binary_image, min_size=10000)
+cleaned_nosoma = remove_small_objects_3d(nosoma_scenes[7], min_size=6000)
+plot_images(cleaned_nosoma[8,:,:], nosoma_scenes[7][8,:,:], 'clean', 'No soma')
+
+
+
+def process_scenes(scenes, min_size=50):
+    """
+    Apply small object removal to each 3D image stack in the scenes.
+
+    Parameters:
+        scenes (list of numpy.ndarray): A list of 3D numpy arrays representing the scenes (stacks).
+        min_size (int): The minimum size of objects to keep in the binary image.
+
+    Returns:
+        list of numpy.ndarray: A list of processed 3D binary numpy arrays.
+    """
+    processed_scenes = []
+
+    for i, scene in enumerate(scenes):
+        print(f"Processing scene {i+1}/{len(scenes)}")
+
+        # Ensure that the scene is binary
+        binary_image = np.where(scene > 0, 1, 0)  # Convert to binary (if not already binary)
+
+        # Remove small objects
+        final_binary_image = remove_small_objects_3d(binary_image, min_size=min_size)
+
+        # Append processed image to the list
+        processed_scenes.append(final_binary_image)
+    
+    return processed_scenes
+
+# Example usage:
+# Assuming 'nosoma_scenes' is your list of 3D binary numpy arrays
+cleaned_scenes = process_scenes(nosoma_scenes, min_size=10000)
+plot_images(cleaned_scenes[7][18,:,:], nosoma_scenes[7][18,:,:], 'Processed', 'Original')
+
+
+
+
+
+
+
+
+
+
+
 
 plt.figure(figsize=(10, 10))  # Large display size
-plt.imshow(cleaned_nosoma[8,:,:], cmap='gray')
+plt.imshow(cleaned_nosoma[18,:,:], cmap='gray')
 plt.title('Cleaned Image')
 plt.axis('off')  # Hide the axes
 plt.show()
@@ -400,4 +492,19 @@ p2, p98 = np.percentile(nosoma_img, (0.5, 99.5))
 contrast_stretched = exposure.rescale_intensity(nosoma_img, in_range=(p2, p98))
 
 
+from mayavi import mlab
+import numpy as np
+
+def visualize_3d_mayavi(image):
+    """
+    Visualize a 3D image using Mayavi.
+
+    Parameters:
+        image (numpy.ndarray): The 3D image data.
+    """
+    mlab.contour3d(image, contours=10, opacity=0.5)
+    mlab.show()
+
+# Example usage
+visualize_3d_mayavi(skeletonized)
 

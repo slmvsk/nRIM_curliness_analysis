@@ -22,16 +22,54 @@ from napari.utils import nbscreenshot
 import pyclesperanto_prototype as cle
 
 
-# max z projection of nosoma_image + size-based filter function 
+import numpy as np
+from scipy.ndimage import gaussian_filter
 
-#
-#
-#
+def apply_gaussian(scenes, sigma=1):
+    """
+    Apply Gaussian blur to all scenes in a list of 3D image stacks.
+    
+    Parameters:
+        scenes (list of numpy.ndarray): List of 3D numpy arrays where each array represents a scene.
+        sigma (float or sequence of floats): Standard deviation for Gaussian kernel.
+    
+    Returns:
+        list of numpy.ndarray: List of 3D numpy arrays with Gaussian blur applied.
+    """
+    blurred_scenes = []
+    for i, scene in enumerate(scenes):
+        # Apply Gaussian blur to the current scene
+        blurred_scene = gaussian_filter(scene, sigma=sigma)
+        blurred_scenes.append(blurred_scene)
+        print(f"Applied Gaussian blur to scene {i+1}/{len(scenes)}")
+    
+    return blurred_scenes
+
+# Example usage:
+# Assuming 'scenes' is your list of 3D numpy arrays
+blurred_scenes = apply_gaussian(scenes, sigma=2)
+
+# Visualize one of the blurred scenes (optional)
+import matplotlib.pyplot as plt
+
+plt.imshow(blurred_scenes[0][blurred_scenes[0].shape[0] // 2, :, :], cmap='gray')
+plt.title('Blurred Scene - Middle Slice')
+plt.axis('off')
+plt.show()
 
 
 
 
 
+
+
+
+
+
+
+
+
+# max z projection of nosoma_image + size-based filter function
 
 ##########################
 # Tubeness problem:
@@ -60,10 +98,10 @@ def calculate_hessian(matrix, sigma):
 def tubeness(image, sigma):
     """Calculate the tubeness measure of a 3D image using the Hessian matrix eigenvalues."""
     # Gaussian smoothing
-    smoothed = scipy.ndimage.gaussian_filter(image, sigma)
+    #smoothed = scipy.ndimage.gaussian_filter(image, sigma)
     
     # Calculate the Hessian matrix
-    hessian = calculate_hessian(smoothed, sigma) #replace with smoothed if previous step is active 
+    hessian = calculate_hessian(image, sigma) #replace with smoothed if previous step is active 
     
     # Compute eigenvalues for each voxel
     eigenvalues = np.linalg.eigvalsh(hessian)
@@ -231,9 +269,9 @@ def skeletonize_image(image):
     Returns:
     numpy.ndarray: A 3D binary image containing the skeleton of the original image.
     """
-    # Ensure the image is in the correct format (binary with values 0 and 1)
-    if image.dtype != np.uint8:
-        image = img_as_ubyte(image > 0)  # Convert to uint8 and threshold if necessary
+    if not np.all(np.isin(image, [0, 1])):
+        image = (image > 0).astype(np.uint8)
+        print("Warning: Input image was not binary. It has been converted to binary.")
     
     # Apply skeletonization
     skeleton = skeletonize_3d(image)
@@ -241,7 +279,8 @@ def skeletonize_image(image):
 
 # Example usage:
 # Assume `image_3d` is your 3D numpy array that's already a binary image
-#skeletonized = skeletonize_image(segmented)
+skeletonized = skeletonize_image(cleaned_nosoma)
+
 #plot_images(blurred_result[8,:,:], skeletonized[8,:,:], 'Blurred result Slice', 'Skeletonized')
 #print(skeletonized.shape)
 #save_as_tiff(skeletonized, 'skeletonized.tif')
@@ -399,7 +438,7 @@ def max_intensity_z_projection(image_3d):
 
 # Example: 
 
-mip_image_test = max_intensity_z_projection(cleaned_image_3d)
+mip_image_test = max_intensity_z_projection(skeletonized)
 #print(mip_image.shape)
 plot_images(normalized_scenes[2][8,:,:], mip_image_test, 'Blurred result Slice', 'Skeletonized')
 

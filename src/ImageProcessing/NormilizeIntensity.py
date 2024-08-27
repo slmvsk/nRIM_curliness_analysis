@@ -18,6 +18,8 @@ Created on Sat Jul  6 15:52:36 2024
 
 import numpy as np
 from skimage import exposure
+from skimage.measure import label, regionprops
+from skimage import morphology, img_as_float
 
 def linear_contrast_stretching(image_stack):
     """
@@ -54,17 +56,13 @@ def linear_contrast_stretching(image_stack):
 
     return adjusted_stack.astype(image_stack.dtype)  # Convert back to original data type
 
-
 # diagnostic 
 print("Min pixel value:", np.min(scenes[4]))
 print("Max pixel value:", np.max(scenes[4]))
 
-# Contrast stretching
-p2, p98 = np.percentile(scenes[2], (2, 98))
-img_rescale = exposure.rescale_intensity(scenes[2], in_range=(p2, p98))
 
-# Adaptive Equalization
-img_adapteq = exposure.equalize_adapthist(scenes[2], clip_limit=0.03)
+# Contrast stretching
+
 
 
 
@@ -122,14 +120,14 @@ normalized_scenes = normalizeScenes(scenes)
 
 
 
-plot_images(normalized_scenes[9][8,:,:], scenes[9][8,:,:], 'nm', 'orig')
+plot_images(normalized_scenes[9][18,:,:], scenes[9][18,:,:], 'nm', 'orig')
 
 # equalization do not use, i need to preserve intensities in the images to threshold
 
 import numpy as np
 import matplotlib.pyplot as plt
 
-def plot_image_histogram(image, bins=256, title='Image Histogram', max_intensity=7):
+def plot_image_histogram(image, bins=256, title='Image Histogram', max_intensity=70000):
     """
     Plot the histogram of an image.
 
@@ -158,8 +156,7 @@ def plot_image_histogram(image, bins=256, title='Image Histogram', max_intensity
 
 
 # Example usage
-plot_image_histogram(binary_image[8,:,:])
-
+plot_image_histogram(skeletonized)
 
 
 
