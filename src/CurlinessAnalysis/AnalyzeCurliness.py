@@ -129,7 +129,7 @@ def analyze_dendrite_curliness_3d(image):
     median_curliness = np.median(curliness)
     sem_curliness = std_curliness / np.sqrt(len(longest_path_length))
 
-    return properties, curliness, median_curliness, mean_straightness, mean_curliness, sem_curliness, longest_path_length.tolist(), max_dendritic_reach.tolist()
+    return curliness, median_curliness, mean_straightness, mean_curliness, sem_curliness, longest_path_length.tolist(), max_dendritic_reach.tolist()
 
 # Example usage
 # Assuming 'image_3d' is your loaded 3D skeletonized image
@@ -141,7 +141,7 @@ def analyze_dendrite_curliness_3d(image):
 
 
 # Example usage
-curliness, median_curliness, mean_straightness, mean_curliness, sem_curliness, branch_distances, branch_lengths = analyze_dendrite_curliness(mip_image)
+curliness, median_curliness, mean_straightness, mean_curliness, sem_curliness, branch_distances, branch_lengths = analyze_dendrite_curliness_3d(cleaned_skeleton)
 # Retrieve the image data for scene index 2
 # We assume that 'file_name' or another identifier may be needed if there are multiple entries for the same scene index.
 # Here, I'm directly accessing by index if the scene index is used as a row index. If not, you'd filter by conditions.
@@ -303,6 +303,11 @@ visualize_and_analyze_branches(image_data, curliness, longest_path_length, max_d
 
 
 
+
+
+
+
+
 ############
 import matplotlib.pyplot as plt
 from matplotlib.colors import Normalize, LinearSegmentedColormap
@@ -350,10 +355,61 @@ def visualize_and_analyze_curliness(image, curliness):
     plt.ylabel('Frequency')
     plt.show()
 
+import numpy as np
+import matplotlib.pyplot as plt
+from skimage import measure
+from matplotlib.colors import Normalize
+from matplotlib.cm import ScalarMappable
+
+def analyze_curliness_3d(image, curliness):
+    """
+    Analyze curliness in a 3D skeletonized image, generate a histogram of curliness values,
+    and return the labeled skeleton.
+
+    Parameters:
+        image (numpy.ndarray): The 3D binary skeletonized image.
+        curliness (list): A list of curliness values for each labeled region.
+
+    Returns:
+        numpy.ndarray: The labeled skeleton where each connected component has a unique label.
+    """
+    # Label the skeleton in 3D
+    labeled_skeleton = measure.label(image, connectivity=3)
+    norm = Normalize(vmin=0, vmax=1)  # Normalize curliness values to [0, 1] for coloring
+    
+    # Use a colormap with high diversity, like 'nipy_spectral'
+    cmap = plt.cm.nipy_spectral
+
+    # Create a figure and axis for the histogram
+    fig, ax = plt.subplots(figsize=(8, 6))
+
+    # Plotting curliness histogram with color coding
+    mappable = ScalarMappable(norm=norm, cmap=cmap)
+    colors = mappable.to_rgba(curliness)
+    
+    # Create a histogram with color coding
+    n, bins, patches = ax.hist(curliness, bins=30, alpha=0.7)
+    bin_centers = 0.5 * (bins[:-1] + bins[1:])
+    for bin_center, patch in zip(bin_centers, patches):
+        color = cmap(norm(bin_center))
+        patch.set_facecolor(color)  # Set the color of each bin to the corresponding curliness value
+
+    # Add colorbar to the axis
+    fig.colorbar(mappable, ax=ax, label='Curliness')
+
+    ax.set_title('Histogram of Curliness Distribution')
+    ax.set_xlabel('Curliness')
+    ax.set_ylabel('Frequency')
+    
+    plt.show()
+
+    return labeled_skeleton
 
 
-# Example usage
-visualize_and_analyze_curliness(image_data, curliness)
+
+# Example usage:
+labeled_skeleton = analyze_curliness_3d(cleaned_skeleton, curliness)
+
 
 #90% of skeleton is recognised as 1 branch, the function is not working correctly then
 # I need it to measure branches from node to node (or branch end) instead!!!

@@ -506,5 +506,5 @@ def visualize_3d_mayavi(image):
     mlab.show()
 
 # Example usage
-visualize_3d_mayavi(skeletonized)
+visualize_3d_mayavi(pruned_3d)
 

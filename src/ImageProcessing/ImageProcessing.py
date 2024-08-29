@@ -438,7 +438,7 @@ def max_intensity_z_projection(image_3d):
 
 # Example: 
 
-mip_image_test = max_intensity_z_projection(skeletonized)
+pruned3dmip = max_intensity_z_projection(pruned_3d)
 #print(mip_image.shape)
 plot_images(normalized_scenes[2][8,:,:], mip_image_test, 'Blurred result Slice', 'Skeletonized')
 
@@ -511,9 +511,58 @@ def measure_branch_lengths(image_2d):
 
     return lengths
 
+import numpy as np
+from scipy.spatial.distance import euclidean
+from skimage.measure import label, regionprops
+from skimage.morphology import skeletonize_3d
+
+def clean_skeleton_3d(skeleton_image, min_length=10):
+    """
+    Measure and remove branches shorter than a specified length in a 3D skeletonized image.
+
+    Parameters:
+        skeleton_image (numpy.ndarray): A 3D binary numpy array representing the skeleton (values 0 and 1).
+        min_length (float): The minimum length of branches to keep.
+
+    Returns:
+        numpy.ndarray: A 3D binary image with small branches removed.
+    """
+    # Label the skeletonized image to identify connected components (branches)
+    labeled_skeleton = label(skeleton_image, connectivity=3)
+    props = regionprops(labeled_skeleton)
+
+    # Create an empty array to hold the cleaned skeleton
+    cleaned_skeleton = np.zeros_like(skeleton_image)
+
+    # Iterate over each labeled component (branch)
+    for prop in props:
+        coords = prop.coords
+        if len(coords) < 2:
+            continue  # Skip if the branch has fewer than 2 pixels
+        
+        # Measure the branch length
+        branch_length = 0
+        for i in range(len(coords) - 1):
+            branch_length += euclidean(coords[i], coords[i + 1])
+        
+        # Keep the branch if it's longer than the minimum length
+        if branch_length >= min_length:
+            for coord in coords:
+                cleaned_skeleton[tuple(coord)] = 1
+    
+    return  cleaned_skeleton
+
+# Example usage:
+# Assuming 'skeleton_image' is your 3D binary skeletonized numpy array
+min_branch_length = 10  # Adjust this value based on your needs
+cleaned_skeleton = clean_skeleton_3d(skeletonized, min_length=min_branch_length)
+
+
+
+
 # Test the function
 lengths = measure_branch_lengths(mip_scenes[4])
-print(f"Branch lengths: {branch_lengths}")
+print(f"Branch lengths: {branch_length}")
 min_length = np.min(lengths) 
 max_length = np.max(lengths)
 mean_length = np.mean(lengths)

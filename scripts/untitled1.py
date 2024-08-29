@@ -77,7 +77,7 @@ plot_images(cleaned_scenes[6][18,:,:], scenes[6][18,:,:], 'Processed', 'Original
 #skeletonize
 skeletonized = skeletonize_image(cleaned_nosoma)
 skeletonized_test = skeletonize(cleaned_nosoma)
-plot_images(skeletonized[18,:,:], skeletonized_test[18,:,:], 'Processed', 'Original')
+plot_images(skeletonized[18,:,:], labeled_skeleton[18,:,:], 'Processed', 'Original')
 
 # mip to check or save 
 save_as_tiff(skeletonized_test, 'skeletonized_test.tiff') 
@@ -85,12 +85,229 @@ save_as_tiff(skeletonized_test, 'skeletonized_test.tiff')
 # good enough with this example 
 
 #treat as 3D skeleton for further analysis 
+# clean skeleton !!!!!!!!
+cleaned_skeleton = #remove_small_objects_3d(skeletonized, min_size=10)
+min_branch_length = 200  # 200 is fine 
+cleaned_skeleton = clean_skeleton_3d(skeletonized, min_length=min_branch_length)
+save_as_tiff(pruned, 'pruned.tiff') 
+
+
+mip_image_test = max_intensity_z_projection(labeled_skeleton)
+
+
+# pruning of small branches 
+# Prune barbs off skeleton image
+
+import os
+import cv2
+import numpy as np
+from plantcv.plantcv import params
+from plantcv.plantcv import image_subtract
+from plantcv.plantcv.morphology import segment_sort
+from plantcv.plantcv.morphology import segment_skeleton
+from plantcv.plantcv.morphology import _iterative_prune
+from plantcv.plantcv._debug import _debug
+from plantcv.plantcv._helpers import _cv2_findcontours
+
+
+def prune(skel_img, size=0, mask=None):
+    """Prune the ends of skeletonized segments.
+    The pruning algorithm proposed by https://github.com/karnoldbio
+    Segments a skeleton into discrete pieces, prunes off all segments less than or
+    equal to user specified size. Returns the remaining objects as a list and the
+    pruned skeleton.
+
+    Inputs:
+    skel_img    = Skeletonized image
+    size        = Size to get pruned off each branch
+    mask        = (Optional) binary mask for debugging. If provided, debug image will be overlaid on the mask.
+
+    Returns:
+    pruned_img      = Pruned image
+    segmented_img   = Segmented debugging image
+    segment_objects = List of contours
+
+    :param skel_img: numpy.ndarray
+    :param size: int
+    :param mask: numpy.ndarray
+    :return pruned_img: numpy.ndarray
+    :return segmented_img: numpy.ndarray
+    :return segment_objects: list
+    """
+    # Store debug
+    debug = params.debug
+    params.debug = None
+
+    pruned_img = skel_img.copy()
+
+    _, objects = segment_skeleton(skel_img)
+    kept_segments = []
+    removed_segments = []
+
+    if size > 0:
+        # If size>0 then check for segments that are smaller than size pixels long
+
+        # Sort through segments since we don't want to remove primary segments
+        secondary_objects, _ = segment_sort(skel_img, objects)
+
+        # Keep segments longer than specified size
+        for i in range(0, len(secondary_objects)):
+            if len(secondary_objects[i]) > size:
+                kept_segments.append(secondary_objects[i])
+            else:
+                removed_segments.append(secondary_objects[i])
+
+        # Draw the contours that got removed
+        removed_barbs = np.zeros(skel_img.shape[:2], np.uint8)
+        cv2.drawContours(removed_barbs, removed_segments, -1, 255, 1,
+                         lineType=8)
+
+        # Subtract all short segments from the skeleton image
+        pruned_img = image_subtract(pruned_img, removed_barbs)
+        pruned_img = _iterative_prune(pruned_img, 1)
+
+    # Reset debug mode
+    params.debug = debug
+
+    # Make debugging image
+    if mask is None:
+        pruned_plot = np.zeros(skel_img.shape[:2], np.uint8)
+    else:
+        pruned_plot = mask.copy()
+    pruned_plot = cv2.cvtColor(pruned_plot, cv2.COLOR_GRAY2RGB)
+    pruned_obj, _ = _cv2_findcontours(bin_img=pruned_img)
+    cv2.drawContours(pruned_plot, removed_segments, -1, (0, 0, 255), params.line_thickness, lineType=8)
+    cv2.drawContours(pruned_plot, pruned_obj, -1, (150, 150, 150), params.line_thickness, lineType=8)
+
+    _debug(visual=pruned_img, filename=os.path.join(params.debug_outdir, f"{params.device}_pruned.png"))
+    _debug(visual=pruned_img, filename=os.path.join(params.debug_outdir, f"{params.device}_pruned_debug.png"))
+
+    # Segment the pruned skeleton
+    segmented_img, segment_objects = segment_skeleton(pruned_img, mask)
+
+    return pruned_img, segmented_img, segment_objects
+
+
+pruned_img, segmented_img, segment_objects = prune(mip_image_test, size=30, mask=None) #30 is fine 
+plot_images(pruned_img, mip_image_test, 'Processed', 'Original')
+
+
+
+# 3D function 
+import numpy as np
+from scipy.ndimage import label
+from skimage import morphology
+
+def prune_3d(skel_img, size=0):
+    """
+    Prune the ends of skeletonized segments in 3D.
+    
+    Parameters:
+    - skel_img (numpy.ndarray): A 3D numpy array representing the skeletonized image.
+    - size (int): Minimum segment size to retain. Segments smaller than this will be removed.
+    
+    Returns:
+    - numpy.ndarray: Pruned 3D skeleton image.
+    """
+    pruned_img = skel_img.copy()
+
+    # Label connected components in the 3D skeleton
+    labeled_skeleton, num_features = label(skel_img)
+
+    # Loop through each connected component (segment)
+    for i in range(1, num_features + 1):
+        segment = (labeled_skeleton == i)
+        segment_size = np.sum(segment)
+
+        if segment_size <= size:
+            # Remove segments smaller than the specified size
+            pruned_img[segment] = 0
+
+    # Optionally, further prune small branches
+    pruned_img = morphology.remove_small_objects(pruned_img.astype(bool), min_size=size).astype(np.uint8)
+
+    return pruned_img
+
+# Example usage:
+# Assuming `mip_image_test_3d` is your 3D skeletonized image
+pruned_3d = prune_3d(skeletonized, size=30)
+pruned3dmip = max_intensity_z_projection(pruned_3d)
+plot_images(pruned3dmip, mip_image_test, 'Processed', 'Original')
+
+import numpy as np
+from scipy.ndimage import label
+from skimage import morphology
+
+def prune_3d(skel_img, size=0):
+    """
+    Prune the ends of skeletonized segments in 3D.
+    
+    Parameters:
+    - skel_img (numpy.ndarray): A 3D numpy array representing the skeletonized image.
+    - size (int): Minimum segment size to retain. Segments smaller than this will be removed.
+    
+    Returns:
+    - numpy.ndarray: Pruned 3D skeleton image.
+    """
+    pruned_img = skel_img.copy()
+
+    # Label connected components in the 3D skeleton
+    labeled_skeleton, num_features = label(skel_img)
+
+    print(f"Number of segments: {num_features}")
+    
+    # Debug: Collect and print the sizes of all segments
+    segment_sizes = []
+    for i in range(1, num_features + 1):
+        segment_size = np.sum(labeled_skeleton == i)
+        segment_sizes.append(segment_size)
+    
+    print(f"Segment sizes: {segment_sizes}")
+
+    # Now prune based on the given size threshold
+    for i in range(1, num_features + 1):
+        segment = (labeled_skeleton == i)
+        segment_size = np.sum(segment)
+
+        if segment_size <= size:
+            # Remove segments smaller than the specified size
+            pruned_img[segment] = 0
+
+    # Optionally, further prune small branches
+    pruned_img = morphology.remove_small_objects(pruned_img.astype(bool), min_size=size).astype(np.uint8)
+
+    return pruned_img
+
+# Example usage:
+# Assuming `mip_image_test_3d` is your 3D skeletonized image
+pruned_3d = prune_3d(skeletonized, size=10)
+# understand the logic of prune function
 
 
 
 
 
-# do closing later or with skeleton? 
+
+
+
+
+
+# try to do morphological opening before measuring curliness 
+
+
+
+
+#######check my original skeletonize function for scenes and continue doing for scenes 
+#and check all of them 
+
+# how to remove small branches from large branches
+# opening in 3D skeleton? forst try without it just clean 
+# or proceed to analysis with 3D skeleton and label and see 
+
+
+
+
+
 
 
 
