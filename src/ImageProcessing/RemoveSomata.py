@@ -49,6 +49,34 @@ segmented_stack = apply_thresholds(blurred_scenes[2], thresholds)
 plot_images(segmented_stack[15,:,:], blurred_scenes[2][15,:,:], 'th', 'blurr')
 
 
+def binarize_image_stack(image_stack, threshold):
+    """
+    Binarize a 3D image stack based on a given threshold value.
+    
+    Parameters:
+        image_stack (ndarray): A 3D numpy array representing the image stack.
+        threshold (float): Threshold value for binarization.
+    
+    Returns:
+        ndarray: A 3D numpy array of the binarized image stack.
+    """
+    # Initialize a binarized stack
+    binarized_stack = np.zeros_like(image_stack, dtype=bool)
+    
+    # Binarize each slice
+    for i in range(image_stack.shape[0]):
+        img_float = img_as_float(image_stack[i, :, :])  # Convert slice to float
+        binarized_stack[i, :, :] = img_float > threshold  # Apply threshold
+    
+    return binarized_stack
+
+# Example usage
+threshold_value = 0.25  # Example threshold for binarization
+binarized_stack = binarize_image_stack(blurred_scenes[2], threshold_value)
+plot_images(binarized_stack[15, :, :], blurred_scenes[2][15, :, :], 'Binarized', 'Original')
+
+
+
 
 #debugging step 
 def removeSomaFromAllScenes(scenes, thresholds):
@@ -75,7 +103,7 @@ def removeSomaFromAllScenes(scenes, thresholds):
         
         try:
             # Apply the removeSomafromStack function to the current scene
-            processed_scene = apply_thresholds_to_stack(scene, thresholds) #changed to manual temporary 
+            processed_scene = binarize_image_stack(scene, thresholds) #changed to manual temporary 
             processed_scenes.append(processed_scene)
             print(f"Processed scene {i+1} successfully added to the list.")
               
@@ -93,7 +121,7 @@ print(f"Number of scenes processed and returned: {len(nosoma_scenes)}")
 
 plot_images(normalized_scenes[9][18,:,:], nosoma_scenes[9][18,:,:], 'Original', 'No soma')
 # fine enough 
-
+print(blurred_scenes[1].shape)
 
 
 
@@ -176,8 +204,8 @@ def apply_opening(image, radius=2):
 # Example usage:
 # Assuming 'image' is your 3D binary numpy array
 radius_value = 3  # Adjust the radius value as needed
-opened_image = apply_opening(cleaned_scenes[6], radius=radius_value)
-plot_images(cleaned_scenes[6][17,:,:], scenes[6][17,:,:], 'clean', 'opened')
+opened_image = apply_opening(, radius=radius_value)
+plot_images(opened_image[10,:,:], cleaned_nosoma[17,:,:], 'clean', 'opened')
 
 
 
@@ -321,6 +349,9 @@ from scipy.ndimage import gaussian_filter
 
 
 
+from scipy.ndimage import label
+import scipy.ndimage as ndimage
+
 def remove_small_objects_3d(binary_image, min_size=50):
     """
     Remove small objects from a 3D binary image (values 0 and 1) based on their size.
@@ -332,22 +363,22 @@ def remove_small_objects_3d(binary_image, min_size=50):
     Returns:
         numpy.ndarray: A 3D binary image with small objects removed.
     """
-    # Label the binary image
-    labeled_image = label(binary_image, connectivity=3)
+    # Label the binary image with connectivity defining how pixels are connected
+    labeled_image, num_features = label(binary_image, structure=ndimage.generate_binary_structure(3, 2))
 
     # Remove small objects
-    cleaned_image = morphology.remove_small_objects(labeled_image, min_size=min_size, connectivity=3)
-    cleaned = np.where(cleaned_image > 0, 1, 0)
-        
+    unique, counts = np.unique(labeled_image, return_counts=True)
+    remove = unique[counts < min_size]
+    for obj in remove:
+        labeled_image[labeled_image == obj] = 0
+
+    # Create a cleaned binary image
+    cleaned = labeled_image > 0
+    
     return cleaned
 
-
-
-# this is 3d connectivity 
-
 # Usage example
-cleaned_nosoma = remove_small_objects_3d(nosoma_scenes[7], min_size=6000)
-plot_images(cleaned_nosoma[8,:,:], nosoma_scenes[7][8,:,:], 'clean', 'No soma')
+cleaned_nosoma = remove_small_objects_3d(nosoma_scenes[7], min_size=1000)
 
 
 
@@ -506,5 +537,5 @@ def visualize_3d_mayavi(image):
     mlab.show()
 
 # Example usage
-visualize_3d_mayavi(pruned_3d)
+visualize_3d_mayavi(skeletonized)
 
