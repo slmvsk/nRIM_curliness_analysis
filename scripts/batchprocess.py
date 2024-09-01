@@ -17,11 +17,12 @@ sys.path.append('/Users/tetianasalamovska/Documents/GitHub/nRIM_curliness_analys
 # Also might need requirments.txt file 
 
 import numpy as np
+import matplotlib.pyplot as plt
 from src.FileImport.DesctiptorsBasedFileSearch import getMatchingFilesList
 #from src.FileImport.BatchProcessing import 
 from src.FileImport.ReadZeissStacks import readCziFile
 from src.ImageProcessing.NormilizeIntensity import normalizeScenes
-from src.FileImport.PlottingImage import plotToCompare
+from src.FileImport.PlottingImage import plotToCompare, plotImageHistogram
 
 
 
@@ -72,11 +73,12 @@ normalized_scenes = normalizeScenes(scenes, percentiles=[0.1,99.9])
 
 
 # Optionally visualize one of the slices in the one of the stacks before and after 
-plotToCompare(scenes[4][8,:,:], normalized_scenes[8,:,:], 'Original', 'Normalized')
-
+# Here it is important to remember image shape structure: scenes - your list, [4] - index of scenes,
+# in Python index starts from 0, [8,:,:] - this means 8 slice with all X and Y dimension values
+plotToCompare(scenes[6][10,:,:], normalized_scenes[6][10,:,:], 'Original', 'Normalized')
 
 # Inspect histograms if needed 
-
+plotImageHistogram(scenes[6], bins=256, pixel_range=(0, 65535), title='Pixel Intensity Histogram for Original Image')
 
 
 

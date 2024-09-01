@@ -69,3 +69,33 @@ def show(image_to_show, labels=False):
 
 #show(input_gpu)
 #print(input_gpu.shape)
+
+def plotImageHistogram(image_stack, bins=256, pixel_range=(0, 65535), title='Pixel Intensity Histogram'):
+    """
+    Plot the histogram of pixel intensities for a 3D image stack.
+    
+    Parameters:
+        image_stack (numpy.ndarray): A 3D numpy array (Z, Y, X) of an image stack.
+        bins (int): Number of bins for the histogram.
+        pixel_range (tuple): The range (min, max) of pixel intensities.
+        title (str): Title of the histogram plot.
+    """
+    # Flatten the 3D image stack to a 1D array
+    pixels = image_stack.ravel()
+
+    # Calculate the histogram
+    histogram, bin_edges = np.histogram(pixels, bins=bins, range=pixel_range)
+
+    # Configure the plot
+    plt.figure(figsize=(10, 5))
+    plt.title(title)
+    plt.xlabel('Pixel Intensity')
+    plt.ylabel('Pixel Count')
+
+    # Plot the histogram
+    plt.bar(bin_edges[:-1], histogram, width=np.diff(bin_edges), edgecolor='black', align='edge')
+
+    # Display the plot
+    plt.show()
+    
+#plotImageHistogram(scenes[6], bins=256, pixel_range=(0, 65535), title='Pixel Intensity Histogram for Original Image')
