@@ -15,6 +15,11 @@ files_list = get_matching_files(folder_with_data)
 print(file_list)
 folder_with_data = '/Users/tetianasalamovska/Desktop/zeis'
 
+
+
+
+
+
 # Example: Adjust parameters based on your file naming convention
 file_list = getMatchingFilesList(
     folder_with_data,
