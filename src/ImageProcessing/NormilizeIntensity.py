@@ -8,7 +8,7 @@ Created on Sat Jul  6 15:52:36 2024
 
 from skimage.measure import label, regionprops
 from skimage import morphology, img_as_float, exposure
-
+import numpy as np
 
 def linearContrastStretching(image_stack, percentiles=[0.1, 99.9]):
     """
