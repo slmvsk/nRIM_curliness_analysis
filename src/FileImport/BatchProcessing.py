@@ -13,12 +13,12 @@ def processFile(file_name):
     # Step 1: Read the file as a list of 3D numpy arrays (scenes)
     scenes, metadata = readCziFile(file_name)
     
-    #Step 1.5 for memory efficiency:
-    # Convert to 8 bit (no need for now)
-    
     # Step 2: Normalize intensity 
     normalized_scenes = normalizeScenes(scenes)
     del scenes  # Free memory used by the original scenes
+    
+    # denoising 
+    
     
     # Step 3: Remove soma
     #filtered_scenes = apply_median_filter_to_scenes(scenes, radius=3) #recommended 

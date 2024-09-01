@@ -7,10 +7,7 @@ Created on Tue Jun 25 09:33:53 2024
 """
 
 
-# main.py
-from czitools.metadata_tools import czi_metadata as czimd
-import numpy as np
-from czifile import CziFile
+
 import pyclesperanto_prototype as cle
 
 
@@ -18,35 +15,12 @@ import pyclesperanto_prototype as cle
 
 from src.ImageProcessing.RemoveSomata import findOptimalThreshold, removeSomafromStack, removeSomaFromAllScenes
 from src.ImageProcessing.VerifyAndPlotIntensity import verify_and_plot_intensity
-from src.FileImport.DesctiptorsBasedFileSearch import get_matching_files
 from src.FileImport.PlottingImage import plot_slice_from_stack, plot_comparison
 from src.ImageProcessing.NormilizeIntensity import normalizeScenes, validate_image_adjustment, process_scenes
 
 from src.FileImport.ReadZeissStacks import readCziFile
 
-file_path = '/Users/tetianasalamovska/Desktop/zeis/IHCT_THT53_40x2x_IHCT08_slice6_stack_positions_A488_laser08_speed6.czi'
 
-#scenes, metadata = read_czi_stack(file_path)
-
-scenes, metadata = readCziFile('/Users/tetianasalamovska/Desktop/zeis/IHCT_THT53_40x3x_IHCT08_slice6_stack_positions_A488_laser08_speed6.czi')
-
-
-
-# Print the metadata
-#prints all metadata (no need)
-print(metadata)
-
-# Print the shape of the first scene (all)
-if scenes:
-    print(scenes[0-10].shape)
-
-#print selected metadata ??? 
-czi_scaling = czimd.CziScaling(file_path)
-print(czi_scaling)
-czi_channels = czimd.CziChannelInfo(file_path)
-print(czi_channels)
-czi_objectives = czimd.CziObjectives(file_path)
-print(czi_objectives)
 
 # normalizing intensities min 0 max 65535 for 16 bit 
 adjusted_scenes = process_scenes(scenes)

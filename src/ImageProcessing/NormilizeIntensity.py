@@ -6,22 +6,11 @@ Created on Sat Jul  6 15:52:36 2024
 @author: tetianasalamovska
 """
 
-# if converting to 8 bit, do it here 
-
-############### normalize contrast intensities 
-# i need not only normalize between images but also for every stack between Z dimension!!!
-# then plot averaged intensities on 1 plot colourcoded and compare the output 
-# i am normalizing for individual images, manually adjusting "thresholds" that are %les 
-
-
-# 3D (using this one) 
-
-import numpy as np
 from skimage import exposure
 from skimage.measure import label, regionprops
 from skimage import morphology, img_as_float
 
-def linear_contrast_stretching(image_stack):
+def linearContrastStretching(image_stack):
     """
     Apply linear contrast stretching to an entire 3D image stack globally.
 
@@ -39,13 +28,12 @@ def linear_contrast_stretching(image_stack):
     else:
         raise ValueError("Unsupported image data type")
 
-
     # Convert the image stack to floating point to handle intensity scaling
     image_stack_float = img_as_float(image_stack)
 
     # Calculate global percentiles across the entire stack to handle outliers
-    # Exclude the top and bottom 1% of data to reduce the impact of outliers
-    min_th, max_th = np.percentile(image_stack_float, [0.1, 99.9])
+    # Exclude the top and bottom 0.1-1% of data to reduce the impact of outliers
+    min_th, max_th = np.percentile(image_stack_float, [1, 99])
 
     # Apply contrast stretching across the stack
     adjusted_stack = np.zeros_like(image_stack_float)
@@ -55,22 +43,6 @@ def linear_contrast_stretching(image_stack):
         )
 
     return adjusted_stack.astype(image_stack.dtype)  # Convert back to original data type
-
-# diagnostic 
-print("Min pixel value:", np.min(scenes[4]))
-print("Max pixel value:", np.max(scenes[4]))
-
-
-# Contrast stretching
-
-
-
-
-
-
-# Optionally visualize or further process `enhanced_stack`
-plot_image_histogram(img_adapteq[8,:,:])
-plot_images(normalized_scenes[4][8,:,:], enhanced_stack[8,:,:], 'Original', 'No soma')
 
 
 # putting together 
@@ -86,7 +58,7 @@ def normalizeScenes(scenes):
     """
     adjusted_scenes = []
     for scene in scenes:
-        adjusted_scene = linear_contrast_stretching(scene) #fixed
+        adjusted_scene = linearContrastStretching(scene) 
         validateImageAdjustment(scene, adjusted_scene)
         adjusted_scenes.append(adjusted_scene)
     return adjusted_scenes
@@ -114,50 +86,5 @@ def validateImageAdjustment(scene, adjusted_scene):
         raise ValueError(f"Shape mismatch: Original shape {scene.shape} doesn't match adjusted shape {adjusted_scene.shape}")
 
 # Assuming 'scenes' is your list of 11 3D numpy arrays
-normalized_scenes = normalizeScenes(scenes)
-
-
-
-
-
-plot_images(normalized_scenes[9][18,:,:], scenes[9][18,:,:], 'nm', 'orig')
-
-# equalization do not use, i need to preserve intensities in the images to threshold
-
-import numpy as np
-import matplotlib.pyplot as plt
-
-def plot_image_histogram(image, bins=256, title='Image Histogram', max_intensity=70000):
-    """
-    Plot the histogram of an image.
-
-    Parameters:
-        image (numpy.ndarray): A 2D numpy array representing the grayscale image.
-        bins (int): Number of histogram bins.
-        title (str): Title of the histogram plot.
-        max_intensity (int): Maximum intensity to include in the histogram.
-    """
-    # Calculate histogram
-    histogram, bin_edges = np.histogram(image, bins=bins, range=[0, max_intensity])
-
-    # Configure plot
-    plt.figure(figsize=(10, 5))
-    plt.title(title)
-    plt.xlabel('Pixel Intensity')
-    plt.ylabel('Pixel Count')
-
-    # Plot the histogram
-    plt.bar(bin_edges[:-1], histogram, width=np.diff(bin_edges), edgecolor='black', align='edge')
-
-    # Display the plot
-    plt.show()
-
-# Example usage with your image data:
-
-
-# Example usage
-plot_image_histogram(skeletonized)
-
-
-
+# normalized_scenes = normalizeScenes(scenes)
 
