@@ -17,7 +17,7 @@ sys.path.append('/Users/tetianasalamovska/Documents/GitHub/nRIM_curliness_analys
 # Also might need requirments.txt file 
 
 from src.FileImport.DesctiptorsBasedFileSearch import getMatchingFilesList
-
+from src.FileImport.BatchProcessing import 
 
 
 
@@ -39,6 +39,10 @@ file_list = getMatchingFilesList(
     SEPARATOR='_',
     EXTENSION='.czi')
 
+#print("Matching Files:", file_list)
+
+
+# There must be a batch process function, but I will write a test analysis for 1 file 
 
 
 

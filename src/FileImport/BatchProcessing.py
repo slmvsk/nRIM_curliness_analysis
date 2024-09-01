@@ -70,7 +70,7 @@ def processFile(file_name):
 
 import pandas as pd
 
-def batch_process_files(file_list, process_function, folder_path):
+def batchProcessFiles(file_list, process_function, folder_path):
     """
     Batch processes files and compiles results into a pandas DataFrame.
     
