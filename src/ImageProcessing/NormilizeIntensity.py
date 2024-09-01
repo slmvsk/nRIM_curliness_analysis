@@ -6,16 +6,17 @@ Created on Sat Jul  6 15:52:36 2024
 @author: tetianasalamovska
 """
 
-from skimage import exposure
 from skimage.measure import label, regionprops
-from skimage import morphology, img_as_float
+from skimage import morphology, img_as_float, exposure
 
-def linearContrastStretching(image_stack):
+
+def linearContrastStretching(image_stack, percentiles=[0.1, 99.9]):
     """
-    Apply linear contrast stretching to an entire 3D image stack globally.
+    Apply linear contrast stretching to an entire 3D image stack globally with adjustable percentiles.
 
     Parameters:
     - image_stack (numpy.ndarray): A 3D numpy array (Z, Y, X) of an image stack.
+    - percentiles (list): List of two values (lower, upper) to define the stretch limits.
 
     Returns:
     - numpy.ndarray: Contrast stretched 3D image stack.
@@ -32,8 +33,7 @@ def linearContrastStretching(image_stack):
     image_stack_float = img_as_float(image_stack)
 
     # Calculate global percentiles across the entire stack to handle outliers
-    # Exclude the top and bottom 0.1-1% of data to reduce the impact of outliers
-    min_th, max_th = np.percentile(image_stack_float, [1, 99])
+    min_th, max_th = np.percentile(image_stack_float, percentiles)
 
     # Apply contrast stretching across the stack
     adjusted_stack = np.zeros_like(image_stack_float)
@@ -45,23 +45,6 @@ def linearContrastStretching(image_stack):
     return adjusted_stack.astype(image_stack.dtype)  # Convert back to original data type
 
 
-# putting together 
-def normalizeScenes(scenes):
-    """
-    Apply normalization to each 3D numpy array in a list and validate each one.
-
-    Parameters:
-    - scenes (list): List of 3D numpy arrays.
-
-    Returns:
-    - list: List of adjusted 3D numpy arrays.
-    """
-    adjusted_scenes = []
-    for scene in scenes:
-        adjusted_scene = linearContrastStretching(scene) 
-        validateImageAdjustment(scene, adjusted_scene)
-        adjusted_scenes.append(adjusted_scene)
-    return adjusted_scenes
 
 def validateImageAdjustment(scene, adjusted_scene):
     print("Scene shape:", scene.shape)
@@ -84,6 +67,27 @@ def validateImageAdjustment(scene, adjusted_scene):
 
     if scene.shape != adjusted_scene.shape:
         raise ValueError(f"Shape mismatch: Original shape {scene.shape} doesn't match adjusted shape {adjusted_scene.shape}")
+
+
+
+# putting above 2 function together to process all scenes in the file
+def normalizeScenes(scenes, perceltiles=[0.1, 99.9]):
+    """
+    Apply normalization to each 3D numpy array in a list and validate each one.
+
+    Parameters:
+    - scenes (list): List of 3D numpy arrays.
+
+    Returns:
+    - list: List of adjusted 3D numpy arrays.
+    """
+    adjusted_scenes = []
+    for scene in scenes:
+        adjusted_scene = linearContrastStretching(scene, percentiles) 
+        validateImageAdjustment(scene, adjusted_scene)
+        adjusted_scenes.append(adjusted_scene)
+    return adjusted_scenes
+
 
 # Assuming 'scenes' is your list of 11 3D numpy arrays
 # normalized_scenes = normalizeScenes(scenes)
