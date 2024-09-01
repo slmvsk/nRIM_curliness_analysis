@@ -21,7 +21,7 @@ from src.FileImport.DesctiptorsBasedFileSearch import getMatchingFilesList
 #from src.FileImport.BatchProcessing import 
 from src.FileImport.ReadZeissStacks import readCziFile
 from src.ImageProcessing.NormilizeIntensity import normalizeScenes
-
+from src.FileImport.PlottingImage import plotToCompare
 
 
 
@@ -71,8 +71,8 @@ scenes, metadata = readCziFile(file_name)
 normalized_scenes = normalizeScenes(scenes, percentiles=[0.1,99.9])
 
 
-# Optionally visualize one of the slices in the one of the stacks
-plot_images(normalized_scenes[4][8,:,:], enhanced_stack[8,:,:], 'Original', 'No soma')
+# Optionally visualize one of the slices in the one of the stacks before and after 
+plotToCompare(scenes[4][8,:,:], normalized_scenes[8,:,:], 'Original', 'Normalized')
 
 
 # Inspect histograms if needed 
