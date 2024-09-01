@@ -7,6 +7,7 @@ Created on Sun Jul  7 10:53:21 2024
 """
 
 import matplotlib.pyplot as plt
+import numpy as np
    
 def plotComparison(image1, image2, title):
     """
