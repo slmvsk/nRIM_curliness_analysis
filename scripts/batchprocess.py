@@ -72,11 +72,10 @@ normalized_scenes = normalizeScenes(scenes, percentiles=[0.1,99.9])
 
 
 # Optionally visualize one of the slices in the one of the stacks
-plot_image_histogram(img_adapteq[8,:,:])
 plot_images(normalized_scenes[4][8,:,:], enhanced_stack[8,:,:], 'Original', 'No soma')
 
 
-
+# Inspect histograms if needed 
 
 
 
