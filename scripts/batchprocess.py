@@ -16,6 +16,7 @@ sys.path.append('/Users/tetianasalamovska/Documents/GitHub/nRIM_curliness_analys
 # Importing all related functions after navigating to downloaded repository 
 # Also might need requirments.txt file 
 
+import numpy as np
 from src.FileImport.DesctiptorsBasedFileSearch import getMatchingFilesList
 #from src.FileImport.BatchProcessing import 
 from src.FileImport.ReadZeissStacks import readCziFile
@@ -64,20 +65,13 @@ scenes, metadata = readCziFile(file_name)
     #print(scenes[0-10].shape)
 
 
-# Normalizing intensities and enhancing contrast 
-
+# Normalizing intensities and enhancing contrast
+# Also returnes normalized image shape and min and max intensities in the console
+# You can print it using print(np.min(scenes[5]))
 normalized_scenes = normalizeScenes(scenes, percentiles=[0.1,99.9])
 
 
-plot_images(normalized_scenes[9][18,:,:], scenes[9][18,:,:], 'nm', 'orig')
-
-
-# diagnostic 
-print("Min pixel value:", np.min(scenes[4]))
-print("Max pixel value:", np.max(scenes[4]))
-
-
-# Optionally visualize or further process `enhanced_stack`
+# Optionally visualize one of the slices in the one of the stacks
 plot_image_histogram(img_adapteq[8,:,:])
 plot_images(normalized_scenes[4][8,:,:], enhanced_stack[8,:,:], 'Original', 'No soma')
 
