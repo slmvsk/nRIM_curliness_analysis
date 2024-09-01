@@ -71,7 +71,7 @@ def validateImageAdjustment(scene, adjusted_scene):
 
 
 # putting above 2 function together to process all scenes in the file
-def normalizeScenes(scenes, perceltiles=[0.1, 99.9]):
+def normalizeScenes(scenes, percentiles=[0.1, 99.9]):
     """
     Apply normalization to each 3D numpy array in a list and validate each one.
 

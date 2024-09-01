@@ -19,7 +19,7 @@ sys.path.append('/Users/tetianasalamovska/Documents/GitHub/nRIM_curliness_analys
 from src.FileImport.DesctiptorsBasedFileSearch import getMatchingFilesList
 #from src.FileImport.BatchProcessing import 
 from src.FileImport.ReadZeissStacks import readCziFile
-
+from src.ImageProcessing.NormilizeIntensity import normalizeScenes
 
 
 
@@ -66,7 +66,7 @@ scenes, metadata = readCziFile(file_name)
 
 # Normalizing intensities and enhancing contrast 
 
-normalized_scenes = normalizeScenes(scenes)
+normalized_scenes = normalizeScenes(scenes, percentiles=[0.1,99.9])
 
 
 plot_images(normalized_scenes[9][18,:,:], scenes[9][18,:,:], 'nm', 'orig')
