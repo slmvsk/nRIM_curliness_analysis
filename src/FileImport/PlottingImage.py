@@ -66,7 +66,7 @@ def plot_comparison(image1, image2, title):
 #plot_comparison(adjusted_scenes[2][5,:,:], filtered_image[5,:,:], "Background Correction Comparison")
 
 # this is the best one so far 
-def plot_images(image1, image2, title1='Image 1', title2='Image 2'):
+def plotToCompare(image1, image2, title1='Image 1', title2='Image 2'):
     """Plot two images side by side with high quality."""
     fig, ax = plt.subplots(1, 2, figsize=(10, 5), dpi=300)  # Increase dpi for higher quality
     
