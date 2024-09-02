@@ -722,7 +722,7 @@ def cleanMipSkeleton(scenes_2d, length_percentiles=(5, 95)):
 
 #Write image as tif. Ue imageJ for visualization
 from skimage.io import imsave
-imsave("tttt.tif", tubeness_scenes[6]) 
+#imsave("tttt.tif", tubeness_scenes[6]) 
 
 import tifffile as tiff
 
