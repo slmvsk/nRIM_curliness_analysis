@@ -45,16 +45,7 @@ def applyGaussian(scenes, sigma=1):
 
 # Example usage:
 # Assuming 'scenes' is your list of 3D numpy arrays
-blurred_scenes = apply_gaussian(scenes, sigma=2)
-
-# Visualize one of the blurred scenes (optional)
-import matplotlib.pyplot as plt
-
-plt.imshow(blurred_scenes[0][blurred_scenes[0].shape[0] // 2, :, :], cmap='gray')
-plt.title('Blurred Scene - Middle Slice')
-plt.axis('off')
-plt.show()
-
+#blurred_scenes = apply_gaussian(scenes, sigma=2)
 
 
 
@@ -135,11 +126,11 @@ def estimate_sigma_based_on_scale(image, scale_factor=1.0):
 
 # Example usage:
   # Replace this with your actual 3D image
-sigma = estimate_sigma_based_on_scale(nosoma_scenes[5], scale_factor=0.9)
-tubeness_measure = tubeness(nosoma_scenes[5], sigma)
+#sigma = estimate_sigma_based_on_scale(nosoma_scenes[5], scale_factor=0.9)
+#tubeness_measure = tubeness(nosoma_scenes[5], sigma)
 
 
-plot_images(result[8,:,:], nosoma_scenes[8][8,:,:], 'Original', 'No Somata')
+#plot_images(result[8,:,:], nosoma_scenes[8][8,:,:], 'Original', 'No Somata')
 
 # more or less but 1. needs validation as described below 
 # and needs batch processing memory-efficient optimisation like 
@@ -185,14 +176,13 @@ def tubenessForAllScenes(scenes, scale_factor=1.0):
     
     return processed_scenes
 
-tubeness_scenes = tubenessForAllScenes(nosoma_scenes, scale_factor=0.9)
+#tubeness_scenes = tubenessForAllScenes(nosoma_scenes, scale_factor=0.9)
 
-plot_images(tubeness_scenes[6][8,:,:], nosoma_scenes[6][8,:,:], 'Original', 'No Somata')
+#plot_images(tubeness_scenes[6][8,:,:], nosoma_scenes[6][8,:,:], 'Original', 'No Somata')
 
 ##################################### try to SAVE AS TIFF to see if it is only plotting bug 
 ############################################################################################
 # Validation of tubeness 
-import numpy as np
 from skimage import exposure
 
 def normalize_intensity_zero(image):
@@ -230,10 +220,10 @@ def subtract_tubeness_from_nosoma(nosoma, tubeness):
 
 # Example usage:
 # Assuming `nosoma` and `tubeness` are 3D numpy arrays
-validation = subtract_tubeness_from_nosoma(nosoma_scenes[8], tubeness_scenes[8])
+#validation = subtract_tubeness_from_nosoma(nosoma_scenes[8], tubeness_scenes[8])
 
-plot_images(tubeness_scenes[8][8,:,:], nosoma_scenes[8][8,:,:], 'Original', 'No Somata')
-plot_images(validation[8,:,:], nosoma_scenes[8][8,:,:], 'Original', 'No Somata')
+#plot_images(tubeness_scenes[8][8,:,:], nosoma_scenes[8][8,:,:], 'Original', 'No Somata')
+#plot_images(validation[8,:,:], nosoma_scenes[8][8,:,:], 'Original', 'No Somata')
 #seems to work nicely, on specific images there are more "leftovers" 
 # sometimes there is an extra tubeness 
 
@@ -244,8 +234,8 @@ plot_images(validation[8,:,:], nosoma_scenes[8][8,:,:], 'Original', 'No Somata')
 
 # Example usage with a 3D numpy array `data`
 # Sigma should be chosen based on the scale of the structures you're looking to enhance
-sigma = 4.0  # Smoothing parameter 
-result = tubeness(nosoma_scenes[8], sigma)
+#sigma = 4.0  # Smoothing parameter 
+#result = tubeness(nosoma_scenes[8], sigma)
 #plot_comparison(result[8,:,:], scenes[2][8,:,:], "Gaussian comparison") 
 #or plot_images(blurred_result[8,:,:], blurred_scenes[2][8,:,:], 'Result Slice', 'Blurred Scene Slice')
 
@@ -277,7 +267,7 @@ def skeletonize_image(image):
 
 # Example usage:
 # Assume `image_3d` is your 3D numpy array that's already a binary image
-skeletonized = skeletonize_image(cleaned_nosoma)
+#skeletonized = skeletonize_image(cleaned_nosoma)
 
 #plot_images(blurred_result[8,:,:], skeletonized[8,:,:], 'Blurred result Slice', 'Skeletonized')
 #print(skeletonized.shape)
@@ -317,9 +307,9 @@ def skeletonize_scenes(scenes):
     return processed_scenes
 
 # Example usage:
-skeletonized_scenes = skeletonize_scenes(tubeness_scenes)
+#skeletonized_scenes = skeletonize_scenes(tubeness_scenes)
 
-plot_images(skeletonized_scenes[5][8,:,:], nosoma_scenes[5][8,:,:], 'Original', 'No Somata')
+#plot_images(skeletonized_scenes[5][8,:,:], nosoma_scenes[5][8,:,:], 'Original', 'No Somata')
 
 
 
@@ -399,11 +389,11 @@ def process_scenes_for_skeletonization(scenes):
     return processed_scenes
 
 # Example usage:
-skeletonized_scenes = process_scenes_for_skeletonization(tubeness_scenes)
-plot_images(tubeness_scenes[5][8,:,:], skeletonized_scenes[5][8,:,:], 'Tubeness', 'Skeleton')
+#skeletonized_scenes = process_scenes_for_skeletonization(tubeness_scenes)
+#plot_images(tubeness_scenes[5][8,:,:], skeletonized_scenes[5][8,:,:], 'Tubeness', 'Skeleton')
 
 
-binary_image = preprocess_image(tubeness_scenes[5])
+#binary_image = preprocess_image(tubeness_scenes[5])
 
 
 ################################
@@ -436,9 +426,9 @@ def max_intensity_z_projection(image_3d):
 
 # Example: 
 
-pruned3dmip = max_intensity_z_projection(pruned_3d)
+#pruned3dmip = max_intensity_z_projection(pruned_3d)
 #print(mip_image.shape)
-plot_images(normalized_scenes[2][8,:,:], mip_image_test, 'Blurred result Slice', 'Skeletonized')
+#plot_images(normalized_scenes[2][8,:,:], mip_image_test, 'Blurred result Slice', 'Skeletonized')
 
 
 import gc
@@ -474,9 +464,9 @@ def do_mip_scenes(skeletonized_scenes):
     return mip_scenes
 
 # Example usage:
-mip_scenes = mip_scenes(skeletonized_scenes)
+#mip_scenes = mip_scenes(skeletonized_scenes)
 
-plot_images(tubeness_scenes[4][8,:,:], mip_scenes[4], 'Blurred result Slice', 'Skeletonized')
+#plot_images(tubeness_scenes[4][8,:,:], mip_scenes[4], 'Blurred result Slice', 'Skeletonized')
 
 
 # it works but requires skeleton pre! cleaning (is it possible? for now do only post) 
@@ -552,19 +542,9 @@ def clean_skeleton_3d(skeleton_image, min_length=10):
 
 # Example usage:
 # Assuming 'skeleton_image' is your 3D binary skeletonized numpy array
-min_branch_length = 10  # Adjust this value based on your needs
-cleaned_skeleton = clean_skeleton_3d(skeletonized, min_length=min_branch_length)
+#min_branch_length = 10  # Adjust this value based on your needs
+#cleaned_skeleton = clean_skeleton_3d(skeletonized, min_length=min_branch_length)
 
-
-
-
-# Test the function
-lengths = measure_branch_lengths(mip_scenes[4])
-print(f"Branch lengths: {branch_length}")
-min_length = np.min(lengths) 
-max_length = np.max(lengths)
-mean_length = np.mean(lengths)
-print(mean_length)
 
 
 
@@ -608,10 +588,10 @@ def clean_skeleton(image_2d, min_length, max_length):
     
     return cleaned_skeleton
 # Test the function
-cleaned_skeleton = clean_skeleton(mip_scenes[4], min_length=100, max_length=1471528)
+#cleaned_skeleton = clean_skeleton(mip_scenes[4], min_length=100, max_length=1471528)
 
 # Example usage:
-plot_images(cleaned_skeleton, mip_scenes[4], 'Blurred result Slice', 'Skeletonized')
+#plot_images(cleaned_skeleton, mip_scenes[4], 'Blurred result Slice', 'Skeletonized')
 
 
 ##################################################
@@ -649,10 +629,10 @@ def measure_branch_lengths_batch(scenes_2d):
     return all_lengths
 
 # Example usage:
-all_lengths = measure_branch_lengths_batch(mip_scenes)
+#all_lengths = measure_branch_lengths_batch(mip_scenes)
 
 # You can now calculate min, max, and mean for each scene
-scene_stats = [(np.min(lengths), np.max(lengths), np.mean(lengths)) for lengths in all_lengths]
+#scene_stats = [(np.min(lengths), np.max(lengths), np.mean(lengths)) for lengths in all_lengths]
 
 for idx, (min_len, max_len, mean_len) in enumerate(scene_stats):
     print(f"Scene {idx+1} - Min: {min_len}, Max: {max_len}, Mean: {mean_len}")
@@ -719,10 +699,10 @@ def cleanMipSkeleton(scenes_2d, length_percentiles=(5, 95)):
     return cleaned_scenes
 
 # Example usage:
-cleaned_scenes = cleanMipSkeleton(mip_scenes, length_percentiles=(70, 100))
+#cleaned_scenes = cleanMipSkeleton(mip_scenes, length_percentiles=(70, 100))
 
 # Plotting results
-plot_images(cleaned_scenes[4], mip_scenes[4], 'Cleaned Skeleton', 'Original MIP')
+#plot_images(cleaned_scenes[4], mip_scenes[4], 'Cleaned Skeleton', 'Original MIP')
 
 
 #########################
@@ -754,8 +734,8 @@ def save_as_tiff(image_slice, file_name):
     tiff.imwrite(file_name, image_slice, photometric='minisblack')
 
 # Example usage to save specific slices
-save_as_tiff(tubeness_scenes[6], 'tubeness_python.tif')
-save_as_tiff(blurred_scenes[2][8, :, :], 'blurred_scene_slice_8.tif')
+#save_as_tiff(tubeness_scenes[6], 'tubeness_python.tif')
+#save_as_tiff(blurred_scenes[2][8, :, :], 'blurred_scene_slice_8.tif')
 
 
 
