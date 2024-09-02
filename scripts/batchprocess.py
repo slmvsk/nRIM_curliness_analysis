@@ -49,7 +49,7 @@ file_list = getMatchingFilesList(
 # and then just put it in the function at src.FileImport.BarchProcessing 
 
 # Step 1. Importing files that match file list names (here just importing one file) and reading metadata
-    # 1.1. Read the file as a list of 3D numpy arrays (scenes)
+    # 1.1. Read the file as a list of 3D numpy arrays ( or "scenes" like in your single file, there are 11 of them)
 
 file_name = '/Users/tetianasalamovska/Desktop/zeis/IHCT_THT53_40x3x_IHCT08_slice6_stack_positions_A488_laser08_speed6.czi'
 scenes, metadata = readCziFile(file_name)
@@ -90,7 +90,14 @@ blurred_scenes = applyGaussian(normalized_scenes, sigma=2)
 
 plotToCompare(normalized_scenes[6][10,:,:], blurred_scenes[6][10,:,:], 'Normalized', 'Gaussian Blur')
 
+    # 2.3. Background substraction, try radius between 25-40 
 
+background_subtracted_images = subtract_background(blurred_scenes[6], radius=35) # 20 is also very fine 
+
+subtracted_scenes = subtractBackgroundFromScenes(scenes, radius=25)
+
+
+plotToCompare(background_subtracted_images[10,:,:], blurred_scenes[6][10,:,:], 'Substracted', 'Gaussian Blur')
 
 
 
