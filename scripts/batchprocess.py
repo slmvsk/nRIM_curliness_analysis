@@ -85,8 +85,10 @@ plotToCompare(scenes[6][10,:,:], normalized_scenes[6][10,:,:], 'Original', 'Norm
 plotImageHistogram(normalized_scenes[6], bins=256, pixel_range=(0, 65535), title='Pixel Intensity Histogram for Normalized Image')
 
 
-    # 2.2. Denoising and morphological techniques
+    # 2.2. Denoising and optional morphological techniques
+blurred_scenes = applyGaussian(normalized_scenes, sigma=2)
 
+plotToCompare(normalized_scenes[6][10,:,:], blurred_scenes[6][10,:,:], 'Normalized', 'Gaussian Blur')
 
 
 
