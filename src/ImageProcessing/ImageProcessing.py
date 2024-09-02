@@ -20,12 +20,10 @@ import matplotlib.pyplot as plt
 import napari
 from napari.utils import nbscreenshot
 import pyclesperanto_prototype as cle
-
-
-import numpy as np
 from scipy.ndimage import gaussian_filter
 
-def apply_gaussian(scenes, sigma=1):
+
+def applyGaussian(scenes, sigma=1):
     """
     Apply Gaussian blur to all scenes in a list of 3D image stacks.
     

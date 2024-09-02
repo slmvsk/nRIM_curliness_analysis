@@ -32,6 +32,8 @@ def processFile(file_name):
     tubeness_scenes = tubenessForAllScenes(processed_scenes, scale_factor=0.9)
     del nosoma_scenes  # Free memory used by the nosoma scenes
     
+    # threshold after TUBENESS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    
     #Step 4.1: Validate tubeness
     #validation = subtract_tubeness_from_nosoma(nosoma_scenes[8], tubeness_scenes[8])
     #plot_images(tubeness_scenes[8][8,:,:], nosoma_scenes[8][8,:,:], 'Tubeness', 'No Somata')

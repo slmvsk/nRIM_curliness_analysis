@@ -23,7 +23,7 @@ from src.FileImport.DesctiptorsBasedFileSearch import getMatchingFilesList
 from src.FileImport.ReadZeissStacks import readCziFile
 from src.ImageProcessing.NormilizeIntensity import normalizeScenes
 from src.FileImport.PlottingImage import plotToCompare, plotImageHistogram
-
+from src.ImageProcessing.ImageProcessing import 
 
 
 
@@ -48,12 +48,13 @@ file_list = getMatchingFilesList(
 # !!! There must be a batch process function, but I will write a test analysis for 1 file instead 
 # and then just put it in the function at src.FileImport.BarchProcessing 
 
-# Importing files that match file list names (here just importing one file)
+# Step 1. Importing files that match file list names (here just importing one file) and reading metadata
+    # 1.1. Read the file as a list of 3D numpy arrays (scenes)
 
 file_name = '/Users/tetianasalamovska/Desktop/zeis/IHCT_THT53_40x3x_IHCT08_slice6_stack_positions_A488_laser08_speed6.czi'
 scenes, metadata = readCziFile(file_name)
 
-# Create a metadata dictionary and access it with this function 
+    # 1.2. Create a metadata dictionary and access it with this function 
 
 
 
@@ -66,7 +67,10 @@ scenes, metadata = readCziFile(file_name)
     #print(scenes[0-10].shape)
 
 
-# Normalizing intensities and enhancing contrast
+# Step 2. Preprocessing
+
+    # 2.1 Normalizing intensities and enhancing contrast
+    
 # Also returnes normalized image shape and min and max intensities in the console
 # You can print it using print(np.min(scenes[5]))
 normalized_scenes = normalizeScenes(scenes, percentiles=[0.1,99.9])
@@ -78,8 +82,10 @@ normalized_scenes = normalizeScenes(scenes, percentiles=[0.1,99.9])
 plotToCompare(scenes[6][10,:,:], normalized_scenes[6][10,:,:], 'Original', 'Normalized')
 
 # Inspect histograms if needed 
-plotImageHistogram(scenes[6], bins=256, pixel_range=(0, 65535), title='Pixel Intensity Histogram for Original Image')
+plotImageHistogram(normalized_scenes[6], bins=256, pixel_range=(0, 65535), title='Pixel Intensity Histogram for Normalized Image')
 
+
+    # 2.2. Denoising and morphological techniques
 
 
 
