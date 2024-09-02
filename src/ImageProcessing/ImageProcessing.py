@@ -634,9 +634,6 @@ def measure_branch_lengths_batch(scenes_2d):
 # You can now calculate min, max, and mean for each scene
 #scene_stats = [(np.min(lengths), np.max(lengths), np.mean(lengths)) for lengths in all_lengths]
 
-for idx, (min_len, max_len, mean_len) in enumerate(scene_stats):
-    print(f"Scene {idx+1} - Min: {min_len}, Max: {max_len}, Mean: {mean_len}")
-    
     
 def cleanMipSkeleton(scenes_2d, length_percentiles=(5, 95)):
     """
