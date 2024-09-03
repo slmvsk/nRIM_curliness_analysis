@@ -84,21 +84,17 @@ def calculate_hessian(matrix, sigma):
     
     return hessian
 
-def tubeness(image, sigma=None):
+def tubeness(image, sigma):
     """
     Calculate the tubeness measure of a 3D image using the Hessian matrix eigenvalues.
     
     Parameters:
         image (ndarray): The input 3D image array.
-        sigma (float, optional): The scale of Gaussian blurring for smoothing.
-                                 If None, sigma is estimated based on the object sizes.
+        sigma (float): The scale of Gaussian blurring for smoothing.
     
     Returns:
         ndarray: A 3D numpy array representing the tubeness measure.
     """
-    if sigma is None:
-        sigma = estimate_sigma_from_structure_width(image)
-
     hessian = calculate_hessian(image, sigma)
     eigenvalues = np.linalg.eigvalsh(hessian)
     min_eigenvalue = np.min(eigenvalues, axis=-1)
@@ -106,27 +102,13 @@ def tubeness(image, sigma=None):
     
     return tubeness
 
-def estimate_sigma_from_structure_width(image, typical_structure_width=20):
+def process_all_scenes(scenes, sigma):
     """
-    Estimate an appropriate sigma based on the expected width of structures in the image.
-    
-    Parameters:
-        image (ndarray): The input 3D image array.
-        typical_structure_width (int): Expected width of tubular structures in pixels.
-    
-    Returns:
-        float: The estimated sigma value for smoothing.
-    """
-    # Assuming the sigma should be approximately 1/4 to 1/2 of the width of structures
-    sigma = typical_structure_width / 4
-    return sigma
-
-def tubenessForAllScenes(scenes):
-    """
-    Apply tubeness to a list of scenes with optimized memory handling.
+    Apply tubeness to a list of scenes with a specified sigma value.
     
     Parameters:
         scenes (list of ndarray): List of 3D numpy arrays.
+        sigma (float): Gaussian sigma value for tubeness calculation.
     
     Returns:
         list of ndarray: Tubeness measures for each scene.
@@ -134,19 +116,16 @@ def tubenessForAllScenes(scenes):
     processed_scenes = []
     for index, scene in enumerate(scenes):
         try:
-            processed_scene = tubeness(scene)
+            processed_scene = tubeness(scene, sigma)
             processed_scenes.append(processed_scene)
         except Exception as e:
             print(f"Error processing scene {index + 1}: {e}")
     return processed_scenes
 
-# Example of how to use these functions
-# Assuming 'scenes' is your list of 3D numpy arrays
-#processed_scenes = process_all_scenes(scenes)
-
-#tubeness_scenes = tubenessForAllScenes(nosoma_scenes, scale_factor=0.9)
-
-#plot_images(tubeness_scenes[6][8,:,:], nosoma_scenes[6][8,:,:], 'Original', 'No Somata')
+# Example usage:
+# Assuming 'scenes' is your list of 3D numpy arrays and sigma is predefined
+sigma = 2.0  # example sigma value
+processed_scenes = process_all_scenes(scenes, sigma)
 
 ##################################### try to SAVE AS TIFF to see if it is only plotting bug 
 ############################################################################################
