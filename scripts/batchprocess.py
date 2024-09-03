@@ -113,6 +113,16 @@ plotToCompare(subtracted_scenes[7][10,:,:], blurred_scenes[7][10,:,:], 'Substrac
     # 2.5. Contrast enhancement, small obj. cleaning, similar to tubeness morphological operation
 
 
+from skimage.morphology import white_tophat, ball
+
+selem = ball(radius=30)
+enhanced_image = white_tophat(subtracted_scenes[7], footprint=selem)
+
+plotToCompare(subtracted_scenes[7][10,:,:], enhanced_image[10,:,:], 'Substracted', 'Filter')
+
+
+
+
 
 
 # Step 3. Thresholding and binarisation
