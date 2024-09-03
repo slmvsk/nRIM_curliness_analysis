@@ -25,7 +25,7 @@ from src.ImageProcessing.NormilizeIntensity import normalizeScenes
 from src.FileImport.PlottingImage import plotToCompare, plotImageHistogram
 from src.ImageProcessing.ImageProcessing import applyGaussian #change to new file 
 from src.ImageProcessing.SubstractBackground import subtractBackgroundFromScenes
-from src.ImageProcessing.ImageProcessing import tubenessForAllScenes 
+#from src.ImageProcessing.SatoTubeness import applySatoTubeness 
 
 
 
@@ -102,11 +102,12 @@ plotToCompare(subtracted_scenes[7][10,:,:], blurred_scenes[7][10,:,:], 'Substrac
 # Might need some contrast enhancement here !!!!!!!!!!!!!!!!
 
 
-    # Optional: 2.4. Tubeness filter  (might need more preprocessing before this, more filters)
+    # Do not use: 2.4. Tubeness filter  (might need more preprocessing before this, more filters or opening/closing operations
+    # or pref. demoving some small objects, not noise + contrast enhancement)
 
-tubeness_scenes = tubenessForAllScenes(subtracted_scenes, sigma=2.0)
-
-plotToCompare(subtracted_scenes[7][10,:,:], tubeness_scenes[7][10,:,:], 'Substracted', 'Tubeness')
+# sato tubeness from scikit image 
+#tubeness_test = applySatoTubeness(subtracted_scenes[7], sigma = 1, black_ridges=False)
+#plotToCompare(subtracted_scenes[7][10,:,:], tubeness_test[10,:,:], 'Substracted', 'Tubeness')
 
 
 
