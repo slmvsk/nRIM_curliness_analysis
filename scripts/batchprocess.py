@@ -23,7 +23,7 @@ from src.FileImport.DesctiptorsBasedFileSearch import getMatchingFilesList
 from src.FileImport.ReadZeissStacks import readCziFile
 from src.ImageProcessing.NormilizeIntensity import normalizeScenes
 from src.FileImport.PlottingImage import plotToCompare, plotImageHistogram
-from src.ImageProcessing.ImageProcessing import applyGaussian #change to new file 
+from src.ImageProcessing.Skeletonize import applyGaussian #change to new file 
 from src.ImageProcessing.SubstractBackground import subtractBackgroundFromScenes
 #from src.ImageProcessing.SatoTubeness import applySatoTubeness 
 
@@ -110,7 +110,12 @@ plotToCompare(subtracted_scenes[7][10,:,:], blurred_scenes[7][10,:,:], 'Substrac
 #plotToCompare(subtracted_scenes[7][10,:,:], tubeness_test[10,:,:], 'Substracted', 'Tubeness')
 
 
+    # 2.5. Contrast enhancement, small obj. cleaning, similar to tubeness morphological operation
 
+
+
+
+# Step 3. Thresholding and binarisation
 
 
 
