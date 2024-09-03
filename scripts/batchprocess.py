@@ -104,7 +104,7 @@ plotToCompare(subtracted_scenes[7][10,:,:], blurred_scenes[7][10,:,:], 'Substrac
 
     # Optional: 2.4. Tubeness filter  (might need more preprocessing before this, more filters)
 
-tubeness_scenes = tubenessForAllScenes(subtracted_scenes)
+tubeness_scenes = tubenessForAllScenes(subtracted_scenes, sigma=2.0)
 
 plotToCompare(subtracted_scenes[7][10,:,:], tubeness_scenes[7][10,:,:], 'Substracted', 'Tubeness')
 

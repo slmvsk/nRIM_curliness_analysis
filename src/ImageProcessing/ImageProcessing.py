@@ -102,7 +102,7 @@ def tubeness(image, sigma):
     
     return tubeness
 
-def process_all_scenes(scenes, sigma):
+def tubenessForAllScenes(scenes, sigma):
     """
     Apply tubeness to a list of scenes with a specified sigma value.
     
