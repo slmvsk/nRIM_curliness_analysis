@@ -124,8 +124,8 @@ def process_all_scenes(scenes, sigma):
 
 # Example usage:
 # Assuming 'scenes' is your list of 3D numpy arrays and sigma is predefined
-sigma = 2.0  # example sigma value
-processed_scenes = process_all_scenes(scenes, sigma)
+#sigma = 2.0  # example sigma value
+#processed_scenes = process_all_scenes(scenes, sigma)
 
 ##################################### try to SAVE AS TIFF to see if it is only plotting bug 
 ############################################################################################
