@@ -23,9 +23,9 @@ from src.FileImport.DesctiptorsBasedFileSearch import getMatchingFilesList
 from src.FileImport.ReadZeissStacks import readCziFile
 from src.ImageProcessing.NormilizeIntensity import normalizeScenes
 from src.FileImport.PlottingImage import plotToCompare, plotImageHistogram
-from src.ImageProcessing.ImageProcessing import applyGaussian
-
-
+from src.ImageProcessing.ImageProcessing import applyGaussian #change to new file 
+from src.ImageProcessing.SubstractBackground import subtractBackgroundFromScenes
+from src.ImageProcessing.ImageProcessing import tubenessForAllScenes 
 
 
 
@@ -90,15 +90,23 @@ blurred_scenes = applyGaussian(normalized_scenes, sigma=2)
 
 plotToCompare(normalized_scenes[6][10,:,:], blurred_scenes[6][10,:,:], 'Normalized', 'Gaussian Blur')
 
-    # 2.3. Background substraction, try radius between 25-40 
-
-background_subtracted_images = subtract_background(blurred_scenes[6], radius=35) # 20 is also very fine 
+    # 2.3. Background substraction, try radius from 25 to 35++
+    
+#for one stack to test different radius 
+#subtracted_scene = subtract_background(blurred_scenes[6], radius=35) # 20 is also very fine 
 
 subtracted_scenes = subtractBackgroundFromScenes(scenes, radius=25)
 
+plotToCompare(subtracted_scenes[7][10,:,:], blurred_scenes[7][10,:,:], 'Substracted', 'Gaussian Blur')
 
-plotToCompare(background_subtracted_images[10,:,:], blurred_scenes[6][10,:,:], 'Substracted', 'Gaussian Blur')
+# Might need some contrast enhancement here !!!!!!!!!!!!!!!!
 
+
+    # Optional: 2.4. Tubeness filter  (might need more preprocessing before this, more filters)
+
+tubeness_scenes = tubenessForAllScenes(subtracted_scenes, scale_factor=0.9)
+
+plotToCompare(subtracted_scenes[7][10,:,:], tubeness_scenes[7][10,:,:], 'Substracted', 'Tubeness')
 
 
 

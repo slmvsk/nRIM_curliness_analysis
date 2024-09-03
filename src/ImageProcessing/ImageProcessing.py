@@ -70,111 +70,79 @@ def applyGaussian(scenes, sigma=1):
 # 2. 
 ##########################
 
+import numpy as np
+import scipy.ndimage
 
 def calculate_hessian(matrix, sigma):
     """Calculate the Hessian matrix for each voxel in a 3D array."""
-    # Calculate the gradients
     gradients = np.gradient(matrix, sigma, axis=(0, 1, 2))
-    hessian = np.empty((matrix.shape[0], matrix.shape[1], matrix.shape[2], 3, 3))
+    hessian = np.empty(matrix.shape + (3, 3), dtype=np.float32)
     
-    # Compute each component of the Hessian matrix
     for k in range(3):
         for l in range(3):
             hessian[..., k, l] = np.gradient(gradients[k], sigma, axis=l)
     
     return hessian
 
-def tubeness(image, sigma):
-    """Calculate the tubeness measure of a 3D image using the Hessian matrix eigenvalues."""
-    # Gaussian smoothing
-    #smoothed = scipy.ndimage.gaussian_filter(image, sigma)
+def tubeness(image, sigma=None):
+    """
+    Calculate the tubeness measure of a 3D image using the Hessian matrix eigenvalues.
     
-    # Calculate the Hessian matrix
-    hessian = calculate_hessian(image, sigma) #replace with smoothed if previous step is active 
+    Parameters:
+        image (ndarray): The input 3D image array.
+        sigma (float, optional): The scale of Gaussian blurring for smoothing.
+                                 If None, sigma is estimated based on the object sizes.
     
-    # Compute eigenvalues for each voxel
+    Returns:
+        ndarray: A 3D numpy array representing the tubeness measure.
+    """
+    if sigma is None:
+        sigma = estimate_sigma_from_structure_width(image)
+
+    hessian = calculate_hessian(image, sigma)
     eigenvalues = np.linalg.eigvalsh(hessian)
-    
-    # Select the most negative eigenvalue
     min_eigenvalue = np.min(eigenvalues, axis=-1)
-    
-    # Tubeness measure: negative eigenvalues indicate tubular structures
     tubeness = np.where(min_eigenvalue < 0, -min_eigenvalue, 0)
     
     return tubeness
 
-#validation of tubness 
-#normalize intensity and substract tubeness image from original
-# ......
-
-
-def estimate_sigma_based_on_scale(image, scale_factor=1.0):
+def estimate_sigma_from_structure_width(image, typical_structure_width=20):
     """
-    Estimate an appropriate sigma for the tubeness function based on the image scale.
+    Estimate an appropriate sigma based on the expected width of structures in the image.
     
     Parameters:
         image (ndarray): The input 3D image array.
-        scale_factor (float): A multiplier for scaling sigma according to the image resolution.
+        typical_structure_width (int): Expected width of tubular structures in pixels.
     
     Returns:
-        float: The estimated sigma value.
+        float: The estimated sigma value for smoothing.
     """
-    # Example estimation based on image size and scale factor
-    median_dim = np.median(image.shape)
-    sigma = median_dim * 0.005 * scale_factor    
+    # Assuming the sigma should be approximately 1/4 to 1/2 of the width of structures
+    sigma = typical_structure_width / 4
     return sigma
 
-# Example usage:
-  # Replace this with your actual 3D image
-#sigma = estimate_sigma_based_on_scale(nosoma_scenes[5], scale_factor=0.9)
-#tubeness_measure = tubeness(nosoma_scenes[5], sigma)
-
-
-#plot_images(result[8,:,:], nosoma_scenes[8][8,:,:], 'Original', 'No Somata')
-
-# more or less but 1. needs validation as described below 
-# and needs batch processing memory-efficient optimisation like 
-# remove somata function has 
-
-#adjusting only sigma itself gives the same output 
-# maybe remove this function to estimate sigma or make it based on the width of 
-# dendrites or make formula to find the best scale factor 
-
-
-def tubenessForAllScenes(scenes, scale_factor=1.0):
+def tubenessForAllScenes(scenes):
     """
-    Iterate over all scenes in a file, apply the tubeness function to each scene,
-    and release memory after processing each scene.
+    Apply tubeness to a list of scenes with optimized memory handling.
     
     Parameters:
-        scenes (list): List of 3D numpy arrays where each array represents a scene.
-        scale_factor (float): Scaling factor for sigma estimation.
+        scenes (list of ndarray): List of 3D numpy arrays.
     
     Returns:
-        list: A list of 3D numpy arrays with tubeness measure applied.
+        list of ndarray: Tubeness measures for each scene.
     """
     processed_scenes = []
-    
-    for i, scene in enumerate(scenes):
-        print(f"Processing scene {i+1}/{len(scenes)}")
-        
-        if scene.size == 0:
-            print(f"Scene {i+1} is empty or invalid!")
-            continue
-        
+    for index, scene in enumerate(scenes):
         try:
-            sigma = estimate_sigma_based_on_scale(scene, scale_factor)
-            processed_scene = tubeness(scene, sigma)
+            processed_scene = tubeness(scene)
             processed_scenes.append(processed_scene)
-            
         except Exception as e:
-            print(f"Error processing scene {i+1}: {e}")
-            continue
-        
-        del scene
-        gc.collect()
-    
+            print(f"Error processing scene {index + 1}: {e}")
     return processed_scenes
+
+# Example of how to use these functions
+# Assuming 'scenes' is your list of 3D numpy arrays
+#processed_scenes = process_all_scenes(scenes)
 
 #tubeness_scenes = tubenessForAllScenes(nosoma_scenes, scale_factor=0.9)
 

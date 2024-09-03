@@ -13,15 +13,6 @@ import pyclesperanto_prototype as cle
 
 
 
-from src.ImageProcessing.RemoveSomata import findOptimalThreshold, removeSomafromStack, removeSomaFromAllScenes
-from src.ImageProcessing.VerifyAndPlotIntensity import verify_and_plot_intensity
-from src.FileImport.PlottingImage import plot_slice_from_stack, plot_comparison
-from src.ImageProcessing.NormilizeIntensity import normalizeScenes, validate_image_adjustment, process_scenes
-
-from src.FileImport.ReadZeissStacks import readCziFile
-
-
-
 # normalizing intensities min 0 max 65535 for 16 bit 
 adjusted_scenes = process_scenes(scenes)
 
