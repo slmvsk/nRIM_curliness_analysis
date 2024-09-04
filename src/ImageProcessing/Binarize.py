@@ -22,7 +22,7 @@ import matplotlib.pyplot as plt
 
 # use this function for now for good segmentation 
 
-def apply_thresholds(image_stack, thresholds):
+def applyThresholds(image_stack, thresholds):
     """
     Apply given threshold values to segment a 3D image stack.
     

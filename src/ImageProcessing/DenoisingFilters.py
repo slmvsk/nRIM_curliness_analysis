@@ -9,6 +9,7 @@ Created on Wed Sep  4 10:33:40 2024
 import numpy as np
 from scipy.ndimage import gaussian_filter, median_filter
 from skimage.filters import gaussian
+from skimage import exposure
 
 
 def applyGaussian(scenes, sigma=1):
@@ -59,5 +60,34 @@ def applyMedianFilter(scenes, size=3):
 # Example usage:
 #median_scenes = applyMedianFilter(scenes, size=3)
 
+def applyContrastStretching(scenes, lower_percentile=2, upper_percentile=98):
+    """
+    Apply contrast stretching to all scenes in a list of 3D image stacks.
+    
+    Parameters:
+        scenes (list of numpy.ndarray): List of 3D numpy arrays where each array represents a scene.
+        lower_percentile (float): Lower percentile for contrast stretching (default is 2).
+        upper_percentile (float): Upper percentile for contrast stretching (default is 98).
+    
+    Returns:
+        list of numpy.ndarray: List of 3D numpy arrays with contrast stretching applied.
+    """
+    stretched_scenes = []
+    for i, scene in enumerate(scenes):
+        # Compute the lower and upper percentiles for contrast stretching
+        p2, p98 = np.percentile(scene, (lower_percentile, upper_percentile))
+        
+        # Apply contrast stretching
+        stretched_scene = exposure.rescale_intensity(scene, in_range=(p2, p98))
+        stretched_scenes.append(stretched_scene)
+        
+        print(f"Applied contrast stretching to scene {i+1}/{len(scenes)}")
+    
+    return stretched_scenes
 
 
+#from skimage.morphology import white_tophat, ball
+
+#selem = ball(radius=12) #try larger radius 
+#enhanced_image = white_tophat(subtracted_scenes[7], footprint=selem)
+#plotToCompare(subtracted_scenes[7][10,:,:], enhanced_image[10,:,:], 'Substracted', 'Filter')

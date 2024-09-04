@@ -23,7 +23,7 @@ from src.FileImport.DesctiptorsBasedFileSearch import getMatchingFilesList
 from src.FileImport.ReadZeissStacks import readCziFile
 from src.ImageProcessing.NormilizeIntensity import normalizeScenes
 from src.FileImport.PlottingImage import plotToCompare, plotImageHistogram
-from src.ImageProcessing.DenoisingFilters import applyGaussian 
+from src.ImageProcessing.DenoisingFilters import applyGaussian, applyMedianFilter, applyContrastStretching
 from src.ImageProcessing.SubstractBackground import subtractBackgroundFromScenes
 #from src.ImageProcessing.SatoTubeness import applySatoTubeness 
 
@@ -84,7 +84,7 @@ plotToCompare(scenes[6][10,:,:], normalized_scenes[6][10,:,:], 'Original', 'Norm
 # Inspect histograms if needed 
 plotImageHistogram(normalized_scenes[6], bins=256, pixel_range=(0, 65535), title='Pixel Intensity Histogram for Normalized Image')
 
-# del scenes
+#del scenes
 
     # 2.2. Denoising and optional morphological techniques
 blurred_scenes = applyGaussian(normalized_scenes, sigma=2)
@@ -111,22 +111,20 @@ plotToCompare(subtracted_scenes[7][10,:,:], blurred_scenes[7][10,:,:], 'Substrac
 #plotToCompare(subtracted_scenes[7][10,:,:], tubeness_test[10,:,:], 'Substracted', 'Tubeness')
 
 
-    # 2.5. Contrast enhancement, small obj. cleaning, similar to tubeness morphological operation
+    # 2.5. Contrast enhancement, small obj. cleaning, similar to tubeness!!!!! morphological operation
+
+# opening, closing? clean? stronger filtering here?? other? 
+
+median_scenes = applyMedianFilter(subtracted_scenes, size=4) # choose 3
+plotToCompare(subtracted_scenes[7][10,:,:], median_scenes[7][10,:,:], 'Substracted', 'Filter')
 
 
-from skimage.morphology import white_tophat, ball
-
-selem = ball(radius=3)
-enhanced_image = white_tophat(subtracted_scenes[7], footprint=selem)
-
-plotToCompare(subtracted_scenes[7][10,:,:], enhanced_image[10,:,:], 'Substracted', 'Filter')
+stretched_scenes = applyContrastStretching(median_scenes, lower_percentile=1, upper_percentile=99)
+plotToCompare(subtracted_scenes[7][15,:,:], stretched_scenes[7][15,:,:], 'Substracted', 'Filter')
 
 
-# median? constrast (stretching? Adaptive Histogram Equalization?), opening, closing? clean? 
+# Step 3. Thresholding and binarisation (previously "soma removal")
 
-
-
-# Step 3. Thresholding and binarisation
 
 
 
