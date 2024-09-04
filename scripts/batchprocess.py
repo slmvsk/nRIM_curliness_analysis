@@ -126,16 +126,33 @@ plotToCompare(subtracted_scenes[7][15,:,:], stretched_scenes[7][15,:,:], 'Substr
 # Step 3. Thresholding and binarisation (previously "soma removal") + cleaning
     # 3.1. Thresholding
 
-thresholds = 0.5
+thresholds = 0.4
 nosoma_scenes = removeSomaFromAllScenes(stretched_scenes, thresholds)
 plotToCompare(nosoma_scenes[7][10,:,:], stretched_scenes[7][10,:,:], 'Nosoma', 'Stretched')
 
-    # 3.2. CLeaning 
 
-cleaned_scenes = cleanBinaryScenes(nosoma_scenes, min_size=5000) #must work in 3D 
+# ADAPTIVE 
+# Instead of using a single threshold value for the whole image, each pixel has its threshold value calculated
+
+
+
+
+
+
+
+
+
+
+
+
+    # 3.2. CLeaning 
+#erosion, dilation, opening, closing? 
+cleaned_scenes = cleanBinaryScenes(nosoma_scenes, min_size=1500) #must work in 3D 
 
 plotToCompare(nosoma_scenes[7][10,:,:], cleaned_scenes[7][10,:,:], 'Nosoma', 'Cleaned')
 
+
+# Step 4. Skeletonization 
 
 
 
