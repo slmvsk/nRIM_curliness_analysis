@@ -84,6 +84,7 @@ plotToCompare(scenes[6][10,:,:], normalized_scenes[6][10,:,:], 'Original', 'Norm
 # Inspect histograms if needed 
 plotImageHistogram(normalized_scenes[6], bins=256, pixel_range=(0, 65535), title='Pixel Intensity Histogram for Normalized Image')
 
+# del scenes
 
     # 2.2. Denoising and optional morphological techniques
 blurred_scenes = applyGaussian(normalized_scenes, sigma=2)
@@ -115,13 +116,13 @@ plotToCompare(subtracted_scenes[7][10,:,:], blurred_scenes[7][10,:,:], 'Substrac
 
 from skimage.morphology import white_tophat, ball
 
-selem = ball(radius=30)
+selem = ball(radius=3)
 enhanced_image = white_tophat(subtracted_scenes[7], footprint=selem)
 
 plotToCompare(subtracted_scenes[7][10,:,:], enhanced_image[10,:,:], 'Substracted', 'Filter')
 
 
-
+# median? constrast (stretching? Adaptive Histogram Equalization?), opening, closing? clean? 
 
 
 
