@@ -23,7 +23,7 @@ from src.FileImport.DesctiptorsBasedFileSearch import getMatchingFilesList
 from src.FileImport.ReadZeissStacks import readCziFile
 from src.ImageProcessing.NormilizeIntensity import normalizeScenes
 from src.FileImport.PlottingImage import plotToCompare, plotImageHistogram
-from src.ImageProcessing.Skeletonize import applyGaussian #change to new file 
+from src.ImageProcessing.DenoisingFilters import applyGaussian 
 from src.ImageProcessing.SubstractBackground import subtractBackgroundFromScenes
 #from src.ImageProcessing.SatoTubeness import applySatoTubeness 
 
