@@ -26,7 +26,7 @@ from src.FileImport.PlottingImage import plotToCompare, plotImageHistogram
 from src.ImageProcessing.DenoisingFilters import applyGaussian, applyMedianFilter, applyContrastStretching
 from src.ImageProcessing.SubstractBackground import subtractBackgroundFromScenes
 #from src.ImageProcessing.SatoTubeness import applySatoTubeness 
-from src.ImageProcessing.Binarize import removeSomaFromAllScenes
+from src.ImageProcessing.Binarize import removeSomaFromAllScenes, cleanBinaryScenes
 
 
 
@@ -132,7 +132,9 @@ plotToCompare(nosoma_scenes[7][10,:,:], stretched_scenes[7][10,:,:], 'Nosoma', '
 
     # 3.2. CLeaning 
 
+cleaned_scenes = cleanBinaryScenes(nosoma_scenes, min_size=5000) #must work in 3D 
 
+plotToCompare(nosoma_scenes[7][10,:,:], cleaned_scenes[7][10,:,:], 'Nosoma', 'Cleaned')
 
 
 
