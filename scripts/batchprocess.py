@@ -26,7 +26,7 @@ from src.FileImport.PlottingImage import plotToCompare, plotImageHistogram
 from src.ImageProcessing.DenoisingFilters import applyGaussian, applyMedianFilter, applyContrastStretching
 from src.ImageProcessing.SubstractBackground import subtractBackgroundFromScenes
 #from src.ImageProcessing.SatoTubeness import applySatoTubeness 
-
+from src.ImageProcessing.Binarize import removeSomaFromAllScenes
 
 
 
@@ -123,9 +123,14 @@ stretched_scenes = applyContrastStretching(median_scenes, lower_percentile=1, up
 plotToCompare(subtracted_scenes[7][15,:,:], stretched_scenes[7][15,:,:], 'Substracted', 'Filter')
 
 
-# Step 3. Thresholding and binarisation (previously "soma removal")
+# Step 3. Thresholding and binarisation (previously "soma removal") + cleaning
+    # 3.1. Thresholding
 
+thresholds = 0.5
+nosoma_scenes = removeSomaFromAllScenes(stretched_scenes, thresholds)
+plotToCompare(nosoma_scenes[7][10,:,:], stretched_scenes[7][10,:,:], 'Nosoma', 'Stretched')
 
+    # 3.2. CLeaning 
 
 
 

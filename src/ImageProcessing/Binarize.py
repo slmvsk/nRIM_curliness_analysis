@@ -6,50 +6,15 @@ Created on Thu Jul 18 00:40:39 2024
 @author: tetianasalamovska
 """
 
-# thresholding = denoising! Otsu?  ####### make 8 bit before this step 
-##############################################
-
-# Operations like enhancing contrast or thresholding can be done as for 2D 
-# images where the context of adjacent slices isn’t important ? 
-# Segmentation must be done for scenes not for slices 
-
 import numpy as np
 from skimage.filters import threshold_multiotsu
 from skimage import img_as_float
 import matplotlib.pyplot as plt
 
-################## putting all above to the function again #######################
+# use this function below (manual one) for now for good segmentation 
 
-# use this function for now for good segmentation 
-
-def applyThresholds(image_stack, thresholds):
-    """
-    Apply given threshold values to segment a 3D image stack.
-    
-    Parameters:
-        image_stack (ndarray): A 3D numpy array representing the image stack.
-        thresholds (list): A list of threshold values to segment the image.
-    
-    Returns:
-        ndarray: A 3D numpy array of the segmented image stack.
-    """
-    # Initialize a segmented stack
-    segmented_stack = np.zeros_like(image_stack)
-    
-    # Apply thresholds to each slice
-    for i in range(image_stack.shape[0]):
-        img_float = img_as_float(image_stack[i, :, :])
-        segmented_stack[i, :, :] = np.digitize(img_float, bins=thresholds)
-    
-    return segmented_stack
-
-# Example usage
-thresholds = [0.25]  # Example thresholds
-segmented_stack = apply_thresholds(blurred_scenes[2], thresholds)
-plot_images(segmented_stack[15,:,:], blurred_scenes[2][15,:,:], 'th', 'blurr')
-
-
-def binarize_image_stack(image_stack, threshold):
+# for 1 stack (3D)
+def binarizeImage(image_stack, threshold):
     """
     Binarize a 3D image stack based on a given threshold value.
     
@@ -71,14 +36,11 @@ def binarize_image_stack(image_stack, threshold):
     return binarized_stack
 
 # Example usage
-threshold_value = 0.25  # Example threshold for binarization
-binarized_stack = binarize_image_stack(blurred_scenes[2], threshold_value)
-plot_images(binarized_stack[15, :, :], blurred_scenes[2][15, :, :], 'Binarized', 'Original')
+#threshold_value = 0.25  # Example threshold for binarization
+#binarized_stack = binarize_image_stack(blurred_scenes[2], threshold_value)
 
 
-
-
-#debugging step 
+# for all scenes 
 def removeSomaFromAllScenes(scenes, thresholds):
     """
     Iterate over all scenes in a file, apply the removeSomafromStack function to each scene,
@@ -103,7 +65,7 @@ def removeSomaFromAllScenes(scenes, thresholds):
         
         try:
             # Apply the removeSomafromStack function to the current scene
-            processed_scene = binarize_image_stack(scene, thresholds) #changed to manual temporary 
+            processed_scene = binarizeImage(scene, thresholds) #changed to manual temporary 
             processed_scenes.append(processed_scene)
             print(f"Processed scene {i+1} successfully added to the list.")
               
@@ -116,37 +78,12 @@ def removeSomaFromAllScenes(scenes, thresholds):
     return processed_scenes
 
 
-nosoma_scenes = removeSomaFromAllScenes(blurred_scenes, thresholds)
-print(f"Number of scenes processed and returned: {len(nosoma_scenes)}")
-
-plot_images(normalized_scenes[9][18,:,:], nosoma_scenes[9][18,:,:], 'Original', 'No soma')
-# fine enough 
-print(blurred_scenes[1].shape)
-
-
-
-# Optionally, inspect the first scene to ensure it's not empty
-if len(nosoma_scenes) > 0:
-    print(f"Shape of the first processed scene: {nosoma_scenes[0].shape}")
-else:
-    print("No scenes were processed.")
-    
-plot_images(binary_image[8,:,:], nosoma_scenes[9][8,:,:], 'Original', 'No soma')
-
+#nosoma_scenes = removeSomaFromAllScenes(blurred_scenes, thresholds)
+#print(f"Number of scenes processed and returned: {len(nosoma_scenes)}")
 
 
 
 # clean 
-
-
-
-
-
-
-
-
-import numpy as np
-from skimage.morphology import binary_closing, ball
 
 import numpy as np
 from skimage.morphology import binary_closing, ball
@@ -174,12 +111,11 @@ def apply_closing(image, radius=2):
 
 # Example usage:
 # Assuming 'scenes' is your list of 3D numpy arrays
-radius_value = 4  # Adjust the radius value as needed
-closed_scene = apply_closing(segmented_stack, radius=radius_value)
-plot_images(segmented_stack[17,:,:], closed_scene[17,:,:], 'th', 'closed')
+#radius_value = 4  # Adjust the radius value as needed
+#closed_scene = apply_closing(segmented_stack, radius=radius_value)
 
 
- import numpy as np
+import numpy as np
 from skimage.morphology import binary_opening, ball
 
 def apply_opening(image, radius=2):
@@ -203,9 +139,9 @@ def apply_opening(image, radius=2):
 
 # Example usage:
 # Assuming 'image' is your 3D binary numpy array
-radius_value = 3  # Adjust the radius value as needed
-opened_image = apply_opening(, radius=radius_value)
-plot_images(opened_image[10,:,:], cleaned_nosoma[17,:,:], 'clean', 'opened')
+#radius_value = 3  # Adjust the radius value as needed
+#opened_image = apply_opening(, radius=radius_value)
+#plot_images(opened_image[10,:,:], cleaned_nosoma[17,:,:], 'clean', 'opened')
 
 
 
@@ -265,10 +201,10 @@ def removeSomafromStack(image_stack, xy_resolution):
         image_stack_filtered[:, :, i][bg_mask[:, :, i]] = 0
 
     return image_stack_filtered
-nosoma_stack = removeSomafromStack(equalized_image, xy_resolution=1)
+#nosoma_stack = removeSomafromStack(equalized_image, xy_resolution=1)
 #img_filtered = median(normalized_scenes[8], ball(3))  # ball(2) provides a reasonable balance in 3D
 #nosoma_img_med = removeSomafromStack(img_filtered, xy_resolution=1)
-plot_images(normalized_scenes[9][18,:,:], nosoma_scenes[9][18,:,:], 'Original', 'No soma')
+#plot_images(normalized_scenes[9][18,:,:], nosoma_scenes[9][18,:,:], 'Original', 'No soma')
  
     
 
@@ -282,36 +218,6 @@ import matplotlib.pyplot as plt
 from skimage import data
 from skimage import color, morphology
 
-footprint = morphology.disk(2)
-res = morphology.white_tophat(nosoma_scenes[4][8,:,:], footprint)
-
-fig, ax = plt.subplots(ncols=3, figsize=(20, 8))
-ax[0].set_title('Original')
-ax[0].imshow(nosoma_scenes[4][8,:,:], cmap='gray')
-ax[1].set_title('White tophat')
-ax[1].imshow(res, cmap='gray')
-ax[2].set_title('Complementary')
-ax[2].imshow(nosoma_scenes[4][8,:,:] - res, cmap='gray')
-plt.show()
-# Display the original image
-plt.figure(figsize=(10, 10))  # Large display size
-plt.imshow(nosoma_scenes[4][8,:,:], cmap='gray')
-plt.title('Original')
-plt.axis('off')  # Hide the axes
-plt.show()
-# Display the white tophat transformed image
-plt.figure(figsize=(10, 10))  # Large display size
-plt.imshow(res, cmap='gray')
-plt.title('White Tophat')
-plt.axis('off')  # Hide the axes
-plt.show()
-# Display the complementary image
-complementary = nosoma_scenes[4][8,:,:] - res
-plt.figure(figsize=(10, 10))  # Large display size
-plt.imshow(complementary, cmap='gray')
-plt.title('Complementary')
-plt.axis('off')  # Hide the axes
-plt.show()
 
 # complementary is fine result but now i need to remove small objects literaly 
 
@@ -378,11 +284,11 @@ def remove_small_objects_3d(binary_image, min_size=50):
     return cleaned
 
 # Usage example
-cleaned_nosoma = remove_small_objects_3d(nosoma_scenes[7], min_size=1000)
+#cleaned_nosoma = remove_small_objects_3d(nosoma_scenes[7], min_size=1000)
 
 
 
-def process_scenes(scenes, min_size=50):
+def cleanBinaryScenes(scenes, min_size=50):
     """
     Apply small object removal to each 3D image stack in the scenes.
 
@@ -411,8 +317,8 @@ def process_scenes(scenes, min_size=50):
 
 # Example usage:
 # Assuming 'nosoma_scenes' is your list of 3D binary numpy arrays
-cleaned_scenes = process_scenes(nosoma_scenes, min_size=10000)
-plot_images(cleaned_scenes[7][18,:,:], nosoma_scenes[7][18,:,:], 'Processed', 'Original')
+#cleaned_scenes = process_scenes(nosoma_scenes, min_size=10000)
+#plot_images(cleaned_scenes[7][18,:,:], nosoma_scenes[7][18,:,:], 'Processed', 'Original')
 
 
 
@@ -422,55 +328,6 @@ plot_images(cleaned_scenes[7][18,:,:], nosoma_scenes[7][18,:,:], 'Processed', 'O
 
 
 
-
-
-
-plt.figure(figsize=(10, 10))  # Large display size
-plt.imshow(cleaned_nosoma[18,:,:], cmap='gray')
-plt.title('Cleaned Image')
-plt.axis('off')  # Hide the axes
-plt.show()
-
-cleaned_nosoma = remove_small_objects_3d(nosoma_scenes[4], min_size=1)
-
-plt.figure(figsize=(10, 10))  # Large display size
-plt.imshow(cleaned_nosoma[8,:,:], cmap='gray')
-plt.title('?')
-plt.axis('off')  # Hide the axes
-plt.show()
-
-
-import matplotlib.pyplot as plt
-from skimage import exposure, io
-from skimage.filters import threshold_otsu
-
-# Load an example image
-
-# Display the histogram of the image
-fig, ax = plt.subplots(1, 2, figsize=(12, 6))
-ax[0].imshow(normalized_scenes[4][8,:,:], cmap='gray')
-ax[0].set_title('Original Image')
-ax[0].axis('off')
-
-# Histogram and threshold line
-hist, bins_center = exposure.histogram(normalized_scenes[4][8,:,:])
-ax[1].plot(bins_center, hist, lw=2)
-ax[1].set_title('Histogram of Pixel Intensities')
-
-# Apply Otsu's method to find an optimal threshold
-thresh = threshold_otsu(normalized_scenes[4][8,:,:])
-ax[1].axvline(thresh, color='r', ls='--')
-
-ax[1].text(thresh+0.02, max(hist)/2, f'Threshold: {thresh}', color='red')
-
-# Apply threshold
-binary_image = image > thresh
-fig, ax2 = plt.subplots(figsize=(6, 6))
-ax2.imshow(binary_image, cmap='gray')
-ax2.set_title('Binary Image After Thresholding')
-ax2.axis('off')
-
-plt.show()
 
 
 
@@ -505,7 +362,7 @@ plt.show()
 # `xy_resolution` is a parameter that you might use to adjust algorithm behavior based on image resolution
 
 
-plot_images(normalized_scenes[5][8,:,:], nosoma_img[8,:,:], 'Original', 'No soma')
+#plot_images(normalized_scenes[5][8,:,:], nosoma_img[8,:,:], 'Original', 'No soma')
 
 
 
@@ -519,8 +376,8 @@ from skimage import restoration, exposure
 
 
 # Applying contrast stretching
-p2, p98 = np.percentile(nosoma_img, (0.5, 99.5))
-contrast_stretched = exposure.rescale_intensity(nosoma_img, in_range=(p2, p98))
+#p2, p98 = np.percentile(nosoma_img, (0.5, 99.5))
+#contrast_stretched = exposure.rescale_intensity(nosoma_img, in_range=(p2, p98))
 
 
 from mayavi import mlab
@@ -537,5 +394,5 @@ def visualize_3d_mayavi(image):
     mlab.show()
 
 # Example usage
-visualize_3d_mayavi(skeletonized)
+#visualize_3d_mayavi(skeletonized)
 
