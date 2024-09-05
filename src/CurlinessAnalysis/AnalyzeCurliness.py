@@ -72,7 +72,7 @@ def analyzeCurliness(image):
     median_curliness = np.median(curliness)
     sem_curliness = std_curliness / np.sqrt(len(longest_path_length))
 
-    return properties, curliness, median_curliness, mean_straightness, mean_curliness, sem_curliness, longest_path_length.tolist(), max_dendritic_reach.tolist()
+    return curliness, median_curliness, mean_straightness, mean_curliness, sem_curliness, longest_path_length.tolist(), max_dendritic_reach.tolist()
 
 
 ###########
