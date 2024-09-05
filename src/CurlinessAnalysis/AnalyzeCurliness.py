@@ -75,11 +75,10 @@ def analyzeCurliness(image):
     return curliness, median_curliness, mean_straightness, mean_curliness, sem_curliness, longest_path_length.tolist(), max_dendritic_reach.tolist()
 
 
-###########
-# 3d 
-from skimage.measure import label, regionprops
-import numpy as np
 
+
+
+# 3d 
 def analyze_dendrite_curliness_3d(image):
     # Label the 3D skeleton
     labeled_skeleton = label(image)
@@ -129,48 +128,25 @@ def analyze_dendrite_curliness_3d(image):
 
 
 # Example usage
-curliness, median_curliness, mean_straightness, mean_curliness, sem_curliness, branch_distances, branch_lengths = analyze_dendrite_curliness_3d(cleaned_skeleton)
+#curliness, median_curliness, mean_straightness, mean_curliness, sem_curliness, branch_distances, branch_lengths = analyze_dendrite_curliness_3d(cleaned_skeleton)
 # Retrieve the image data for scene index 2
 # We assume that 'file_name' or another identifier may be needed if there are multiple entries for the same scene index.
 # Here, I'm directly accessing by index if the scene index is used as a row index. If not, you'd filter by conditions.
-image_data = dataframe_results[dataframe_results['scene_index'] == 10]['cleaned_scene'].iloc[0]
+#image_data = dataframe_results[dataframe_results['scene_index'] == 10]['cleaned_scene'].iloc[0]
 
 
 # Now apply the analyze function
-properties, curliness, median_curliness, mean_straightness, mean_curliness, sem_curliness, longest_path_length, max_dendritic_reach = analyze_dendrite_curliness(image_data)
-print("Mean Straightness:", mean_straightness)
-print("Mean Curliness:", median_curliness)
-print("Longest Path Length:", longest_path_length)
-print("Maximum Dendritic Reach:", max_dendritic_reach)
+#properties, curliness, median_curliness, mean_straightness, mean_curliness, sem_curliness, longest_path_length, max_dendritic_reach = analyze_dendrite_curliness(image_data)
+#print("Mean Straightness:", mean_straightness)
+#print("Mean Curliness:", median_curliness)
+#print("Longest Path Length:", longest_path_length)
+#print("Maximum Dendritic Reach:", max_dendritic_reach)
 
 
-# Plotting longest_path_length
-plt.figure(figsize=(6, 4))
-plt.hist(curliness, bins=100, color='blue', alpha=0.7)
-plt.title('Histogram of longest_path_length')
-plt.xlabel('Length')
-plt.ylabel('Frequency')
-plt.xlim([0, 1])  # Set x-axis limits
-plt.ylim([0, 6])  # Optionally adjust the y-axis to change how density appears
-plt.show()
-
-# Plotting max_dendritic_reach
-plt.figure(figsize=(6, 4))
-plt.hist(branch_distances, bins=10000, color='green', alpha=0.7)
-plt.title('Histogram of max_dendritic_reach')
-plt.xlabel('max_reach')
-plt.ylabel('Frequency')
-plt.xlim([0, 300])  # Set x-axis limits for example 
-plt.ylim([0, 50])  # Optionally adjust the y-axis to change how density appears
-plt.show()
-
-# Plotting mean curliness across groups 
 
 ############################# dataframe is an input 
 
-import numpy as np
 import pandas as pd
-from skimage import measure
 
 def analyze_dendrite_curliness_batch(dataframe):
     # Initialize lists to hold results
@@ -221,9 +197,9 @@ def analyze_dendrite_curliness_batch(dataframe):
     return results_df
 
 # Assuming 'dataframe_results' is your DataFrame that contains all the processed images.
-curliness_df = analyze_dendrite_curliness_batch(dataframe_results)
-print(curliness_df.head())
-curliness_df.to_csv('/Users/tetianasalamovska/Desktop/zeis/curliness_df.csv', index=False)
+#curliness_df = analyze_dendrite_curliness_batch(dataframe_results)
+#print(curliness_df.head())
+#curliness_df.to_csv('/Users/tetianasalamovska/Desktop/zeis/curliness_df.csv', index=False)
 
 ############# COLOR CODE
 # label skeletons to see how it identifies dendrites 
@@ -231,7 +207,6 @@ curliness_df.to_csv('/Users/tetianasalamovska/Desktop/zeis/curliness_df.csv', in
 
 import matplotlib.pyplot as plt
 from matplotlib.colors import Normalize
-import numpy as np
 from skimage import color
 
 def visualize_and_analyze_branches(image, curliness, longest_path_length, max_dendritic_reach):
@@ -287,7 +262,7 @@ def visualize_and_analyze_branches(image, curliness, longest_path_length, max_de
     
     
 # Example assuming you have an 'image_data' which is a binary skeletonized image
-visualize_and_analyze_branches(image_data, curliness, longest_path_length, max_dendritic_reach)
+#visualize_and_analyze_branches(image_data, curliness, longest_path_length, max_dendritic_reach)
 
 
 
@@ -297,11 +272,8 @@ visualize_and_analyze_branches(image_data, curliness, longest_path_length, max_d
 
 
 ############
-import matplotlib.pyplot as plt
 from matplotlib.colors import Normalize, LinearSegmentedColormap
 from matplotlib.cm import ScalarMappable  # Correct import for ScalarMappable
-import numpy as np
-from skimage import measure, color
 
 def visualize_and_analyze_curliness(image, curliness):
     # Label the skeleton
@@ -396,7 +368,7 @@ def analyze_curliness_3d(image, curliness):
 
 
 # Example usage:
-labeled_skeleton = analyze_curliness_3d(cleaned_skeleton, curliness)
+#labeled_skeleton = analyze_curliness_3d(cleaned_skeleton, curliness)
 
 
 #90% of skeleton is recognised as 1 branch, the function is not working correctly then
@@ -406,7 +378,7 @@ labeled_skeleton = analyze_curliness_3d(cleaned_skeleton, curliness)
 # which involves representing the skeleton as a graph where junctions 
 # are nodes and paths between them are edges !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-import numpy as np
+
 import networkx as netx
 
 def skeleton_to_graph(skeleton):
@@ -440,51 +412,19 @@ def plot_graph(G):
     plt.gca().set_aspect('equal', adjustable='datalim')
     plt.show()
 
-plot_graph(G)
+#plot_graph(G)
 
 # Convert skeleton to graph
-G = skeleton_to_graph(image_data)
+#G = skeleton_to_graph(image_data)
 
 
 # Plot graph to validate its accuracy
-plot_graph(G)
+#plot_graph(G)
 
 
 # Print node positions to validate
-for node, data in G.nodes(data=True):
-    print(f"Node {node} has position {data['pos']}")
-
-
-
-
-
-import numpy as np
-import networkx as netx
-from skimage.morphology import skeletonize
-from skimage.io import imread
-
-
-def build_basic_graph(skeleton):
-    G = netx.Graph()
-    rows, cols = np.where(skeleton > 0)  # Assuming skeleton is a binary image
-
-    # First, add all nodes with their positions
-    for y, x in zip(rows, cols):
-        G.add_node((y, x), pos=(x, y))  # Map (y, x) to (x, y) for visualization purposes
-
-    # Now add edges based on 8-connectivity
-    for y, x in zip(rows, cols):
-        # Consider 8 neighboring pixels
-        for dy, dx in [(-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (-1, 1), (1, -1), (1, 1)]:
-            ny, nx = y + dy, x + dx
-            if 0 <= ny < skeleton.shape[0] and 0 <= nx < skeleton.shape[1] and skeleton[ny, nx]:
-                if (ny, nx) in G.nodes:
-                    # Only add an edge if the neighbor is also a node
-                    G.add_edge((y, x), (ny, nx))
-
-    return G
-
-G = build_basic_graph(image_data)
+#for node, data in G.nodes(data=True):
+    #print(f"Node {node} has position {data['pos']}")
 
 
 
@@ -503,27 +443,6 @@ G = build_basic_graph(image_data)
 
 
 
-
-
-
-# Example usage:
-# Load your binary image data
-# image_data = io.imread('path_to_your_image.png', as_gray=True)
-# image_data = img_as_bool(image_data)  # Ensure it is a binary image suitable for skeletonization
-results = analyze_dendrite_curliness(image_data)
-print(results)
-
-curliness, median_curliness, mean_straightness, mean_curliness, sem_curliness, branch_distances, branch_lengths = analyze_dendrite_curliness(image_data)
-
-
-
-
-
-
-
-
-
-import matplotlib.pyplot as plt
 from matplotlib.colors import Normalize
 from matplotlib.cm import ScalarMappable
 from skimage.color import gray2rgb
@@ -555,21 +474,8 @@ def plot_curliness_results(skeleton, curliness):
     plt.colorbar(ScalarMappable(norm=norm, cmap=cmap), label='Curliness')
     plt.show()
 # Assuming `image_data` and `results['curliness']` are prepared
-plot_curliness_results(image_data, results['pixel_curliness'])
+#plot_curliness_results(image_data, results['pixel_curliness'])
 
-
-
-
-
-
-
-
-
-
-########### Box counting method is the best measure (fractality)
-# look into curliness (how it identifies branches......)
-# try lkshm code with distance matrix 
- 
 
 
 

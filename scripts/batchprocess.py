@@ -29,7 +29,7 @@ from src.ImageProcessing.SubstractBackground import subtractBackgroundFromScenes
 from src.ImageProcessing.Binarize import removeSomaFromAllScenes, cleanBinaryScenes
 from src.ImageProcessing.Skeletonize import skeletonizeScenes, pruneScenes, zProjectScenes, cleanMipSkeleton
 from src.ImageProcessing.Morphology import applyErosionToScenes, applyDilationToScenes
-
+from src.CurlinessAnalysis.AnalyzeCurliness import analyzeCurliness
 
 
 
@@ -222,6 +222,43 @@ plotToCompare(pruned_scenes[3], scenes[3][10,:,:], 'cleaned skeletons', 'Pruned'
 
 
 
+# Plotting longest_path_length
+plt.figure(figsize=(6, 4))
+plt.hist(curliness, bins=100, color='blue', alpha=0.7)
+plt.title('Histogram of longest_path_length')
+plt.xlabel('Length')
+plt.ylabel('Frequency')
+plt.xlim([0, 1])  # Set x-axis limits
+plt.ylim([0, 6])  # Optionally adjust the y-axis to change how density appears
+plt.show()
+
+# Plotting max_dendritic_reach
+plt.figure(figsize=(6, 4))
+plt.hist(branch_distances, bins=10000, color='green', alpha=0.7)
+plt.title('Histogram of max_dendritic_reach')
+plt.xlabel('max_reach')
+plt.ylabel('Frequency')
+plt.xlim([0, 300])  # Set x-axis limits for example 
+plt.ylim([0, 50])  # Optionally adjust the y-axis to change how density appears
+plt.show()
+
+# Plotting mean curliness across groups 
+
+
+# Example usage
+#curliness, median_curliness, mean_straightness, mean_curliness, sem_curliness, branch_distances, branch_lengths = analyze_dendrite_curliness_3d(cleaned_skeleton)
+# Retrieve the image data for scene index 2
+# We assume that 'file_name' or another identifier may be needed if there are multiple entries for the same scene index.
+# Here, I'm directly accessing by index if the scene index is used as a row index. If not, you'd filter by conditions.
+#image_data = dataframe_results[dataframe_results['scene_index'] == 10]['cleaned_scene'].iloc[0]
+
+
+# Now apply the analyze function
+#properties, curliness, median_curliness, mean_straightness, mean_curliness, sem_curliness, longest_path_length, max_dendritic_reach = analyze_dendrite_curliness(image_data)
+#print("Mean Straightness:", mean_straightness)
+#print("Mean Curliness:", median_curliness)
+#print("Longest Path Length:", longest_path_length)
+#print("Maximum Dendritic Reach:", max_dendritic_reach)
 
 
 
