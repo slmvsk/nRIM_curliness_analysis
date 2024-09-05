@@ -171,7 +171,7 @@ dilated_scenes = applyDilationToScenes(eroded_scenes, iterations=3, structure=np
 plotToCompare(dilated_scenes[6][10,:,:], cleaned_scenes[6][10,:,:], 'dilated scenes', 'before erosion')
 
 
-visualize3dMayavi(dilated_scenes[6])
+visualize3dMayavi(dilated_scenes[7])
 
 ###### maybe closing? 
 
@@ -189,7 +189,7 @@ visualize3dMayavi(dilated_scenes[6])
 skeletonized_scenes = skeletonizeScenes(dilated_scenes) # So far so good 
 
 
-visualize3dMayavi(skeletonized_scenes[6]) # you can save snapshot in this window 
+visualize3dMayavi(skeletonized_scenes[7]) # you can save snapshot in this window 
 
     # 4.2. Skeleton pruning and cleaning 
     
@@ -203,7 +203,7 @@ plotToCompare(dilated_scenes[6][10,:,:], z_projected_scenes[6], 'dilated scenes'
 
 # z_projection cleaning + pruning 
 
-cleaned_2d_skeletons = cleanMipSkeleton(z_projected_scenes, length_percentiles=(20, 99))
+cleaned_2d_skeletons = cleanMipSkeleton(z_projected_scenes, min_length=100, max_length=30000)
 # clean function work not well 
 
 plotToCompare(cleaned_2d_skeletons[6], z_projected_scenes[6], 'cleaned skeletons', 'MIP')
@@ -213,8 +213,11 @@ plotToCompare(cleaned_2d_skeletons[7], stretched_scenes[7][10,:,:], 'cleaned ske
 #just increase size if you don't want side branches at all 
 pruned_scenes, segmented_scenes, segment_objects_list = pruneScenes(cleaned_2d_skeletons, size=30, mask=None)
 
-plotToCompare(pruned_scenes[2], scenes[2][10,:,:], 'cleaned skeletons', 'Pruned')
+plotToCompare(pruned_scenes[3], scenes[3][10,:,:], 'cleaned skeletons', 'Pruned')
 
+
+###################################################
+# Analyze Curliness 
 
 
 

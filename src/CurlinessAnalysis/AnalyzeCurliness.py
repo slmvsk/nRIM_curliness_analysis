@@ -7,44 +7,32 @@ Created on Mon Jul 22 16:16:21 2024
  
 """
 
-# cutting too large values (outliers) 
+# Input image is Z-projection of skeletons 
 
-# Input image is max intensity Z-projection of skeletons 
-# mip_image
-
-
-# measurements: fiber length density? francal nature(dF - fractal dimensions (berween 1 and 2
-# ))
 
 # Straightness = max. Dendritic reach / longest single path length 
 # max. dendritic reach is the shortest path between the start and end points of the branch
 # longest single path length is  the actual path length measured along the branch, 
-# which will be longer than the branch distance for any curved path! 
-
+# which will be longer than the branch distance for any curved path
 # Curliness will be 1 - straightness that implies that a perfectly straight branch (for ex. 15/15 = 1)
 # will have curliness equal 0 (1-1 = 0). More curved branches have higher values approaching 1
 
-# clean skeleton before applying or you get minus curliness because your shortest path between the start and end points of the branch
-#is too long and you get straightness more than 1 in some cases. They are just connected and 
-# algorithm sees them as 1 branch 
 
 import numpy as np
 import matplotlib.pyplot as plt
 from skimage import measure, io, morphology
 from scipy.ndimage import distance_transform_edt
-import numpy as np
 from skimage import measure
 
-#break points 
+# NOTES: break points 
 # clean skeleton, keep this method
 # Yoe did regionprop for 3D skeletons 
 # min branch length as par
-# curliness
+# curliness how exactly it looks 
 # color by id 
-# change lim values for distyributions 
+# change lim values for distributions 
 # maybe do more strict thresholding if 3d regionprop doestnt work
-# 
-# if the image before skeletonizing have loops (tubmess)
+# if the image before skeletonizing have loops remove
 
 
 def analyze_dendrite_curliness(image):
