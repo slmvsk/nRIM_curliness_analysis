@@ -8,6 +8,8 @@ Created on Sun Jul  7 10:53:21 2024
 
 import matplotlib.pyplot as plt
 import numpy as np
+from mayavi import mlab
+
    
 def plotComparison(image1, image2, title):
     """
@@ -100,3 +102,16 @@ def plotImageHistogram(image_stack, bins=256, pixel_range=(0, 65535), title='Pix
     plt.show()
     
 #plotImageHistogram(scenes[6], bins=256, pixel_range=(0, 65535), title='Pixel Intensity Histogram for Original Image')
+
+def visualize3dMayavi(image):
+    """
+    Visualize a 3D image using Mayavi.
+
+    Parameters:
+        image (numpy.ndarray): The 3D image data.
+    """
+    mlab.contour3d(image, contours=10, opacity=0.5)
+    mlab.show()
+
+# Example usage
+#visualize_3d_mayavi(skeletonized)

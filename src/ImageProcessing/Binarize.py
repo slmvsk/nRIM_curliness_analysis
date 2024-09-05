@@ -380,19 +380,4 @@ from skimage import restoration, exposure
 #contrast_stretched = exposure.rescale_intensity(nosoma_img, in_range=(p2, p98))
 
 
-from mayavi import mlab
-import numpy as np
-
-def visualize_3d_mayavi(image):
-    """
-    Visualize a 3D image using Mayavi.
-
-    Parameters:
-        image (numpy.ndarray): The 3D image data.
-    """
-    mlab.contour3d(image, contours=10, opacity=0.5)
-    mlab.show()
-
-# Example usage
-#visualize_3d_mayavi(skeletonized)
 
