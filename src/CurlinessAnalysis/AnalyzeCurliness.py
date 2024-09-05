@@ -75,6 +75,39 @@ def analyzeCurliness(image):
     return curliness, median_curliness, mean_straightness, mean_curliness, sem_curliness, longest_path_length.tolist(), max_dendritic_reach.tolist()
 
 
+def analyzeCurlinessBatch(scenes_2d):
+    """
+    Analyze the curliness and other metrics for a list of 2D binary skeletonized images (scenes).
+
+    Args:
+    scenes_2d (list): A list of 2D binary skeletonized images.
+
+    Returns:
+    list: A list of results for each scene, containing curliness, median curliness, mean straightness,
+          mean curliness, SEM of curliness, list of longest path lengths, and list of max dendritic reach.
+    """
+    all_results = []
+    
+    for idx, scene in enumerate(scenes_2d):
+        print(f"Processing scene {idx+1}/{len(scenes_2d)}")
+        
+        # Analyze curliness for the current scene
+        result = analyzeCurliness(scene)
+        
+        # Append the result to the list
+        all_results.append(result)
+    
+    return all_results
+
+
+
+
+
+
+
+
+
+
 
 
 
