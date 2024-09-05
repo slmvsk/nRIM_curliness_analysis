@@ -144,7 +144,6 @@ plotToCompare(nosoma_scenes[7][10,:,:], stretched_scenes[7][10,:,:], 'Nosoma', '
 
 
     # 3.2. CLeaning 
-#erosion, dilation, opening, closing? 
 cleaned_scenes = cleanBinaryScenes(nosoma_scenes, min_size=2000) #must work in 3D 
 
 plotToCompare(nosoma_scenes[7][10,:,:], cleaned_scenes[7][10,:,:], 'Nosoma', 'Cleaned')
@@ -152,6 +151,12 @@ plotToCompare(nosoma_scenes[7][10,:,:], cleaned_scenes[7][10,:,:], 'Nosoma', 'Cl
 
 # Save as tiff or visualize in 3D 
 visualize3dMayavi(cleaned_scenes[7])
+
+    # 3.3. erosion, dilation, opening, closing? 
+
+
+
+
 
 
 
