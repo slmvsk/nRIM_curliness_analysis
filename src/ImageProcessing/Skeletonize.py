@@ -75,56 +75,6 @@ def skeletonizeScenes(scenes):
 
 
 
-# Cleaning skeleton in 3D (doesnt work)
-
-def cleanSkeleton3d(skeleton_image, min_length=10):
-    """
-    Measure and remove branches shorter than a specified length in a 3D skeletonized image.
-
-    Parameters:
-        skeleton_image (numpy.ndarray): A 3D binary numpy array representing the skeleton (values 0 and 1).
-        min_length (float): The minimum length of branches to keep.
-
-    Returns:
-        numpy.ndarray: A 3D binary image with small branches removed.
-    """
-    # Label the skeletonized image to identify connected components (branches)
-    labeled_skeleton = label(skeleton_image, connectivity=3)
-    props = regionprops(labeled_skeleton)
-
-    # Create an empty array to hold the cleaned skeleton
-    cleaned_skeleton = np.zeros_like(skeleton_image)
-
-    # Iterate over each labeled component (branch)
-    for prop in props:
-        coords = prop.coords
-        if len(coords) < 2:
-            continue  # Skip if the branch has fewer than 2 pixels
-        
-        # Measure the branch length
-        branch_length = 0
-        for i in range(len(coords) - 1):
-            branch_length += euclidean(coords[i], coords[i + 1])
-        
-        # Keep the branch if it's longer than the minimum length
-        if branch_length >= min_length:
-            for coord in coords:
-                cleaned_skeleton[tuple(coord)] = 1
-    
-    return  cleaned_skeleton
-
-
-
-
-
-
-
-
-
-
-
-
-
 #############################################
 # z-projection to visualize or analyze in 2D 
 
@@ -182,47 +132,20 @@ def zProjectScenes(skeletonized_scenes):
 ##################################################
 # cleaning, batch for MIP images (2D)
 
-def measure_branch_lengths_batch(scenes_2d):
+
+
+def cleanMipSkeleton(scenes_2d, min_length=10, max_length=100):
     """
-    Measure the branch lengths for a list of 2D binary skeletonized images.
-
-    Args:
-    scenes_2d (list): A list of 2D binary images of skeletonized structures.
-
-    Returns:
-    list: A list of lists, where each sublist contains the lengths of branches in the corresponding scene.
-    """
-    all_lengths = []
-    for idx, scene in enumerate(scenes_2d):
-        lengths = []
-        skeleton = scene > 0
-        labeled_skeleton = label(skeleton)
-        props = regionprops(labeled_skeleton)
-
-        for prop in props:
-            coords = prop.coords
-            if len(coords) < 2:
-                continue  # Skip if the branch has fewer than 2 pixels
-            branch_length = 0
-            for i in range(len(coords) - 1):
-                branch_length += euclidean(coords[i], coords[i + 1])
-            lengths.append(branch_length)
-        
-        all_lengths.append(lengths)
-        print(f"Processed scene {idx+1}/{len(scenes_2d)}: {len(lengths)} branches measured")
+    Clean a list of 2D binary skeleton images by removing branches shorter than `min_length` 
+    or longer than `max_length`.
     
-    return all_lengths
-
-def cleanMipSkeleton(scenes_2d, length_percentiles=(5, 95)):
-    """
-    Clean a list of 2D binary skeleton images by removing small or excessively large branches based on dynamic length thresholds.
-
     Args:
-    scenes_2d (list): A list of 2D binary images of skeletonized structures.
-    length_percentiles (tuple): Percentiles to determine the min and max branch lengths to keep (default is (5, 95)).
+        scenes_2d (list): A list of 2D binary images of skeletonized structures.
+        min_length (float): Minimum branch length to keep.
+        max_length (float): Maximum branch length to keep.
 
     Returns:
-    list: A list of cleaned skeleton images with filtered branches.
+        list: A list of cleaned skeleton images with filtered branches.
     """
     cleaned_scenes = []
     
@@ -236,24 +159,6 @@ def cleanMipSkeleton(scenes_2d, length_percentiles=(5, 95)):
         # Measure the properties of the labeled regions
         props = regionprops(labeled_skeleton)
         
-        lengths = []
-        for prop in props:
-            coords = prop.coords
-            branch_length = 0
-            for i in range(len(coords) - 1):
-                branch_length += euclidean(coords[i], coords[i + 1])
-            lengths.append(branch_length)
-        
-        if len(lengths) > 0:
-            # Set dynamic min and max lengths based on percentiles
-            min_length = np.percentile(lengths, length_percentiles[0])
-            max_length = np.percentile(lengths, length_percentiles[1])
-        else:
-            min_length = 0
-            max_length = float('inf')
-        
-        print(f"Scene {idx+1} - Min Length: {min_length:.2f}, Max Length: {max_length:.2f}")
-        
         # Create a new cleaned skeleton image
         cleaned_skeleton = np.zeros_like(binary_image)
         
@@ -263,13 +168,13 @@ def cleanMipSkeleton(scenes_2d, length_percentiles=(5, 95)):
             for i in range(len(coords) - 1):
                 branch_length += euclidean(coords[i], coords[i + 1])
             
-            # Keep branches that meet the dynamic length criteria
+            # Keep branches that meet the specified length criteria
             if min_length <= branch_length <= max_length:
                 for coord in coords:
                     cleaned_skeleton[coord[0], coord[1]] = 1  # Set pixel to 1 to keep the branch
         
         cleaned_scenes.append(cleaned_skeleton)
-        print(f"Processed scene {idx+1}/{len(scenes_2d)}: Skeleton cleaned")
+        print(f"Processed scene {idx+1}/{len(scenes_2d)}: Skeleton cleaned, {len(props)} branches processed")
     
     return cleaned_scenes
 
@@ -392,21 +297,7 @@ def pruneScenes(scenes, size=0, mask=None):
     return pruned_scenes, segmented_scenes, segment_objects_list
 
 # Example usage:
-# scenes = [np.random.rand(512, 512) for _ in range(5)]  # Replace with actual 2D skeletonized images
-# pruned_scenes, segmented_scenes, segment_objects_list = apply_prune_to_all_scenes(scenes, size=50, mask=None)
-
-
-
-
-
-
-
-
-
-
-
-
-
+# pruned_scenes, segmented_scenes, segment_objects_list = pruneScenes(scenes, size=50, mask=None)
 
 
 

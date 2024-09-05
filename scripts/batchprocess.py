@@ -183,12 +183,6 @@ visualize3dMayavi(dilated_scenes[6])
 
 
 
-
-
-
-
-
-
 # Step 4. Skeletonization 
 
     # 4.1. Skeletonization itself 
@@ -209,12 +203,17 @@ plotToCompare(dilated_scenes[6][10,:,:], z_projected_scenes[6], 'dilated scenes'
 
 # z_projection cleaning + pruning 
 
-cleaned_2d_skeletons = cleanMipSkeleton(z_projected_scenes, length_percentiles=(50, 100))
+cleaned_2d_skeletons = cleanMipSkeleton(z_projected_scenes, length_percentiles=(20, 99))
+# clean function work not well 
 
 plotToCompare(cleaned_2d_skeletons[6], z_projected_scenes[6], 'cleaned skeletons', 'MIP')
-plotToCompare(cleaned_2d_skeletons[6], stretched_scenes[6][10,:,:], 'cleaned skeletons', 'original')
+plotToCompare(cleaned_2d_skeletons[7], stretched_scenes[7][10,:,:], 'cleaned skeletons', 'original')
 
-pruned_scenes = pruneScenes
+
+#just increase size if you don't want side branches at all 
+pruned_scenes, segmented_scenes, segment_objects_list = pruneScenes(cleaned_2d_skeletons, size=30, mask=None)
+
+plotToCompare(pruned_scenes[2], scenes[2][10,:,:], 'cleaned skeletons', 'Pruned')
 
 
 
