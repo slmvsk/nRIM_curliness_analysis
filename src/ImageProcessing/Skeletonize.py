@@ -18,13 +18,16 @@ import napari
 from napari.utils import nbscreenshot
 import pyclesperanto_prototype as cle
 
+import numpy as np
+from skimage.morphology import skeletonize_3d
+from skimage import img_as_bool
 
-#########################################################
-#skeletonize (and project like in fiji)
+
+# skeletonize 
 from skimage.morphology import skeletonize_3d
 from skimage import img_as_ubyte
 
-def skeletonize_image(image):
+def skeletonizeImage(image):
     """
     Apply skeletonization to a 3D binary image.
     
@@ -42,17 +45,8 @@ def skeletonize_image(image):
     skeleton = skeletonize_3d(image)
     return skeleton
 
-# Example usage:
-# Assume `image_3d` is your 3D numpy array that's already a binary image
-#skeletonized = skeletonize_image(cleaned_nosoma)
 
-#plot_images(blurred_result[8,:,:], skeletonized[8,:,:], 'Blurred result Slice', 'Skeletonized')
-#print(skeletonized.shape)
-#save_as_tiff(skeletonized, 'skeletonized.tif')
-#save_as_tiff(scenes[2], 'scenes_2.tif')
-
-
-def skeletonize_scenes(scenes):
+def skeletonizeScenes(scenes):
     """
     Process a list of 3D scenes: binarize, skeletonize, and release memory after processing each scene.
     
@@ -83,107 +77,11 @@ def skeletonize_scenes(scenes):
     
     return processed_scenes
 
-# Example usage:
-#skeletonized_scenes = skeletonize_scenes(tubeness_scenes)
-
-#plot_images(skeletonized_scenes[5][8,:,:], nosoma_scenes[5][8,:,:], 'Original', 'No Somata')
 
 
+# z - projection
 
-
-
-
-
-import numpy as np
-from skimage.morphology import skeletonize_3d
-from skimage import img_as_bool
-
-def preprocess_image(image):
-    """
-    Preprocess the image by binarizing it using Otsu's thresholding to prepare for skeletonization.
-    
-    Args:
-    image (numpy.ndarray): The input 3D image.
-    
-    Returns:
-    numpy.ndarray: The binary image where the structures are 1's and the background is 0's.
-    """
-    # Apply Otsu's thresholding to find the optimal threshold
-    otsu_thresh = threshold_otsu(image)
-    
-    # Binarize the image based on the threshold
-    binary_image = image > otsu_thresh
-    
-    # Convert to uint8 format (0s and 1s)
-    binary_image = img_as_ubyte(binary_image)
-    
-    return binary_image
-
-def skeletonize_image(image):
-    """
-    Apply skeletonization to a 3D binary image.
-    
-    Args:
-    image (numpy.ndarray): A 3D binary image where the objects are 1's and the background is 0's.
-    
-    Returns:
-    numpy.ndarray: A 3D binary image containing the skeleton of the original image.
-    """
-    binary_image = preprocess_image(image)  # Ensure proper binarization
-    skeleton = skeletonize_3d(binary_image) # Apply skeletonization
-    # Ensure the skeleton is binary (0 and 1)
-    #skeleton = (skeleton > 0).astype(np.uint8)
-    return skeleton
-
-def process_scenes_for_skeletonization(scenes):
-    """
-    Process a list of 3D scenes: preprocess (binarize), skeletonize, and release memory after processing each scene.
-    
-    Args:
-    scenes (list of numpy.ndarray): A list of 3D images where each image is a scene.
-    
-    Returns:
-    list of numpy.ndarray: A list of 3D binary skeletonized images.
-    """
-    processed_scenes = []
-    
-    for i, scene in enumerate(scenes):
-        print(f"Processing scene {i+1}/{len(scenes)}")
-        
-        try:
-            # Preprocess and skeletonize the scene
-            skeleton = skeletonize_image(scene)
-            processed_scenes.append(skeleton)
-            
-            # Release memory
-            del scene, skeleton
-            gc.collect()
-        
-        except Exception as e:
-            print(f"Error processing scene {i+1}: {e}")
-            continue
-    
-    return processed_scenes
-
-# Example usage:
-#skeletonized_scenes = process_scenes_for_skeletonization(tubeness_scenes)
-#plot_images(tubeness_scenes[5][8,:,:], skeletonized_scenes[5][8,:,:], 'Tubeness', 'Skeleton')
-
-
-#binary_image = preprocess_image(tubeness_scenes[5])
-
-
-################################
-# tune parameters so the skeleton will be more accurate (some of the very low intensity or SMALL branches are not skeletonized)
-# and clean skeleton afterwards + do labeling
-################################
-
-# validation of skeletonization 
-# ..................
-
-# max intensity z - projection
-
-def max_intensity_z_projection(image_3d):
+def Zprojection(image_3d):
     """
     Create a maximum intensity projection (MIP) of a 3D binary image along the z-axis.
     
