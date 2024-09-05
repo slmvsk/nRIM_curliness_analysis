@@ -35,7 +35,7 @@ from skimage import measure
 # if the image before skeletonizing have loops remove
 
 
-def analyze_dendrite_curliness(image):
+def analyzeCurliness(image):
     # Label the skeleton
     labeled_skeleton = measure.label(image)
     properties = measure.regionprops(labeled_skeleton) # give parameters 
