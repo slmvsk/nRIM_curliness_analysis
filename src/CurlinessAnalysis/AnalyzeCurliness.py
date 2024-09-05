@@ -80,6 +80,8 @@ def analyzeCurliness(image):
 # has loops or inaccuracies in labeling the structure.
 
 
+#!!!!!!!!!!!!! not always length is larger than shortest path
+
 
 def analyzeCurlinessBatch(scenes_2d):
     """

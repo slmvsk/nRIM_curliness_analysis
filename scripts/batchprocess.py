@@ -222,11 +222,11 @@ plotToCompare(pruned_scenes[3], scenes[3][10,:,:], 'cleaned skeletons', 'Pruned'
 ###################################################
 # Analyze Curliness 
 
-results = analyzeCurlinessBatch(pruned_scenes)
+results = analyzeCurlinessBatch(pruned_scenes) # fix curliness function 
 
 # Example of accessing curliness for the first scene (index 0)
 
-scene_index = 7  # Choose the scene you want to access
+scene_index = 9  # Choose the scene you want to access
 
 # Access the curliness, median curliness, mean straightness, etc. for the first scene
 curliness = results[scene_index][0]
