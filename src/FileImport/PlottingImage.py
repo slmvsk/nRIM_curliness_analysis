@@ -110,6 +110,8 @@ def visualize3dMayavi(image):
     Parameters:
         image (numpy.ndarray): The 3D image data.
     """
+    if image.dtype == bool:
+        image = image.astype(np.int8)
     mlab.contour3d(image, contours=10, opacity=0.5)
     mlab.show()
 

@@ -22,12 +22,11 @@ from src.FileImport.DesctiptorsBasedFileSearch import getMatchingFilesList
 #from src.FileImport.BatchProcessing import 
 from src.FileImport.ReadZeissStacks import readCziFile
 from src.ImageProcessing.NormilizeIntensity import normalizeScenes
-from src.FileImport.PlottingImage import plotToCompare, plotImageHistogram
+from src.FileImport.PlottingImage import plotToCompare, plotImageHistogram, visualize3dMayavi
 from src.ImageProcessing.DenoisingFilters import applyGaussian, applyMedianFilter, applyContrastStretching
 from src.ImageProcessing.SubstractBackground import subtractBackgroundFromScenes
 #from src.ImageProcessing.SatoTubeness import applySatoTubeness 
 from src.ImageProcessing.Binarize import removeSomaFromAllScenes, cleanBinaryScenes
-
 
 
 # Choosing files you want to analyze, assuming they are all in one folder 
@@ -122,7 +121,6 @@ plotToCompare(subtracted_scenes[7][10,:,:], median_scenes[7][10,:,:], 'Substract
 stretched_scenes = applyContrastStretching(median_scenes, lower_percentile=1, upper_percentile=99)
 plotToCompare(subtracted_scenes[7][15,:,:], stretched_scenes[7][15,:,:], 'Substracted', 'Filter')
 
-
 # Step 3. Thresholding and binarisation (previously "soma removal") + cleaning
     # 3.1. Thresholding
 
@@ -153,7 +151,7 @@ plotToCompare(nosoma_scenes[7][10,:,:], cleaned_scenes[7][10,:,:], 'Nosoma', 'Cl
 
 
 # Save as tiff or visualize in 3D 
-
+visualize3dMayavi(cleaned_scenes[7])
 
 
 
