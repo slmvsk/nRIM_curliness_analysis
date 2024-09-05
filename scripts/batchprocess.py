@@ -165,12 +165,18 @@ visualize3dMayavi(cleaned_scenes[7])
     # 4.1. Skeletonization itself 
 skeletonized_scenes = skeletonizeScenes(cleaned_scenes)
 
-visualize3dMayavi(skeletonized_scenes[7])
+visualize3dMayavi(skeletonized_scenes[7]) # you can save snapshot in this window 
 
     # 4.2. Skeleton pruning and cleaning 
     
 
+# here cleanskeleotn3d function for scenes 
 
+
+
+
+
+visualize3dMayavi(clean_skeleton_scenes[7]) # you can save snapshot in this window 
 
 
 

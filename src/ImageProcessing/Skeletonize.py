@@ -12,7 +12,15 @@ import gc
 from skimage import img_as_ubyte
 from scipy.spatial.distance import euclidean
 from skimage.measure import label, regionprops
-from skimage.morphology import remove_small_objects
+import os
+import cv2
+from plantcv.plantcv import params
+from plantcv.plantcv import image_subtract
+from plantcv.plantcv.morphology import segment_sort
+from plantcv.plantcv.morphology import segment_skeleton
+from plantcv.plantcv.morphology import _iterative_prune
+from plantcv.plantcv._debug import _debug
+from plantcv.plantcv._helpers import _cv2_findcontours
 
 
 def skeletonizeImage(image):
@@ -64,6 +72,58 @@ def skeletonizeScenes(scenes):
             continue
     
     return processed_scenes
+
+
+
+# Cleaning skeleton in 3D (doesnt work)
+
+def cleanSkeleton3d(skeleton_image, min_length=10):
+    """
+    Measure and remove branches shorter than a specified length in a 3D skeletonized image.
+
+    Parameters:
+        skeleton_image (numpy.ndarray): A 3D binary numpy array representing the skeleton (values 0 and 1).
+        min_length (float): The minimum length of branches to keep.
+
+    Returns:
+        numpy.ndarray: A 3D binary image with small branches removed.
+    """
+    # Label the skeletonized image to identify connected components (branches)
+    labeled_skeleton = label(skeleton_image, connectivity=3)
+    props = regionprops(labeled_skeleton)
+
+    # Create an empty array to hold the cleaned skeleton
+    cleaned_skeleton = np.zeros_like(skeleton_image)
+
+    # Iterate over each labeled component (branch)
+    for prop in props:
+        coords = prop.coords
+        if len(coords) < 2:
+            continue  # Skip if the branch has fewer than 2 pixels
+        
+        # Measure the branch length
+        branch_length = 0
+        for i in range(len(coords) - 1):
+            branch_length += euclidean(coords[i], coords[i + 1])
+        
+        # Keep the branch if it's longer than the minimum length
+        if branch_length >= min_length:
+            for coord in coords:
+                cleaned_skeleton[tuple(coord)] = 1
+    
+    return  cleaned_skeleton
+
+
+
+
+
+
+
+
+
+
+
+
 
 #############################################
 # z-projection to visualize or analyze in 2D 
@@ -119,51 +179,8 @@ def z_projectScenes(skeletonized_scenes):
     return mip_scenes
 
 
-#####################################
-# Cleaning skeleton in 3D 
-
-def cleanSkeleton3d(skeleton_image, min_length=10):
-    """
-    Measure and remove branches shorter than a specified length in a 3D skeletonized image.
-
-    Parameters:
-        skeleton_image (numpy.ndarray): A 3D binary numpy array representing the skeleton (values 0 and 1).
-        min_length (float): The minimum length of branches to keep.
-
-    Returns:
-        numpy.ndarray: A 3D binary image with small branches removed.
-    """
-    # Label the skeletonized image to identify connected components (branches)
-    labeled_skeleton = label(skeleton_image, connectivity=3)
-    props = regionprops(labeled_skeleton)
-
-    # Create an empty array to hold the cleaned skeleton
-    cleaned_skeleton = np.zeros_like(skeleton_image)
-
-    # Iterate over each labeled component (branch)
-    for prop in props:
-        coords = prop.coords
-        if len(coords) < 2:
-            continue  # Skip if the branch has fewer than 2 pixels
-        
-        # Measure the branch length
-        branch_length = 0
-        for i in range(len(coords) - 1):
-            branch_length += euclidean(coords[i], coords[i + 1])
-        
-        # Keep the branch if it's longer than the minimum length
-        if branch_length >= min_length:
-            for coord in coords:
-                cleaned_skeleton[tuple(coord)] = 1
-    
-    return  cleaned_skeleton
-
-
-
-
-
 ##################################################
-# batch 
+# cleaning, batch for MIP images (2D)
 
 def measure_branch_lengths_batch(scenes_2d):
     """
@@ -196,13 +213,6 @@ def measure_branch_lengths_batch(scenes_2d):
     
     return all_lengths
 
-# Example usage:
-#all_lengths = measure_branch_lengths_batch(mip_scenes)
-
-# You can now calculate min, max, and mean for each scene
-#scene_stats = [(np.min(lengths), np.max(lengths), np.mean(lengths)) for lengths in all_lengths]
-
-    
 def cleanMipSkeleton(scenes_2d, length_percentiles=(5, 95)):
     """
     Clean a list of 2D binary skeleton images by removing small or excessively large branches based on dynamic length thresholds.
@@ -263,41 +273,13 @@ def cleanMipSkeleton(scenes_2d, length_percentiles=(5, 95)):
     
     return cleaned_scenes
 
-# Example usage:
-#cleaned_scenes = cleanMipSkeleton(mip_scenes, length_percentiles=(70, 100))
-
-# Plotting results
-#plot_images(cleaned_scenes[4], mip_scenes[4], 'Cleaned Skeleton', 'Original MIP')
 
 
-#########################
-# clean skeleton !!! remove small branches wit length smaller than ? (and weird very long??? )
-# skeletonize try https://github.com/seung-lab/kimimaro
-
-# i can label skeletons across all slices and then recognise where they intersect and where one 
-# branch ends??? 
-
-#label skeleton 
-#measure branches 
-# cut them or remove too short and what do i do with loo long branches 
-##########################
-
-# pruning of small branches 
-# Prune barbs off skeleton image
-
-import os
-import cv2
-import numpy as np
-from plantcv.plantcv import params
-from plantcv.plantcv import image_subtract
-from plantcv.plantcv.morphology import segment_sort
-from plantcv.plantcv.morphology import segment_skeleton
-from plantcv.plantcv.morphology import _iterative_prune
-from plantcv.plantcv._debug import _debug
-from plantcv.plantcv._helpers import _cv2_findcontours
+#######################################
+# Prune 
 
 
-def prune(skel_img, size=0, mask=None):
+def prune2D(skel_img, size=0, mask=None):
     """Prune the ends of skeletonized segments.
     The pruning algorithm proposed by https://github.com/karnoldbio
     Segments a skeleton into discrete pieces, prunes off all segments less than or
