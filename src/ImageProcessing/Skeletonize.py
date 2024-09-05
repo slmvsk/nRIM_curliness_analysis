@@ -64,7 +64,7 @@ def skeletonizeScenes(scenes):
         # Binarize and skeletonize the scene
         try:
             binarized_scene = img_as_ubyte(scene > 0)
-            skeleton = skeletonize_image(binarized_scene)
+            skeleton = skeletonizeImage(binarized_scene)
             processed_scenes.append(skeleton)
             
             # Release memory
