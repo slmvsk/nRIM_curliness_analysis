@@ -29,7 +29,7 @@ from src.ImageProcessing.SubstractBackground import subtractBackgroundFromScenes
 from src.ImageProcessing.Binarize import removeSomaFromAllScenes, cleanBinaryScenes
 from src.ImageProcessing.Skeletonize import skeletonizeScenes, pruneScenes, zProjectScenes, cleanMipSkeleton
 from src.ImageProcessing.Morphology import applyErosionToScenes, applyDilationToScenes
-from src.CurlinessAnalysis.AnalyzeCurliness import analyzeCurliness
+from src.CurlinessAnalysis.AnalyzeCurliness import analyzeCurlinessBatch
 
 
 
@@ -203,8 +203,11 @@ plotToCompare(dilated_scenes[6][10,:,:], z_projected_scenes[6], 'dilated scenes'
 
 # z_projection cleaning + pruning 
 
-cleaned_2d_skeletons = cleanMipSkeleton(z_projected_scenes, min_length=100, max_length=30000)
-# clean function work not well 
+cleaned_2d_skeletons = cleanMipSkeleton(z_projected_scenes, min_length=100, max_length=30000) #this 
+# or analyze curliness measures branches not correctly 
+
+
+
 
 plotToCompare(cleaned_2d_skeletons[6], z_projected_scenes[6], 'cleaned skeletons', 'MIP')
 plotToCompare(cleaned_2d_skeletons[7], stretched_scenes[7][10,:,:], 'cleaned skeletons', 'original')
@@ -218,6 +221,45 @@ plotToCompare(pruned_scenes[3], scenes[3][10,:,:], 'cleaned skeletons', 'Pruned'
 
 ###################################################
 # Analyze Curliness 
+
+results = analyzeCurlinessBatch(pruned_scenes)
+
+# Example of accessing curliness for the first scene (index 0)
+
+scene_index = 7  # Choose the scene you want to access
+
+# Access the curliness, median curliness, mean straightness, etc. for the first scene
+curliness = results[scene_index][0]
+median_curliness = results[scene_index][1]
+mean_straightness = results[scene_index][2]
+mean_curliness = results[scene_index][3]
+sem_curliness = results[scene_index][4]
+longest_path_lengths = results[scene_index][5]
+max_dendritic_reach = results[scene_index][6]
+
+# Print the values for the first scene
+print(f"Scene {scene_index+1} Curliness: {curliness}")
+print(f"Scene {scene_index+1} Median Curliness: {median_curliness}")
+print(f"Scene {scene_index+1} Mean Straightness: {mean_straightness}")
+print(f"Scene {scene_index+1} Mean Curliness: {mean_curliness}")
+print(f"Scene {scene_index+1} SEM Curliness: {sem_curliness}")
+print(f"Scene {scene_index+1} Longest Path Lengths: {longest_path_lengths}")
+print(f"Scene {scene_index+1} Max Dendritic Reach: {max_dendritic_reach}")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -62,7 +62,7 @@ def analyzeCurliness(image):
     max_dendritic_reach = np.array(max_dendritic_reach)
 
     # Calculate straightness and curliness
-    straightness = max_dendritic_reach / longest_path_length
+    straightness = np.clip(max_dendritic_reach / longest_path_length, 0, 1)
     curliness = 1 - straightness
 
     # Calculate average, std, and sem of curliness
@@ -73,6 +73,12 @@ def analyzeCurliness(image):
     sem_curliness = std_curliness / np.sqrt(len(longest_path_length))
 
     return curliness, median_curliness, mean_straightness, mean_curliness, sem_curliness, longest_path_length.tolist(), max_dendritic_reach.tolist()
+
+
+# Max dendritic reach (Euclidean distance between endpoints) is greater than the 
+# longest path length, which can occur in some edge cases, especially if the skeleton 
+# has loops or inaccuracies in labeling the structure.
+
 
 
 def analyzeCurlinessBatch(scenes_2d):
