@@ -276,7 +276,7 @@ def cleanMipSkeleton(scenes_2d, length_percentiles=(5, 95)):
 
 
 #######################################
-# Prune 
+# Prune 2D
 
 
 def prune2D(skel_img, size=0, mask=None):
@@ -359,6 +359,54 @@ def prune2D(skel_img, size=0, mask=None):
 
 #pruned_img, segmented_img, segment_objects = prune(mip_image_test, size=50, mask=None) #30 is fine 
 #plot_images(pruned_img, mip_image_test, 'Processed', 'Original')
+
+def pruneScenes(scenes, size=0, mask=None):
+    """
+    Apply the prune2D function to each 2D skeleton image (scene) in a list of scenes.
+    
+    Parameters:
+        scenes (list): List of 2D skeletonized images (scenes).
+        size (int): Size threshold to prune off segments.
+        mask (ndarray): Optional binary mask for debugging.
+    
+    Returns:
+        pruned_scenes (list): List of pruned 2D images for all scenes.
+        segmented_scenes (list): List of segmented debugging images for all scenes.
+        segment_objects_list (list): List of segment objects for all scenes.
+    """
+    pruned_scenes = []
+    segmented_scenes = []
+    segment_objects_list = []
+    
+    for i, scene in enumerate(scenes):
+        print(f"Processing scene {i+1}/{len(scenes)}")
+        
+        # Apply pruning to the current scene using prune2D function
+        pruned_img, segmented_img, segment_objects = prune2D(scene, size=size, mask=mask)
+        
+        # Append the results to the respective lists
+        pruned_scenes.append(pruned_img)
+        segmented_scenes.append(segmented_img)
+        segment_objects_list.append(segment_objects)
+    
+    return pruned_scenes, segmented_scenes, segment_objects_list
+
+# Example usage:
+# scenes = [np.random.rand(512, 512) for _ in range(5)]  # Replace with actual 2D skeletonized images
+# pruned_scenes, segmented_scenes, segment_objects_list = apply_prune_to_all_scenes(scenes, size=50, mask=None)
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

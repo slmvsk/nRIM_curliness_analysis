@@ -27,7 +27,7 @@ from src.ImageProcessing.DenoisingFilters import applyGaussian, applyMedianFilte
 from src.ImageProcessing.SubstractBackground import subtractBackgroundFromScenes
 #from src.ImageProcessing.SatoTubeness import applySatoTubeness 
 from src.ImageProcessing.Binarize import removeSomaFromAllScenes, cleanBinaryScenes
-from src.ImageProcessing.Skeletonize import skeletonizeScenes, prune2D
+from src.ImageProcessing.Skeletonize import skeletonizeScenes, pruneScenes, zProjectScenes, cleanMipSkeleton
 from src.ImageProcessing.Morphology import applyErosionToScenes, applyDilationToScenes
 
 
@@ -166,14 +166,14 @@ eroded_scenes = applyErosionToScenes(cleaned_scenes, iterations=2, structure=np.
 
 plotToCompare(eroded_scenes[6][10,:,:], cleaned_scenes[6][10,:,:], 'eroded scenes', 'Cleaned')
 
-dilated_scenes = applyDilationToScenes(eroded_scenes, iterations=2, structure=np.ones((3, 3, 3)))  # Apply dilation with a 3x3x3 structuring element
+dilated_scenes = applyDilationToScenes(eroded_scenes, iterations=3, structure=np.ones((3, 3, 3)))  # Apply dilation with a 3x3x3 structuring element
 
 plotToCompare(dilated_scenes[6][10,:,:], cleaned_scenes[6][10,:,:], 'dilated scenes', 'before erosion')
 
 
 visualize3dMayavi(dilated_scenes[6])
 
-
+###### maybe closing? 
 
 
 
@@ -203,8 +203,18 @@ visualize3dMayavi(skeletonized_scenes[6]) # you can save snapshot in this window
 # here cleanskeleotn3d + prune3D functions for scenes  or do Z projection like I am doing here because 
 # after erosion and dilation + cleaning, skeleton is simple 
 
+z_projected_scenes = zProjectScenes(skeletonized_scenes)
 
+plotToCompare(dilated_scenes[6][10,:,:], z_projected_scenes[6], 'dilated scenes', 'MIP')
 
+# z_projection cleaning + pruning 
+
+cleaned_2d_skeletons = cleanMipSkeleton(z_projected_scenes, length_percentiles=(50, 100))
+
+plotToCompare(cleaned_2d_skeletons[6], z_projected_scenes[6], 'cleaned skeletons', 'MIP')
+plotToCompare(cleaned_2d_skeletons[6], stretched_scenes[6][10,:,:], 'cleaned skeletons', 'original')
+
+pruned_scenes = pruneScenes
 
 
 
