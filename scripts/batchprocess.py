@@ -28,6 +28,10 @@ from src.ImageProcessing.SubstractBackground import subtractBackgroundFromScenes
 #from src.ImageProcessing.SatoTubeness import applySatoTubeness 
 from src.ImageProcessing.Binarize import removeSomaFromAllScenes, cleanBinaryScenes
 from src.ImageProcessing.Skeletonize import skeletonizeScenes, prune2D
+from src.ImageProcessing.Morphology import applyErosionToScenes
+
+
+
 
 # Choosing files you want to analyze, assuming they are all in one folder 
 # Define descriptors that you need or just run function without descriptors to get all file names in the folder 
@@ -158,8 +162,11 @@ visualize3dMayavi(cleaned_scenes[7])
 
 # EROSION + DILATION IS THE ANSWER 
 
-eroded_scenes = apply_erosion_to_all_scenes(scenes, iterations=2, structure=np.ones((3, 3, 3)))  # Apply erosion with a 3x3x3 structuring element
+eroded_scenes = applyErosionToScenes(cleaned_scenes, iterations=1, structure=np.ones((3, 3, 3)))  # Apply erosion with a 3x3x3 structuring element
 
+plotToCompare(eroded_scenes[6][10,:,:], cleaned_scenes[6][10,:,:], 'eroded scenes', 'Cleaned')
+
+dilated_scenes = applyDilationToScenes(scenes, iterations=2, structure=np.ones((3, 3, 3)))  # Apply dilation with a 3x3x3 structuring element
 
 
 

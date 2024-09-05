@@ -7,6 +7,7 @@ Created on Thu Sep  5 17:43:49 2024
 """
 import numpy as np
 from scipy.ndimage import binary_erosion
+from scipy.ndimage import binary_dilation
 
 
 def applyClosing(image, radius=2):
@@ -93,3 +94,55 @@ def applyErosionToScenes(scenes, iterations=1, structure=None):
 
 
 # eroded_scenes = apply_erosion_to_all_scenes(scenes, iterations=2, structure=np.ones((3, 3, 3)))  # Apply erosion with a 3x3x3 structuring element
+
+
+def applyDilation3d(binary_image, iterations=1, structure=None):
+    """
+    Apply dilation to a 3D binary image.
+
+    Parameters:
+        binary_image (ndarray): A 3D binary image.
+        iterations (int): Number of iterations to apply dilation.
+        structure (ndarray): Structuring element used for dilation (default is a cube).
+
+    Returns:
+        dilated_image (ndarray): The dilated 3D binary image.
+    """
+    # Apply dilation
+    dilated_image = binary_dilation(binary_image, structure=structure, iterations=iterations).astype(binary_image.dtype)
+    
+    return dilated_image
+
+def applyDilationToScenes(scenes, iterations=1, structure=None):
+    """
+    Apply dilation to each 3D binary image (scene) in a list of scenes.
+
+    Parameters:
+        scenes (list): List of 3D binary images.
+        iterations (int): Number of iterations to apply dilation.
+        structure (ndarray): Structuring element used for dilation (default is a cube).
+
+    Returns:
+        processed_scenes (list): List of dilated 3D binary images.
+    """
+    processed_scenes = []
+    
+    for i, scene in enumerate(scenes):
+        print(f"Processing scene {i+1}/{len(scenes)}")
+
+        # Apply dilation to the current scene
+        dilated_scene = applyDilation3d(scene, iterations=iterations, structure=structure)
+        processed_scenes.append(dilated_scene)
+    
+    return processed_scenes
+
+# dilated_scenes = applyDilationToScenes(scenes, iterations=2, structure=np.ones((3, 3, 3)))  # Apply dilation with a 3x3x3 structuring element
+
+
+
+
+
+
+
+
+
