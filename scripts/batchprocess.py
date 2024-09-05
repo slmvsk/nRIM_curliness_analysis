@@ -169,3 +169,25 @@ visualize3dMayavi(cleaned_scenes[7])
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
