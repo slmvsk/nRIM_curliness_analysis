@@ -7,25 +7,13 @@ Created on Thu Jul 18 07:27:03 2024
 """
 
 import numpy as np
-from skimage.filters import gaussian, threshold_otsu
-from skimage.feature import hessian_matrix, hessian_matrix_eigvals
-from skimage import exposure, morphology
-import scipy.ndimage
-from skimage.io import imread
-from pyclesperanto_prototype import imshow
-import matplotlib.pyplot as plt
-import napari
-from napari.utils import nbscreenshot
-import pyclesperanto_prototype as cle
-
-import numpy as np
 from skimage.morphology import skeletonize_3d
-from skimage import img_as_bool
-
-
-# skeletonize 
-from skimage.morphology import skeletonize_3d
+import gc
 from skimage import img_as_ubyte
+from scipy.spatial.distance import euclidean
+from skimage.measure import label, regionprops
+from skimage.morphology import remove_small_objects
+
 
 def skeletonizeImage(image):
     """
@@ -77,11 +65,10 @@ def skeletonizeScenes(scenes):
     
     return processed_scenes
 
+#############################################
+# z-projection to visualize or analyze in 2D 
 
-
-# z - projection
-
-def Zprojection(image_3d):
+def z_projection(image_3d):
     """
     Create a maximum intensity projection (MIP) of a 3D binary image along the z-axis.
     
@@ -99,16 +86,9 @@ def Zprojection(image_3d):
     mip = np.max(image_3d, axis=0)  # Axis 0 corresponds to the z-direction in your image stack
     return mip
 
-# Example: 
-
-#pruned3dmip = max_intensity_z_projection(pruned_3d)
-#print(mip_image.shape)
-#plot_images(normalized_scenes[2][8,:,:], mip_image_test, 'Blurred result Slice', 'Skeletonized')
 
 
-import gc
-
-def do_mip_scenes(skeletonized_scenes):
+def z_projectScenes(skeletonized_scenes):
     """
     Apply maximum intensity Z projection to each scene in a list of skeletonized 3D images.
 
@@ -125,7 +105,7 @@ def do_mip_scenes(skeletonized_scenes):
         
         try:
             # Apply max intensity Z projection to the current scene
-            mip = max_intensity_z_projection(scene)
+            mip = z_projection(scene)
             mip_scenes.append(mip)
             
         except Exception as e:
@@ -138,48 +118,11 @@ def do_mip_scenes(skeletonized_scenes):
 
     return mip_scenes
 
-# Example usage:
-#mip_scenes = mip_scenes(skeletonized_scenes)
 
-#plot_images(tubeness_scenes[4][8,:,:], mip_scenes[4], 'Blurred result Slice', 'Skeletonized')
+#####################################
+# Cleaning skeleton in 3D 
 
-
-# it works but requires skeleton pre! cleaning (is it possible? for now do only post) 
-# and post cleaning 
-
-
-def measure_branch_lengths(image_2d):
-    """
-    Measure the length of each branch in a skeletonized image.
-
-    Args:
-    image_2d (numpy.ndarray): The 2D binary image of skeletonized structures.
-
-    Returns:
-    list: List of lengths of each branch.
-    """
-    skeleton = skeletonize(image_2d > 0)
-    labeled_skeleton = label(skeleton)
-    props = regionprops(labeled_skeleton)
-
-    lengths = []
-    for prop in props:
-        coords = prop.coords
-        if len(coords) < 2:
-            continue  # Skip if the branch has fewer than 2 pixels
-        branch_length = 0
-        for i in range(len(coords) - 1):
-            branch_length += euclidean(coords[i], coords[i + 1])
-        lengths.append(branch_length)
-
-    return lengths
-
-import numpy as np
-from scipy.spatial.distance import euclidean
-from skimage.measure import label, regionprops
-from skimage.morphology import skeletonize_3d
-
-def clean_skeleton_3d(skeleton_image, min_length=10):
+def cleanSkeleton3d(skeleton_image, min_length=10):
     """
     Measure and remove branches shorter than a specified length in a 3D skeletonized image.
 
@@ -215,58 +158,8 @@ def clean_skeleton_3d(skeleton_image, min_length=10):
     
     return  cleaned_skeleton
 
-# Example usage:
-# Assuming 'skeleton_image' is your 3D binary skeletonized numpy array
-#min_branch_length = 10  # Adjust this value based on your needs
-#cleaned_skeleton = clean_skeleton_3d(skeletonized, min_length=min_branch_length)
 
 
-
-
-from skimage.morphology import remove_small_objects
-from skimage.measure import label, regionprops
-from scipy.spatial.distance import euclidean
-
-def clean_skeleton(image_2d, min_length, max_length):
-    """
-    Clean a 2D binary skeleton image by removing small or excessively large branches.
-    
-    Args:
-    image_2d (numpy.ndarray): The 2D binary image of skeletonized structures.
-    min_length (float): The minimum branch length to keep.
-    max_length (float): The maximum branch length to keep.
-    
-    Returns:
-    numpy.ndarray: The cleaned skeleton image with filtered branches.
-    """
-    # Ensure the image is binary
-    binary_image = (image_2d > 0).astype(np.uint8)
-    
-    # Label the connected components in the skeleton
-    labeled_skeleton = label(binary_image)
-    
-    # Measure the properties of the labeled regions
-    props = regionprops(labeled_skeleton)
-    
-    cleaned_skeleton = np.zeros_like(binary_image)
-    
-    for prop in props:
-        coords = prop.coords
-        branch_length = 0
-        for i in range(len(coords) - 1):
-            branch_length += euclidean(coords[i], coords[i + 1])
-        
-        # Keep branches that meet the length criteria
-        if min_length <= branch_length <= max_length:
-            for coord in coords:
-                cleaned_skeleton[coord[0], coord[1]] = 1  # Set pixel to 1 to keep the branch
-    
-    return cleaned_skeleton
-# Test the function
-#cleaned_skeleton = clean_skeleton(mip_scenes[4], min_length=100, max_length=1471528)
-
-# Example usage:
-#plot_images(cleaned_skeleton, mip_scenes[4], 'Blurred result Slice', 'Skeletonized')
 
 
 ##################################################

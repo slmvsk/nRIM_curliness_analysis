@@ -27,7 +27,7 @@ from src.ImageProcessing.DenoisingFilters import applyGaussian, applyMedianFilte
 from src.ImageProcessing.SubstractBackground import subtractBackgroundFromScenes
 #from src.ImageProcessing.SatoTubeness import applySatoTubeness 
 from src.ImageProcessing.Binarize import removeSomaFromAllScenes, cleanBinaryScenes
-from src.ImageProcessing.Skeletonize import skeletonizeScenes
+from src.ImageProcessing.Skeletonize import skeletonizeScenes, cleanSkeleton3d
 
 # Choosing files you want to analyze, assuming they are all in one folder 
 # Define descriptors that you need or just run function without descriptors to get all file names in the folder 
@@ -162,9 +162,13 @@ visualize3dMayavi(cleaned_scenes[7])
 
 # Step 4. Skeletonization 
 
+    # 4.1. Skeletonization itself 
 skeletonized_scenes = skeletonizeScenes(cleaned_scenes)
 
+visualize3dMayavi(skeletonized_scenes[7])
 
+    # 4.2. Skeleton pruning and cleaning 
+    
 
 
 
