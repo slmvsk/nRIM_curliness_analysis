@@ -148,7 +148,7 @@ def z_projection(image_3d):
 
 
 
-def z_projectScenes(skeletonized_scenes):
+def zProjectScenes(skeletonized_scenes):
     """
     Apply maximum intensity Z projection to each scene in a list of skeletonized 3D images.
 

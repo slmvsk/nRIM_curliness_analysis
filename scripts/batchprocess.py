@@ -28,7 +28,7 @@ from src.ImageProcessing.SubstractBackground import subtractBackgroundFromScenes
 #from src.ImageProcessing.SatoTubeness import applySatoTubeness 
 from src.ImageProcessing.Binarize import removeSomaFromAllScenes, cleanBinaryScenes
 from src.ImageProcessing.Skeletonize import skeletonizeScenes, prune2D
-from src.ImageProcessing.Morphology import applyErosionToScenes
+from src.ImageProcessing.Morphology import applyErosionToScenes, applyDilationToScenes
 
 
 
@@ -162,14 +162,16 @@ visualize3dMayavi(cleaned_scenes[7])
 
 # EROSION + DILATION IS THE ANSWER 
 
-eroded_scenes = applyErosionToScenes(cleaned_scenes, iterations=1, structure=np.ones((3, 3, 3)))  # Apply erosion with a 3x3x3 structuring element
+eroded_scenes = applyErosionToScenes(cleaned_scenes, iterations=2, structure=np.ones((3, 3, 3)))  # Apply erosion with a 3x3x3 structuring element
 
 plotToCompare(eroded_scenes[6][10,:,:], cleaned_scenes[6][10,:,:], 'eroded scenes', 'Cleaned')
 
-dilated_scenes = applyDilationToScenes(scenes, iterations=2, structure=np.ones((3, 3, 3)))  # Apply dilation with a 3x3x3 structuring element
+dilated_scenes = applyDilationToScenes(eroded_scenes, iterations=2, structure=np.ones((3, 3, 3)))  # Apply dilation with a 3x3x3 structuring element
+
+plotToCompare(dilated_scenes[6][10,:,:], cleaned_scenes[6][10,:,:], 'dilated scenes', 'before erosion')
 
 
-
+visualize3dMayavi(dilated_scenes[6])
 
 
 
@@ -190,23 +192,16 @@ dilated_scenes = applyDilationToScenes(scenes, iterations=2, structure=np.ones((
 # Step 4. Skeletonization 
 
     # 4.1. Skeletonization itself 
-skeletonized_scenes = skeletonizeScenes(cleaned_scenes) # So far so good 
+skeletonized_scenes = skeletonizeScenes(dilated_scenes) # So far so good 
 
 
-visualize3dMayavi(skeletonized_scenes[7]) # you can save snapshot in this window 
+visualize3dMayavi(skeletonized_scenes[6]) # you can save snapshot in this window 
 
     # 4.2. Skeleton pruning and cleaning 
     
 
-# here cleanskeleotn3d function for scenes 
-
-import numpy as np
-from scipy.ndimage import label, distance_transform_edt
-
-
-
-
-branch_lengths, labeled_skeleton = measure_branch_lengths(skeletonized_scenes[7])
+# here cleanskeleotn3d + prune3D functions for scenes  or do Z projection like I am doing here because 
+# after erosion and dilation + cleaning, skeleton is simple 
 
 
 
@@ -225,9 +220,8 @@ branch_lengths, labeled_skeleton = measure_branch_lengths(skeletonized_scenes[7]
 
 
 
-visualize3dMayavi(clean_skeleton_scenes[7]) 
 
-# Prune 3D 
+
 
 
 
