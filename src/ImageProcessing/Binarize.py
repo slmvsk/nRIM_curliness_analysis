@@ -9,7 +9,13 @@ Created on Thu Jul 18 00:40:39 2024
 import numpy as np
 from skimage.filters import threshold_multiotsu
 from skimage import img_as_float
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
+#from skimage import data
+#from skimage import color, morphology
+#from skimage import restoration, exposure
+from scipy.ndimage import label
+import scipy.ndimage as ndimage
+
 
 # use this function below (manual one) for now for good segmentation 
 
@@ -34,10 +40,6 @@ def binarizeImage(image_stack, threshold):
         binarized_stack[i, :, :] = img_float > threshold  # Apply threshold
     
     return binarized_stack
-
-# Example usage
-#threshold_value = 0.25  # Example threshold for binarization
-#binarized_stack = binarize_image_stack(blurred_scenes[2], threshold_value)
 
 
 # for all scenes 
@@ -76,12 +78,6 @@ def removeSomaFromAllScenes(scenes, thresholds):
         del scene
     print(f"Total processed scenes: {len(processed_scenes)}")
     return processed_scenes
-
-
-#nosoma_scenes = removeSomaFromAllScenes(blurred_scenes, thresholds)
-#print(f"Number of scenes processed and returned: {len(nosoma_scenes)}")
-
-
 
 
 
@@ -124,59 +120,16 @@ def removeSomafromStack(image_stack, xy_resolution):
         image_stack_filtered[:, :, i][bg_mask[:, :, i]] = 0
 
     return image_stack_filtered
-#nosoma_stack = removeSomafromStack(equalized_image, xy_resolution=1)
-#img_filtered = median(normalized_scenes[8], ball(3))  # ball(2) provides a reasonable balance in 3D
-#nosoma_img_med = removeSomafromStack(img_filtered, xy_resolution=1)
-#plot_images(normalized_scenes[9][18,:,:], nosoma_scenes[9][18,:,:], 'Original', 'No soma')
- 
-    
+
+
+
+
+
+
 
 
 
 ### NEXT STEP IS TO REMOVE SMALL OBJECTS ################################
-# adapting clean skeleton function here before skeletonizing and tubeness 
-
-# this one of the optoions ( number 2nd priority)
-import matplotlib.pyplot as plt
-from skimage import data
-from skimage import color, morphology
-
-
-# complementary is fine result but now i need to remove small objects literaly 
-
-
-# ignore for now (good option)
-#Area opening removes all connected components (clusters of pixels) that have fewer pixels than a specified threshold. Unlike a standard opening, which defines structure by shape, area opening targets small objects based on size.
-#from skimage.morphology import area_opening
-# Apply area opening ## seems better 
-#cleaned_image = area_opening(nosoma_scenes[4][8,:,:], area_threshold=100)  # Adjust the threshold as needed
-#plt.figure(figsize=(10, 10))  # Large display size
-#plt.imshow(cleaned_image, cmap='gray')
-#plt.title('?')
-#plt.axis('off')  # Hide the axes
-#plt.show()
-#try to apply all of that before removing soma and thresholding 
-
-
-#another method 
-from skimage import morphology, measure, filters
-from skan import csr
-
-from skimage.measure import label, regionprops
-import numpy as np
-import matplotlib.pyplot as plt
-#########HERE FIX
-
-#i have 3nary image, convert to binary 
-import numpy as np
-from skimage.measure import label, regionprops
-from skimage import morphology
-
-
-from scipy.ndimage import gaussian_filter
-
-
-
 
 from scipy.ndimage import label
 import scipy.ndimage as ndimage
@@ -206,10 +159,6 @@ def remove_small_objects_3d(binary_image, min_size=50):
     
     return cleaned
 
-# Usage example
-#cleaned_nosoma = remove_small_objects_3d(nosoma_scenes[7], min_size=1000)
-
-
 
 def cleanBinaryScenes(scenes, min_size=50):
     """
@@ -237,70 +186,6 @@ def cleanBinaryScenes(scenes, min_size=50):
         processed_scenes.append(final_binary_image)
     
     return processed_scenes
-
-# Example usage:
-# Assuming 'nosoma_scenes' is your list of 3D binary numpy arrays
-#cleaned_scenes = process_scenes(nosoma_scenes, min_size=10000)
-#plot_images(cleaned_scenes[7][18,:,:], nosoma_scenes[7][18,:,:], 'Processed', 'Original')
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-####################################
-# yes it is for 0ne scene only, but all my functions will be for 1 scene and then 
-# I will just iterate over all of the scenes and files?????????????????
-#or make a function that will iterates for files but not scenes, that will 
-# be already made for scenes 
-# it is also a question that i will release memory after each scene or after each file?
-####################################
-
-
-# Example usage
-# Assume `image_stack` is your 3D numpy array with shape [height, width, depth]
-# `xy_resolution` is a parameter that you might use to adjust algorithm behavior based on image resolution
-
-
-#plot_images(normalized_scenes[5][8,:,:], nosoma_img[8,:,:], 'Original', 'No soma')
-
-
-
-# geometrical approach or deep learningg approach to remove leftovers 
-
-# for my example i need boinarise manually
-# try Z-projection 
-#mip_image = max_intensity_z_projection(image_nosoma)
-
-from skimage import restoration, exposure
-
-
-# Applying contrast stretching
-#p2, p98 = np.percentile(nosoma_img, (0.5, 99.5))
-#contrast_stretched = exposure.rescale_intensity(nosoma_img, in_range=(p2, p98))
 
 
 
