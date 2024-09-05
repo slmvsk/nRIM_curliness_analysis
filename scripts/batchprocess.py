@@ -27,7 +27,7 @@ from src.ImageProcessing.DenoisingFilters import applyGaussian, applyMedianFilte
 from src.ImageProcessing.SubstractBackground import subtractBackgroundFromScenes
 #from src.ImageProcessing.SatoTubeness import applySatoTubeness 
 from src.ImageProcessing.Binarize import removeSomaFromAllScenes, cleanBinaryScenes
-from src.ImageProcessing.Skeletonize import skeletonizeScenes, cleanSkeleton3d
+from src.ImageProcessing.Skeletonize import skeletonizeScenes, prune2D
 
 # Choosing files you want to analyze, assuming they are all in one folder 
 # Define descriptors that you need or just run function without descriptors to get all file names in the folder 
@@ -72,7 +72,7 @@ scenes, metadata = readCziFile(file_name)
     
 # Also returnes normalized image shape and min and max intensities in the console
 # You can print it using print(np.min(scenes[5]))
-normalized_scenes = normalizeScenes(scenes, percentiles=[0.1,99.9])
+normalized_scenes = normalizeScenes(scenes, percentiles=[1,99])
 
 
 # Optionally visualize one of the slices in the one of the stacks before and after 
@@ -97,7 +97,7 @@ plotToCompare(normalized_scenes[6][10,:,:], blurred_scenes[6][10,:,:], 'Normaliz
 
 subtracted_scenes = subtractBackgroundFromScenes(scenes, radius=25)
 
-plotToCompare(subtracted_scenes[7][10,:,:], blurred_scenes[7][10,:,:], 'Substracted', 'Gaussian Blur')
+plotToCompare(subtracted_scenes[6][10,:,:], blurred_scenes[6][10,:,:], 'Substracted', 'Gaussian Blur')
 
 # Might need some contrast enhancement here !!!!!!!!!!!!!!!!
 
@@ -115,18 +115,20 @@ plotToCompare(subtracted_scenes[7][10,:,:], blurred_scenes[7][10,:,:], 'Substrac
 # opening, closing? clean? stronger filtering here?? other? 
 
 median_scenes = applyMedianFilter(subtracted_scenes, size=4) # choose 3
-plotToCompare(subtracted_scenes[7][10,:,:], median_scenes[7][10,:,:], 'Substracted', 'Filter')
+plotToCompare(subtracted_scenes[6][10,:,:], median_scenes[6][10,:,:], 'Substracted', 'Filter')
 
 
 stretched_scenes = applyContrastStretching(median_scenes, lower_percentile=1, upper_percentile=99)
-plotToCompare(subtracted_scenes[7][15,:,:], stretched_scenes[7][15,:,:], 'Substracted', 'Filter')
+plotToCompare(subtracted_scenes[6][10,:,:], stretched_scenes[6][10,:,:], 'Substracted', 'Stretched')
+plotToCompare(blurred_scenes[6][10,:,:], stretched_scenes[6][10,:,:], 'Blurr', 'Stretched')
+
 
 # Step 3. Thresholding and binarisation (previously "soma removal") + cleaning
     # 3.1. Thresholding
 
 thresholds = 0.4
 nosoma_scenes = removeSomaFromAllScenes(stretched_scenes, thresholds)
-plotToCompare(nosoma_scenes[7][10,:,:], stretched_scenes[7][10,:,:], 'Nosoma', 'Stretched')
+plotToCompare(nosoma_scenes[6][10,:,:], stretched_scenes[6][10,:,:], 'Nosoma', 'Stretched')
 
 
 # ADAPTIVE 
@@ -144,15 +146,33 @@ plotToCompare(nosoma_scenes[7][10,:,:], stretched_scenes[7][10,:,:], 'Nosoma', '
 
 
     # 3.2. CLeaning 
-cleaned_scenes = cleanBinaryScenes(nosoma_scenes, min_size=2000) #must work in 3D 
+cleaned_scenes = cleanBinaryScenes(nosoma_scenes, min_size=3000) #must work in 3D 
 
-plotToCompare(nosoma_scenes[7][10,:,:], cleaned_scenes[7][10,:,:], 'Nosoma', 'Cleaned')
+plotToCompare(nosoma_scenes[6][10,:,:], cleaned_scenes[6][10,:,:], 'Nosoma', 'Cleaned')
 
 
 # Save as tiff or visualize in 3D 
 visualize3dMayavi(cleaned_scenes[7])
 
-    # 3.3. erosion, dilation, opening, closing? 
+    # 3.3. erosion, dilation, opening, closing? NEED
+
+# EROSION + DILATION IS THE ANSWER 
+
+eroded_scenes = apply_erosion_to_all_scenes(scenes, iterations=2, structure=np.ones((3, 3, 3)))  # Apply erosion with a 3x3x3 structuring element
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -163,7 +183,8 @@ visualize3dMayavi(cleaned_scenes[7])
 # Step 4. Skeletonization 
 
     # 4.1. Skeletonization itself 
-skeletonized_scenes = skeletonizeScenes(cleaned_scenes)
+skeletonized_scenes = skeletonizeScenes(cleaned_scenes) # So far so good 
+
 
 visualize3dMayavi(skeletonized_scenes[7]) # you can save snapshot in this window 
 
@@ -172,12 +193,34 @@ visualize3dMayavi(skeletonized_scenes[7]) # you can save snapshot in this window
 
 # here cleanskeleotn3d function for scenes 
 
+import numpy as np
+from scipy.ndimage import label, distance_transform_edt
 
 
 
 
-visualize3dMayavi(clean_skeleton_scenes[7]) # you can save snapshot in this window 
+branch_lengths, labeled_skeleton = measure_branch_lengths(skeletonized_scenes[7])
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+visualize3dMayavi(clean_skeleton_scenes[7]) 
+
+# Prune 3D 
 
 
 
