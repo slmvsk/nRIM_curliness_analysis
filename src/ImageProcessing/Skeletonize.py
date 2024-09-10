@@ -415,3 +415,25 @@ def removeLoops(image):
 
 # Apply loop removal
 #skeleton_no_loops = removeLoops(pruned_skeleton)
+
+def removeLoopsScenes(scenes):
+    """
+    Apply the removeLoops function to each 2D scene in the 3D stack of scenes.
+
+    Parameters:
+        scenes (numpy.ndarray): A 3D numpy array representing a stack of 2D scenes (Z, Y, X).
+
+    Returns:
+        numpy.ndarray: A 3D numpy array where loops are removed and each slice is re-skeletonized.
+    """
+    # Initialize an empty array to store the processed scenes
+    processed_scenes = np.zeros_like(scenes)
+    
+    # Iterate through each scene (2D slice) in the 3D stack
+    for i in range(scenes.shape[0]):
+        print(f"Processing scene {i+1}/{scenes.shape[0]}")
+        
+        # Apply the removeLoops function to each 2D slice
+        processed_scenes[i, :, :] = removeLoops(scenes[i, :, :])
+    
+    return processed_scenes
