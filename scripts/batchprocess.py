@@ -99,7 +99,7 @@ plotToCompare(normalized_scenes[6][10,:,:], blurred_scenes[6][10,:,:], 'Normaliz
 #for one stack to test different radius 
 #subtracted_scene = subtract_background(blurred_scenes[6], radius=35) # 20 is also very fine 
 
-subtracted_scenes = subtractBackgroundFromScenes(scenes, radius=25)
+subtracted_scenes = subtractBackgroundFromScenes(blurred_scenes, radius=25)
 
 plotToCompare(subtracted_scenes[6][10,:,:], blurred_scenes[6][10,:,:], 'Substracted', 'Gaussian Blur')
 
