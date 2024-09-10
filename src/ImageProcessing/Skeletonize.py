@@ -313,7 +313,7 @@ def save_as_tiff(image_slice, file_name):
     tiff.imwrite(file_name, image_slice, photometric='minisblack')
 
 # Example usage to save specific slices
-save_as_tiff(skeletonized_image, 'skeletonized_image.tif')
+#save_as_tiff(skeletonized_image, 'skeletonized_image.tif')
 #save_as_tiff(blurred_scenes[2][8, :, :], 'blurred_scene_slice_8.tif')
 
 
@@ -385,7 +385,6 @@ def prune3Dscenes(scenes, size=0):
     return processed_scenes
 
 
-from skimage.measure import label, regionprops
 
 import numpy as np
 from skimage.morphology import skeletonize
