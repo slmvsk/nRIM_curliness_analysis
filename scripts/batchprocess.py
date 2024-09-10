@@ -237,11 +237,8 @@ plotToCompare(pruned_scenes[6], z_projected_scenes[6], 'cleaned skeletons', 'MIP
 #fill holes 
 # skeletonize again 
 
+skeletonized_image = removeLoops(pruned_scenes[6])
 
-
-
-
-skeletonized_image = fill_and_skeletonize(pruned_scenes[6])
 
 plotToCompare(pruned_scenes[6], skeletonized_image, 'cleaned skeletons', 'noloops')
 
