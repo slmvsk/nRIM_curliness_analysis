@@ -325,41 +325,32 @@ def save_as_tiff(image_slice, file_name):
 from skimage.measure import label
 from scipy.ndimage import distance_transform_edt
 
-def prune3D(skel_img, size=0, mask=None):
-    """Prune the ends of skeletonized segments in 3D."""
-    
+def prune3D(skel_img, size=0):
+    """
+    Prune the ends of skeletonized segments in 3D, removing small objects based on a size threshold.
+
+    Parameters:
+        skel_img (numpy.ndarray): A 3D binary numpy array representing the skeletonized image.
+        size (int): Minimum size (e.g., length or volume) of segments to keep.
+
+    Returns:
+        numpy.ndarray: A 3D binary image with small objects removed.
+    """
     pruned_img = skel_img.copy()
 
     # Label the connected components in 3D
     labeled_img, num_features = label(skel_img, connectivity=3, return_num=True)
 
-    kept_segments = []
-    removed_segments = []
-
+    # Measure the size (e.g., length or volume) of each segment in 3D and remove small segments
     if size > 0:
-        # Measure the size (e.g., length or volume) of each segment in 3D
         for segment_id in range(1, num_features + 1):
             segment = (labeled_img == segment_id)
             segment_size = np.sum(segment)
 
-            if segment_size > size:
-                kept_segments.append(segment)
-            else:
-                removed_segments.append(segment)
+            if segment_size <= size:
+                pruned_img[segment] = 0
 
-        # Subtract all short segments from the skeleton image
-        for removed_segment in removed_segments:
-            pruned_img[removed_segment] = 0
-
-    # Optional: Create a debugging plot using a 3D projection or overlay on a mask
-    if mask is not None:
-        # Use 3D visualization tools like matplotlib or plotly for debugging
-        pass
-    
-    # Return the pruned skeleton and optionally the segmented objects
-    segmented_img, segment_objects = label(pruned_img, connectivity=3, return_num=True)
-
-    return pruned_img, segmented_img, segment_objects
+    return pruned_img
 
 
 def prune3Dscenes(scenes, size=0, mask=None):

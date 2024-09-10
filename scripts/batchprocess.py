@@ -27,7 +27,7 @@ from src.ImageProcessing.DenoisingFilters import applyGaussian, applyMedianFilte
 from src.ImageProcessing.SubstractBackground import subtractBackgroundFromScenes
 #from src.ImageProcessing.SatoTubeness import applySatoTubeness 
 from src.ImageProcessing.Binarize import removeSomaFromAllScenes, cleanBinaryScenes
-from src.ImageProcessing.Skeletonize import skeletonizeScenes, pruneScenes, zProjectScenes, cleanMipSkeleton
+from src.ImageProcessing.Skeletonize import skeletonizeScenes, pruneScenes, zProjectScenes, cleanMipSkeleton, prune3Dscenes
 from src.ImageProcessing.Morphology import applyErosionToScenes, applyDilationToScenes
 from src.CurlinessAnalysis.AnalyzeCurliness import analyzeCurlinessBatch
 from src.ImageProcessing.Thresholding import otsuThresholdingScenes
@@ -206,7 +206,6 @@ visualize3dMayavi(skeletonized_scenes[6]) # you can save snapshot in this window
 # cleaning 
 
 #cleaned_2d_skeletons = cleanMipSkeleton(z_projected_scenes, min_length=100, max_length=30000) #this 
-pruned_img, segmented_img, segment_objects = prune3D(skeletonized_scenes[6], size=30)
 
 
 
