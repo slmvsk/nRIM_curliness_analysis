@@ -30,7 +30,7 @@ from src.ImageProcessing.Binarize import removeSomaFromAllScenes, cleanBinarySce
 from src.ImageProcessing.Skeletonize import skeletonizeScenes, pruneScenes, zProjectScenes, cleanMipSkeleton
 from src.ImageProcessing.Morphology import applyErosionToScenes, applyDilationToScenes
 from src.CurlinessAnalysis.AnalyzeCurliness import analyzeCurlinessBatch
-
+from src.ImageProcessing.Thresholding import otsuThresholdingScenes
 
 
 # Choosing files you want to analyze, assuming they are all in one folder 
@@ -130,9 +130,14 @@ plotToCompare(blurred_scenes[6][10,:,:], stretched_scenes[6][10,:,:], 'Blurr', '
 # Step 3. Thresholding and binarisation (previously "soma removal") + cleaning
     # 3.1. Thresholding here not adaptive 
 
-thresholds = 0.4
-nosoma_scenes = removeSomaFromAllScenes(stretched_scenes, thresholds)
-plotToCompare(nosoma_scenes[6][10,:,:], stretched_scenes[6][10,:,:], 'Nosoma', 'Stretched')
+#thresholds = 0.4
+#nosoma_scenes = removeSomaFromAllScenes(stretched_scenes, thresholds)
+#plotToCompare(nosoma_scenes[6][10,:,:], stretched_scenes[6][10,:,:], 'Nosoma', 'Stretched')
+
+binary_scenes = otsuThresholdingScenes(stretched_scenes)
+plotToCompare(binary_scenes[6][10,:,:], stretched_scenes[6][10,:,:], 'Binary', 'Stretched')
+
+
 
 
 # ADAPTIVE 
@@ -150,9 +155,9 @@ plotToCompare(nosoma_scenes[6][10,:,:], stretched_scenes[6][10,:,:], 'Nosoma', '
 
 
     # 3.2. CLeaning 
-cleaned_scenes = cleanBinaryScenes(nosoma_scenes, min_size=3000) #must work in 3D 
+cleaned_scenes = cleanBinaryScenes(binary_scenes, min_size=4000) #must work in 3D 
 
-plotToCompare(nosoma_scenes[6][10,:,:], cleaned_scenes[6][10,:,:], 'Nosoma', 'Cleaned')
+plotToCompare(binary_scenes[6][10,:,:], cleaned_scenes[6][10,:,:], 'Nosoma', 'Cleaned')
 
 
 # Save as tiff or visualize in 3D 
@@ -166,7 +171,7 @@ eroded_scenes = applyErosionToScenes(cleaned_scenes, iterations=2, structure=np.
 
 plotToCompare(eroded_scenes[6][10,:,:], cleaned_scenes[6][10,:,:], 'eroded scenes', 'Cleaned')
 
-dilated_scenes = applyDilationToScenes(eroded_scenes, iterations=3, structure=np.ones((3, 3, 3)))  # Apply dilation with a 3x3x3 structuring element
+dilated_scenes = applyDilationToScenes(eroded_scenes, iterations=2, structure=np.ones((3, 3, 3)))  # Apply dilation with a 3x3x3 structuring element
 
 plotToCompare(dilated_scenes[6][10,:,:], cleaned_scenes[6][10,:,:], 'dilated scenes', 'before erosion')
 
@@ -189,7 +194,23 @@ visualize3dMayavi(dilated_scenes[7])
 skeletonized_scenes = skeletonizeScenes(dilated_scenes) # So far so good 
 
 
-visualize3dMayavi(skeletonized_scenes[7]) # you can save snapshot in this window 
+visualize3dMayavi(skeletonized_scenes[6]) # you can save snapshot in this window 
+
+
+#pruned_img, segmented_img, segment_objects = prune3D(skeletonized_scenes[6], size=30)
+
+
+#visualize3dMayavi(segmented_img)
+
+
+# cleaning 
+
+#cleaned_2d_skeletons = cleanMipSkeleton(z_projected_scenes, min_length=100, max_length=30000) #this 
+pruned_img, segmented_img, segment_objects = prune3D(skeletonized_scenes[6], size=30)
+
+
+
+
 
     # 4.2. Skeleton pruning and cleaning 
     
@@ -201,7 +222,8 @@ z_projected_scenes = zProjectScenes(skeletonized_scenes)
 
 plotToCompare(dilated_scenes[6][10,:,:], z_projected_scenes[6], 'dilated scenes', 'MIP')
 
-# z_projection cleaning + pruning 
+
+# + pruning 
 
 cleaned_2d_skeletons = cleanMipSkeleton(z_projected_scenes, min_length=100, max_length=30000) #this 
 # or analyze curliness measures branches not correctly 
@@ -214,9 +236,9 @@ plotToCompare(cleaned_2d_skeletons[7], stretched_scenes[7][10,:,:], 'cleaned ske
 
 
 #just increase size if you don't want side branches at all 
-pruned_scenes, segmented_scenes, segment_objects_list = pruneScenes(cleaned_2d_skeletons, size=30, mask=None)
+pruned_scenes, segmented_scenes, segment_objects_list = pruneScenes(cleaned_2d_skeletons, size=40, mask=None)
 
-plotToCompare(pruned_scenes[3], scenes[3][10,:,:], 'cleaned skeletons', 'Pruned')
+plotToCompare(pruned_scenes[6], scenes[6][10,:,:], 'cleaned skeletons', 'Pruned')
 
 
 ###################################################
