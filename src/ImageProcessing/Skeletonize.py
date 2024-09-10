@@ -313,7 +313,7 @@ def save_as_tiff(image_slice, file_name):
     tiff.imwrite(file_name, image_slice, photometric='minisblack')
 
 # Example usage to save specific slices
-#save_as_tiff(tubeness_scenes[6], 'tubeness_python.tif')
+save_as_tiff(skeletonized_image, 'skeletonized_image.tif')
 #save_as_tiff(blurred_scenes[2][8, :, :], 'blurred_scene_slice_8.tif')
 
 
@@ -353,7 +353,7 @@ def prune3D(skel_img, size=0):
     return pruned_img
 
 
-def prune3Dscenes(scenes, size=0, mask=None):
+def prune3Dscenes(scenes, size=0):
     """
     Apply pruning to each 3D numpy array in a list.
     
@@ -375,8 +375,8 @@ def prune3Dscenes(scenes, size=0, mask=None):
             continue
         
         try:
-            pruned_img, segmented_img, segment_objects = prune3D(scene, size=size, mask=mask)
-            processed_scenes.append((pruned_img, segmented_img, segment_objects))
+            pruned_img = prune3D(scene, size=size)
+            processed_scenes.append(pruned_img)
             print(f"Processed scene {i+1} successfully.")
         except Exception as e:
             print(f"Error processing scene {i+1}: {e}")
@@ -385,3 +385,34 @@ def prune3Dscenes(scenes, size=0, mask=None):
     return processed_scenes
 
 
+from skimage.measure import label, regionprops
+
+import numpy as np
+from skimage.morphology import skeletonize
+import scipy.ndimage
+import matplotlib.pyplot as plt
+
+def removeLoops(image):
+    """
+    Fill loops in the skeletonized image using binary_fill_holes and then re-skeletonize it.
+
+    Parameters:
+        image (numpy.ndarray): Input 2D binary skeleton image.
+
+    Returns:
+        numpy.ndarray: A re-skeletonized image after filling loops.
+    """
+    # Ensure the input image is binary
+    binary_image = image > 0
+    
+    # Fill the holes using scipy's binary_fill_holes
+    filled_image = scipy.ndimage.binary_fill_holes(binary_image)
+    
+    # Re-skeletonize the filled image
+    skeletonized_image = skeletonize(filled_image)
+    
+    return skeletonized_image
+
+
+# Apply loop removal
+#skeleton_no_loops = removeLoops(pruned_skeleton)

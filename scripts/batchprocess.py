@@ -203,41 +203,61 @@ visualize3dMayavi(skeletonized_scenes[6]) # you can save snapshot in this window
 #visualize3dMayavi(segmented_img)
 
 
+
+    # 4.2. Skeleton pruning and cleaning 
+    
+
 # cleaning 
 
 #cleaned_2d_skeletons = cleanMipSkeleton(z_projected_scenes, min_length=100, max_length=30000) #this 
 
 
 
-
-
-    # 4.2. Skeleton pruning and cleaning 
-    
-
 # here cleanskeleotn3d + prune3D functions for scenes  or do Z projection like I am doing here because 
+
+pruned_scenes3D = prune3Dscenes(skeletonized_scenes, size=30)
+
+visualize3dMayavi(pruned_scenes3D[6])
+
+
+
 # after erosion and dilation + cleaning, skeleton is simple 
 
-z_projected_scenes = zProjectScenes(skeletonized_scenes)
+z_projected_scenes = zProjectScenes(pruned_scenes3D)
 
-plotToCompare(dilated_scenes[6][10,:,:], z_projected_scenes[6], 'dilated scenes', 'MIP')
+plotToCompare(brpt, z_projected_scenes[6], 'dilated scenes', 'MIP')
 
 
 # + pruning 
+pruned_scenes, segmented_scenes, segment_objects_list = pruneScenes(cleaned_2d_skeletons, size=30, mask=None)
+plotToCompare(pruned_scenes[6], z_projected_scenes[6], 'cleaned skeletons', 'MIP')
 
-cleaned_2d_skeletons = cleanMipSkeleton(z_projected_scenes, min_length=100, max_length=30000) #this 
+#skeleton_no_loops = removeLoops(pruned_scenes[6])
+
+#fill holes 
+# skeletonize again 
+
+
+
+
+
+skeletonized_image = fill_and_skeletonize(pruned_scenes[6])
+
+plotToCompare(pruned_scenes[6], skeletonized_image, 'cleaned skeletons', 'noloops')
+
+
+
+
+
+
+
+
+
+
 # or analyze curliness measures branches not correctly 
 
-
-
-
-plotToCompare(cleaned_2d_skeletons[6], z_projected_scenes[6], 'cleaned skeletons', 'MIP')
-plotToCompare(cleaned_2d_skeletons[7], stretched_scenes[7][10,:,:], 'cleaned skeletons', 'original')
-
-
 #just increase size if you don't want side branches at all 
-pruned_scenes, segmented_scenes, segment_objects_list = pruneScenes(cleaned_2d_skeletons, size=40, mask=None)
 
-plotToCompare(pruned_scenes[6], scenes[6][10,:,:], 'cleaned skeletons', 'Pruned')
 
 
 ###################################################
