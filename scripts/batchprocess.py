@@ -128,7 +128,7 @@ plotToCompare(blurred_scenes[6][10,:,:], stretched_scenes[6][10,:,:], 'Blurr', '
 
 
 # Step 3. Thresholding and binarisation (previously "soma removal") + cleaning
-    # 3.1. Thresholding
+    # 3.1. Thresholding here not adaptive 
 
 thresholds = 0.4
 nosoma_scenes = removeSomaFromAllScenes(stretched_scenes, thresholds)
