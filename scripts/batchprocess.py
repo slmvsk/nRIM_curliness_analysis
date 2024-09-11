@@ -18,6 +18,7 @@ sys.path.append('/Users/tetianasalamovska/Documents/GitHub/nRIM_curliness_analys
 
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.cm import ScalarMappable
 from src.FileImport.DesctiptorsBasedFileSearch import getMatchingFilesList
 #from src.FileImport.BatchProcessing import 
 from src.FileImport.ReadZeissStacks import readCziFile

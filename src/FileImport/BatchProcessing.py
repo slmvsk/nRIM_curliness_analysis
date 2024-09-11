@@ -22,7 +22,7 @@ from src.ImageProcessing.SubstractBackground import subtractBackgroundFromScenes
 from src.ImageProcessing.Binarize import removeSomaFromAllScenes, cleanBinaryScenes
 from src.ImageProcessing.Skeletonize import skeletonizeScenes, pruneScenes, zProjectScenes, cleanMipSkeleton, prune3Dscenes,removeLoopsScenes, breakJunctionsAndLabelScenes
 from src.ImageProcessing.Morphology import applyErosionToScenes, applyDilationToScenes
-from src.CurlinessAnalysis.AnalyzeCurliness import analyzeCurlinessBatch
+#from src.CurlinessAnalysis.AnalyzeCurliness import analyzeCurlinessBatch
 from src.ImageProcessing.Thresholding import otsuThresholdingScenes
 
 
