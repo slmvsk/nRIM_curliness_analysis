@@ -23,7 +23,7 @@ file_list = getMatchingFilesList(
 )
 
 
-dataframe_results = batch_process_files(file_list, processFile, folder_with_data)
+dataframe_results = batchProcessFiles(file_list, processFile, folder_with_data)
 print(dataframe_results.head)
 dataframe_results.to_csv('/Users/tetianasalamovska/Desktop/zeis/df.csv', index=False)
 
