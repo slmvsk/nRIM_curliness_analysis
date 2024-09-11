@@ -337,7 +337,12 @@ curliness, straightness, longest_path_length, max_dendritic_reach = analyzeCurli
 
 visualize_and_analyze_branches(broken_skeletons[2], curliness, longest_path_length, max_dendritic_reach)
 
-
+mean_straightness = np.mean(straightness)
+mean_curliness = np.mean(curliness)
+std_curliness = np.std(curliness)
+median_curliness = np.median(curliness)
+sem_curliness = std_curliness / np.sqrt(len(longest_path_length))
+print(median_curliness)
 
 
 
