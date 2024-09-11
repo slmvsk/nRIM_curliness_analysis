@@ -72,7 +72,7 @@ def analyzeCurliness(image):
     median_curliness = np.median(curliness)
     sem_curliness = std_curliness / np.sqrt(len(longest_path_length))
 
-    return curliness, median_curliness, mean_straightness, mean_curliness, sem_curliness, longest_path_length.tolist(), max_dendritic_reach.tolist()
+    return curliness, straightness, longest_path_length.tolist(), max_dendritic_reach.tolist()
 
 
 # Max dendritic reach (Euclidean distance between endpoints) is greater than the 
@@ -247,22 +247,25 @@ def analyze_dendrite_curliness_batch(dataframe):
 
 
 import matplotlib.pyplot as plt
-from matplotlib.colors import Normalize
-from skimage import color
+from matplotlib.colors import Normalize, ScalarMappable
+import numpy as np
+from skimage import measure
 
 def visualize_and_analyze_branches(image, curliness, longest_path_length, max_dendritic_reach):
     # Label the skeleton
     labeled_skeleton = measure.label(image)
     norm = Normalize(vmin=0, vmax=1)  # Normalize the curliness values to [0, 1] for coloring
 
-    # Create a color map
-    cmap = plt.cm.viridis  # Use the viridis color map
+    # Create a vibrant and diverse color map
+    cmap = plt.cm.nipy_spectral  # Use 'nipy_spectral' for bright, diverse colors
     
     # Create a color image where each label is colored by its curliness
     colored_skeleton = np.zeros((*image.shape, 3))
     properties = measure.regionprops(labeled_skeleton)
+    
     for prop, curl in zip(properties, curliness):
-        color = cmap(norm(curl))[:3]  # Get the RGB values
+        color = cmap(norm(curl))[:3]  # Get the RGB values from the colormap
+        # Apply the color to the corresponding segment (branch) in the image
         colored_skeleton[tuple(prop.coords.T)] = color
 
     # Plot the colored skeleton
@@ -272,39 +275,54 @@ def visualize_and_analyze_branches(image, curliness, longest_path_length, max_de
     plt.axis('off')
     plt.show()
 
-    # Plot histograms
+    # Prepare the mappable object for colorbar and histogram
+    mappable = ScalarMappable(norm=norm, cmap=cmap)
+
+    # Plot histograms with color coding that corresponds to the curliness in the image
     plt.figure(figsize=(12, 8))
+
     plt.subplot(2, 2, 1)
-    plt.hist(curliness, bins=20, color='purple', alpha=0.7)
-    plt.title('Curliness Distribution')
+    colors = mappable.to_rgba(curliness)
+    n, bins, patches = plt.hist(curliness, bins=20, alpha=0.7)
+    bin_centers = 0.5 * (bins[:-1] + bins[1:])
+    
+    # Color each bin in the histogram based on the curliness
+    for bin_center, patch in zip(bin_centers, patches):
+        color = cmap(norm(bin_center))
+        patch.set_facecolor(color)
+    plt.title('Curliness Distribution (Color Matched)')
     plt.xlabel('Curliness')
     plt.ylabel('Frequency')
 
     plt.subplot(2, 2, 2)
     straightness = 1 - np.array(curliness)
-    plt.hist(straightness, bins=20, color='blue', alpha=0.7)
-    plt.title('Straightness Distribution')
+    n, bins, patches = plt.hist(straightness, bins=20, alpha=0.7)
+    bin_centers = 0.5 * (bins[:-1] + bins[1:])
+    for bin_center, patch in zip(bin_centers, patches):
+        color = cmap(norm(1 - bin_center))  # Inverse color matching for straightness
+        patch.set_facecolor(color)
+    plt.title('Straightness Distribution (Inverse Color Matched)')
     plt.xlabel('Straightness')
 
     plt.subplot(2, 2, 3)
-    plt.hist(longest_path_length, bins=10000, color='green', alpha=0.7)
+    plt.hist(longest_path_length, bins=100, color='green', alpha=0.7)
     plt.xlim([0, 200])  # Set x-axis limits for example 
-    plt.title('Longest path length ')
+    plt.title('Longest Path Length Distribution')
     plt.xlabel('Length')
 
     plt.subplot(2, 2, 4)
-    plt.hist(max_dendritic_reach, bins=200, color='red', alpha=0.7)
+    plt.hist(max_dendritic_reach, bins=100, color='red', alpha=0.7)
     plt.xlim([0, 300])  # Set x-axis limits for example 
     plt.title('Maximum Dendritic Reach Distribution')
     plt.xlabel('Reach')
-    
+
     plt.tight_layout()
     plt.show()
-    
-    
-# Example assuming you have an 'image_data' which is a binary skeletonized image
-#visualize_and_analyze_branches(image_data, curliness, longest_path_length, max_dendritic_reach)
 
+    # Adding a colorbar to show the color coding for curliness
+    plt.figure(figsize=(6, 1))
+    plt.colorbar(mappable, orientation='horizontal', label='Curliness (0 to 1)')
+    plt.show()
 
 
 
@@ -316,20 +334,35 @@ def visualize_and_analyze_branches(image, curliness, longest_path_length, max_de
 from matplotlib.colors import Normalize, LinearSegmentedColormap
 from matplotlib.cm import ScalarMappable  # Correct import for ScalarMappable
 
+import matplotlib.pyplot as plt
+from matplotlib.colors import Normalize
+from matplotlib.cm import ScalarMappable
+from skimage import measure
+import numpy as np
+
 def visualize_and_analyze_curliness(image, curliness):
+    """
+    Visualize skeleton segments color-coded by their curliness and plot a curliness histogram.
+    
+    Parameters:
+        image (numpy.ndarray): 2D binary skeletonized image.
+        curliness (list): List of curliness values for each segment.
+    """
+    
     # Label the skeleton
     labeled_skeleton = measure.label(image)
     norm = Normalize(vmin=0, vmax=1)  # Normalize the curliness values to [0, 1] for coloring
     
-    # Use a colormap with high diversity, like 'jet' (alternatively, 'nipy_spectral' can be used)
-    cmap = plt.cm.nipy_spectral  # 'jet' or 'nipy_spectral' for high color diversity
+    # Use a colormap with high diversity, like 'jet' or 'nipy_spectral'
+    cmap = plt.cm.nipy_spectral  # You can switch to 'jet' or any other colormap
 
     # Apply color map to labeled regions based on curliness
-    colored_skeleton = np.zeros((*image.shape, 3))
+    colored_skeleton = np.zeros((*image.shape, 3))  # To store RGB values for the skeleton
     properties = measure.regionprops(labeled_skeleton)
+    
     for prop, c in zip(properties, curliness):
         color = cmap(norm(c))[:3]  # Map curliness to RGB color
-        colored_skeleton[tuple(prop.coords.T)] = color  # Apply color to the coordinates of each component
+        colored_skeleton[tuple(prop.coords.T)] = color  # Apply color to the coordinates of each segment
 
     # Display the colorized skeleton
     plt.figure(figsize=(8, 6))
@@ -344,12 +377,13 @@ def visualize_and_analyze_curliness(image, curliness):
     colors = mappable.to_rgba(curliness)
     
     # Create a histogram with color coding
-    n, bins, patches = plt.hist(curliness, bins=30, alpha=0.7)
+    n, bins, patches = plt.hist(curliness, bins=30, alpha=0.7, edgecolor='black')
     bin_centers = 0.5 * (bins[:-1] + bins[1:])
     for bin_center, patch in zip(bin_centers, patches):
-        color = cmap(norm(bin_center))
-        patch.set_facecolor(color)  # Set the color of each bin to the corresponding curliness value
+        color = cmap(norm(bin_center))  # Map bin center to color
+        patch.set_facecolor(color)  # Set bin color based on curliness
 
+    # Add a color bar for the histogram
     plt.colorbar(mappable, label='Curliness')
     plt.title('Histogram of Curliness Distribution')
     plt.xlabel('Curliness')
