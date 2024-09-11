@@ -441,3 +441,67 @@ def removeLoopsScenes(scenes):
         processed_scenes.append(processed_scene)
     
     return processed_scenes
+
+
+
+
+
+
+# break remains branch pounts
+
+import numpy as np
+from skimage.morphology import skeletonize, thin
+from skimage.measure import label
+from skimage.morphology import remove_small_objects
+import cv2
+from skimage.color import label2rgb
+from skimage.measure import label
+
+def breakJunctionsAndLabelScenes(scenes, num_iterations=3):
+    """
+    Iterate over all scenes in a list, break skeletons at junctions and label each separate branch with a different color.
+
+    Parameters:
+        scenes (list): List of 2D skeleton images.
+        num_iterations (int): Number of iterations to break at junctions.
+
+    Returns:
+        colored_skeletons (list): List of skeleton images with separate branches color-labeled.
+    """
+    colored_skeletons = []
+
+    for i, scene in enumerate(scenes):
+        print(f"Processing scene {i + 1}/{len(scenes)}")
+        
+        try:
+            # Make a copy of the scene to process
+            broken_skel = scene.copy()
+
+            # Iterate to break junctions multiple times
+            for _ in range(num_iterations):
+                branch_points = find_branch_pts(broken_skel)
+                broken_skel = break_at_junctions(broken_skel, branch_points)
+
+            # Label connected components in the broken skeleton
+            labeled_skel = label(broken_skel, connectivity=2)
+
+            # Colorize the labeled skeleton (each label gets a different color)
+            #colored_skel = label2rgb(labeled_skel, bg_label=0)
+            colored_skel = broken_skel
+
+            # Append the colored skeleton to the list
+            colored_skeletons.append(colored_skel)
+
+        except Exception as e:
+            print(f"Error processing scene {i + 1}: {e}")
+            continue
+
+    return colored_skeletons
+
+
+
+
+
+
+
+

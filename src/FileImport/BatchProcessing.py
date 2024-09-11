@@ -5,44 +5,69 @@ Created on Thu Jul 25 14:29:08 2024
 
 @author: tetianasalamovska
 """
-#IN PROGRESS 
+
 import scipy
 import gc
+
+
 
 def processFile(file_name):
     # Step 1: Read the file as a list of 3D numpy arrays (scenes)
     scenes, metadata = readCziFile(file_name)
     
     # Step 2: Normalize intensity 
-    normalized_scenes = normalizeScenes(scenes)
+    normalized_scenes = normalizeScenes(scenes, percentiles=[1,99])
     del scenes  # Free memory used by the original scenes
     
-    # denoising 
+    # Step 3: Denoising 
+    blurred_scenes = applyGaussian(normalized_scenes, sigma=2)
+    del normalized_scenes
+    # Step 4: Background substraction and contrast enhancement 
+    subtracted_scenes = subtractBackgroundFromScenes(blurred_scenes, radius=25)
+    del blurred_scenes
+    
+    median_scenes = applyMedianFilter(subtracted_scenes, size=3)
+    del subtracted_scenes
+    
+    stretched_scenes = applyContrastStretching(median_scenes, lower_percentile=1, upper_percentile=99)
+    del median_scenes
+    
+    # Step 5: Remove soma
+    binary_scenes = otsuThresholdingScenes(stretched_scenes) # maybe put old nosoma adaptive thresholding function back here 
+    del stretched_scenes
+    
+    # Step 6: Cleaning
+    cleaned_scenes = cleanBinaryScenes(binary_scenes, min_size=4000) 
+    del binary_scenes
+    
+    eroded_scenes = applyErosionToScenes(cleaned_scenes, iterations=2, structure=np.ones((3, 3, 3)))
+    del cleaned_scenes
+    
+    dilated_scenes = applyDilationToScenes(eroded_scenes, iterations=2, structure=np.ones((3, 3, 3)))  
+    del eroded_scenes
+    
+    # Step 5: Skeletonize and clean, prune skeleton 
+    skeletonized_scenes = skeletonizeScenes(dilated_scenes)
+    del dilated_scenes
+    
+    pruned_scenes3D = prune3Dscenes(skeletonized_scenes, size=30) #here removes small branches in 3d as well
+    del skeletonized_scenes
+    
+    z_projected_scenes = zProjectScenes(pruned_scenes3D) # shifting to 2D image 
+    del pruned_scenes3D
+    
+    #cleaned_2d_skeletons = cleanMipSkeleton(z_projected_scenes, min_length=100, max_length=30000) #this 
+    
+    pruned_scenes, segmented_scenes, segment_objects_list = pruneScenes(cleaned_2d_skeletons, size=30, mask=None) # side branches removal 
+    
+    skeletonizedscenes = removeLoopsScenes(pruned_scenes)
+    del pruned_scenes
+    
+    # More pruning if needed 
+    # pruned_scenes, segmented_scenes, segment_objects_list = pruneScenes(cleaned_2d_skeletons, size=30, mask=None) 
+
     
     
-    # Step 3: Remove soma
-    #filtered_scenes = apply_median_filter_to_scenes(scenes, radius=3) #recommended 
-    nosoma_scenes_cleaned = removeSomaFromAllScenes(normalized_scenes, xy_resolution=1)
-    # validate (just plotting)
-    plot_images(normalized_scenes[8][1,:,:], nosoma_scenes[8][1,:,:], 'Original', 'No Somata')
-    #del normalized_scenes  # Free memory used by the normalized scenes
-    
-    # Step 4: Apply tubeness filter
-    # sigma = 
-    tubeness_scenes = tubenessForAllScenes(processed_scenes, scale_factor=0.9)
-    del nosoma_scenes  # Free memory used by the nosoma scenes
-    
-    # threshold after TUBENESS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    
-    #Step 4.1: Validate tubeness
-    #validation = subtract_tubeness_from_nosoma(nosoma_scenes[8], tubeness_scenes[8])
-    #plot_images(tubeness_scenes[8][8,:,:], nosoma_scenes[8][8,:,:], 'Tubeness', 'No Somata')
-    #plot_images(validation[8,:,:], nosoma_scenes[8][8,:,:], 'Substracted', 'No Somata')
-    # Inside the function can be changed to see the opposite substraction
-    
-    # Step 5: Binarize and skeletonize
-    skeletonized_scenes = process_scenes_for_skeletonization(tubeness_scenes)
-    del tubeness_scenes  # Free memory used by the tubeness scenes
     
     # Step 6: Z-projection
     mip_scenes = do_mip_scenes(skeletonized_scenes)
@@ -207,5 +232,12 @@ fetch_and_plot_images(dataframe_results,
 
 
 
+# threshold after TUBENESS
+
+#Step 4.1: Validate tubeness
+#validation = subtract_tubeness_from_nosoma(nosoma_scenes[8], tubeness_scenes[8])
+#plot_images(tubeness_scenes[8][8,:,:], nosoma_scenes[8][8,:,:], 'Tubeness', 'No Somata')
+#plot_images(validation[8,:,:], nosoma_scenes[8][8,:,:], 'Substracted', 'No Somata')
+# Inside the function can be changed to see the opposite substraction
 
 

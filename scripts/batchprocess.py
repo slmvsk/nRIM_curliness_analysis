@@ -209,7 +209,6 @@ visualize3dMayavi(skeletonized_scenes[6]) # you can save snapshot in this window
 
 # cleaning 
 
-#cleaned_2d_skeletons = cleanMipSkeleton(z_projected_scenes, min_length=100, max_length=30000) #this 
 
 
 
@@ -226,6 +225,7 @@ visualize3dMayavi(pruned_scenes3D[6])
 z_projected_scenes = zProjectScenes(pruned_scenes3D)
 
 plotToCompare(brpt, z_projected_scenes[6], 'dilated scenes', 'MIP')
+#cleaned_2d_skeletons = cleanMipSkeleton(z_projected_scenes, min_length=100, max_length=30000) #this 
 
 
 # + pruning 
@@ -250,56 +250,18 @@ skeletonized_scenes, segmented_scenes, segment_objects_list = pruneScenes(skelet
 
 plotToCompare(skeletonized_scenes[7], final_skeletons[7], 'cleaned skeletons', 'noloops')
 
-# break remains branch pounts
 
-import numpy as np
-from skimage.morphology import skeletonize, thin
-from skimage.measure import label
-from skimage.morphology import remove_small_objects
-import cv2
-from skimage.color import label2rgb
-from skimage.measure import label
 
-def breakJunctionsAndLabelScenes(scenes, num_iterations=3):
-    """
-    Iterate over all scenes in a list, break skeletons at junctions and label each separate branch with a different color.
 
-    Parameters:
-        scenes (list): List of 2D skeleton images.
-        num_iterations (int): Number of iterations to break at junctions.
 
-    Returns:
-        colored_skeletons (list): List of skeleton images with separate branches color-labeled.
-    """
-    colored_skeletons = []
 
-    for i, scene in enumerate(scenes):
-        print(f"Processing scene {i + 1}/{len(scenes)}")
-        
-        try:
-            # Make a copy of the scene to process
-            broken_skel = scene.copy()
 
-            # Iterate to break junctions multiple times
-            for _ in range(num_iterations):
-                branch_points = find_branch_pts(broken_skel)
-                broken_skel = break_at_junctions(broken_skel, branch_points)
 
-            # Label connected components in the broken skeleton
-            labeled_skel = label(broken_skel, connectivity=2)
 
-            # Colorize the labeled skeleton (each label gets a different color)
-            #colored_skel = label2rgb(labeled_skel, bg_label=0)
-            colored_skel = broken_skel
 
-            # Append the colored skeleton to the list
-            colored_skeletons.append(colored_skel)
 
-        except Exception as e:
-            print(f"Error processing scene {i + 1}: {e}")
-            continue
 
-    return colored_skeletons
+
 
 broken_skeletons = breakJunctionsAndLabelScenes(skeletonized_scenes, num_iterations=3)
 
@@ -333,16 +295,16 @@ print(f"Processed skeleton connectivity: {processed_connectivity}")
 # Analyze Curliness 
 
 
-curliness, straightness, longest_path_length, max_dendritic_reach = analyzeCurliness(broken_skeletons[2])
+curliness, straightness, longest_path_length, max_dendritic_reach = analyzeCurliness(broken_skeletons[3])
 
-visualize_and_analyze_branches(broken_skeletons[2], curliness, longest_path_length, max_dendritic_reach)
+visualize_and_analyze_branches(broken_skeletons[3], curliness, longest_path_length, max_dendritic_reach)
 
 mean_straightness = np.mean(straightness)
 mean_curliness = np.mean(curliness)
 std_curliness = np.std(curliness)
 median_curliness = np.median(curliness)
 sem_curliness = std_curliness / np.sqrt(len(longest_path_length))
-print(median_curliness)
+print(np.median(straightness))
 
 
 
