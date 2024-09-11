@@ -27,7 +27,7 @@ from src.ImageProcessing.DenoisingFilters import applyGaussian, applyMedianFilte
 from src.ImageProcessing.SubstractBackground import subtractBackgroundFromScenes
 #from src.ImageProcessing.SatoTubeness import applySatoTubeness 
 from src.ImageProcessing.Binarize import removeSomaFromAllScenes, cleanBinaryScenes
-from src.ImageProcessing.Skeletonize import skeletonizeScenes, pruneScenes, zProjectScenes, cleanMipSkeleton, prune3Dscenes,removeLoops
+from src.ImageProcessing.Skeletonize import skeletonizeScenes, pruneScenes, zProjectScenes, cleanMipSkeleton, prune3Dscenes,removeLoopsScenes
 from src.ImageProcessing.Morphology import applyErosionToScenes, applyDilationToScenes
 from src.CurlinessAnalysis.AnalyzeCurliness import analyzeCurlinessBatch
 from src.ImageProcessing.Thresholding import otsuThresholdingScenes
@@ -236,19 +236,91 @@ plotToCompare(pruned_scenes[6], z_projected_scenes[6], 'cleaned skeletons', 'MIP
 
 #fill holes 
 # skeletonize again 
+#prune again ? 
 
-skeletonized_image = removeLoops(pruned_scenes[6])
-
-
-plotToCompare(pruned_scenes[6], skeletonized_image, 'cleaned skeletons', 'noloops')
+final_skeletons = removeLoopsScenes(pruned_scenes)
 
 
+plotToCompare(pruned_scenes[7], final_skeletons[7], 'cleaned skeletons', 'noloops')
+
+skeleton_scenes, segmented_scenes, segment_objects_list = pruneScenes(final_skeletons, size=40, mask=None)
+skeletonized_scenes, segmented_scenes, segment_objects_list = pruneScenes(skeleton_scenes, size=110, mask=None)
+
+
+
+plotToCompare(skeletonized_scenes[7], final_skeletons[7], 'cleaned skeletons', 'noloops')
+
+# break remains branch pounts
+
+import numpy as np
+from skimage.morphology import skeletonize, thin
+from skimage.measure import label
+from skimage.morphology import remove_small_objects
+import cv2
+from skimage.color import label2rgb
+from skimage.measure import label
+
+def breakJunctionsAndLabelScenes(scenes, num_iterations=3):
+    """
+    Iterate over all scenes in a list, break skeletons at junctions and label each separate branch with a different color.
+
+    Parameters:
+        scenes (list): List of 2D skeleton images.
+        num_iterations (int): Number of iterations to break at junctions.
+
+    Returns:
+        colored_skeletons (list): List of skeleton images with separate branches color-labeled.
+    """
+    colored_skeletons = []
+
+    for i, scene in enumerate(scenes):
+        print(f"Processing scene {i + 1}/{len(scenes)}")
+        
+        try:
+            # Make a copy of the scene to process
+            broken_skel = scene.copy()
+
+            # Iterate to break junctions multiple times
+            for _ in range(num_iterations):
+                branch_points = find_branch_pts(broken_skel)
+                broken_skel = break_at_junctions(broken_skel, branch_points)
+
+            # Label connected components in the broken skeleton
+            labeled_skel = label(broken_skel, connectivity=2)
+
+            # Colorize the labeled skeleton (each label gets a different color)
+            #colored_skel = label2rgb(labeled_skel, bg_label=0)
+            colored_skel = broken_skel
+
+            # Append the colored skeleton to the list
+            colored_skeletons.append(colored_skel)
+
+        except Exception as e:
+            print(f"Error processing scene {i + 1}: {e}")
+            continue
+
+    return colored_skeletons
+
+broken_skeletons = breakJunctionsAndLabelScenes(skeletonized_scenes, num_iterations=3)
+
+plotToCompare(skeletonized_scenes[3], broken_skeletons[3], 'cleaned skeletons', 'broken_skeleton')
 
 
 
 
+from skimage.measure import label
 
+def measure_connectivity(skeleton):
+    """Measure the number of connected components in a skeletonized image."""
+    labeled_skeleton, num_features = label(skeleton, connectivity=2, return_num=True)
+    return num_features
 
+# Example usage
+original_connectivity = measure_connectivity(skeletonized_scenes[6])
+processed_connectivity = measure_connectivity(broken_skeletons[6])
+
+print(f"Original skeleton connectivity: {original_connectivity}")
+print(f"Processed skeleton connectivity: {processed_connectivity}")
 
 
 # or analyze curliness measures branches not correctly 
@@ -260,31 +332,10 @@ plotToCompare(pruned_scenes[6], skeletonized_image, 'cleaned skeletons', 'noloop
 ###################################################
 # Analyze Curliness 
 
-results = analyzeCurlinessBatch(pruned_scenes) # fix curliness function 
 
-# Example of accessing curliness for the first scene (index 0)
+curliness, straightness, longest_path_length, max_dendritic_reach = analyzeCurliness(broken_skeletons[2])
 
-scene_index = 9  # Choose the scene you want to access
-
-# Access the curliness, median curliness, mean straightness, etc. for the first scene
-curliness = results[scene_index][0]
-median_curliness = results[scene_index][1]
-mean_straightness = results[scene_index][2]
-mean_curliness = results[scene_index][3]
-sem_curliness = results[scene_index][4]
-longest_path_lengths = results[scene_index][5]
-max_dendritic_reach = results[scene_index][6]
-
-# Print the values for the first scene
-print(f"Scene {scene_index+1} Curliness: {curliness}")
-print(f"Scene {scene_index+1} Median Curliness: {median_curliness}")
-print(f"Scene {scene_index+1} Mean Straightness: {mean_straightness}")
-print(f"Scene {scene_index+1} Mean Curliness: {mean_curliness}")
-print(f"Scene {scene_index+1} SEM Curliness: {sem_curliness}")
-print(f"Scene {scene_index+1} Longest Path Lengths: {longest_path_lengths}")
-print(f"Scene {scene_index+1} Max Dendritic Reach: {max_dendritic_reach}")
-
-
+visualize_and_analyze_branches(broken_skeletons[2], curliness, longest_path_length, max_dendritic_reach)
 
 
 
