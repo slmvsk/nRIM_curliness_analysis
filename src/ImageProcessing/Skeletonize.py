@@ -285,9 +285,10 @@ def pruneScenes(scenes, size=0, mask=None):
     
     for i, scene in enumerate(scenes):
         print(f"Processing scene {i+1}/{len(scenes)}")
-        
+        img_uint8 = scene.astype(np.uint8) * 255
+
         # Apply pruning to the current scene using prune2D function
-        pruned_img, segmented_img, segment_objects = prune2D(scene, size=size, mask=mask)
+        pruned_img, segmented_img, segment_objects = prune2D(img_uint8, size=size, mask=mask)
         
         # Append the results to the respective lists
         pruned_scenes.append(pruned_img)
@@ -313,7 +314,7 @@ def save_as_tiff(image_slice, file_name):
     tiff.imwrite(file_name, image_slice, photometric='minisblack')
 
 # Example usage to save specific slices
-#save_as_tiff(skeletonized_image, 'skeletonized_image.tif')
+#save_as_tiff(broken_skeleton, 'broken_skeleton.tif')
 #save_as_tiff(blurred_scenes[2][8, :, :], 'blurred_scene_slice_8.tif')
 
 
@@ -418,22 +419,25 @@ def removeLoops(image):
 
 def removeLoopsScenes(scenes):
     """
-    Apply the removeLoops function to each 2D scene in the 3D stack of scenes.
+    Apply the removeLoops function to each 2D image in the list of scenes.
 
     Parameters:
-        scenes (numpy.ndarray): A 3D numpy array representing a stack of 2D scenes (Z, Y, X).
+        scenes (list): A list of 2D numpy arrays representing each scene.
 
     Returns:
-        numpy.ndarray: A 3D numpy array where loops are removed and each slice is re-skeletonized.
+        list: A list of 2D numpy arrays with loops removed and re-skeletonized.
     """
-    # Initialize an empty array to store the processed scenes
-    processed_scenes = np.zeros_like(scenes)
+    # Initialize an empty list to store the processed scenes
+    processed_scenes = []
     
-    # Iterate through each scene (2D slice) in the 3D stack
-    for i in range(scenes.shape[0]):
-        print(f"Processing scene {i+1}/{scenes.shape[0]}")
+    # Iterate through each 2D scene in the list
+    for i, scene in enumerate(scenes):
+        print(f"Processing scene {i+1}/{len(scenes)}")
         
-        # Apply the removeLoops function to each 2D slice
-        processed_scenes[i, :, :] = removeLoops(scenes[i, :, :])
+        # Apply the removeLoops function to each 2D scene
+        processed_scene = removeLoops(scene)
+        
+        # Append the processed scene to the list
+        processed_scenes.append(processed_scene)
     
     return processed_scenes
