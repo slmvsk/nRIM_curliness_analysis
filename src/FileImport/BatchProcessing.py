@@ -11,6 +11,7 @@ import gc
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 from src.FileImport.DesctiptorsBasedFileSearch import getMatchingFilesList
 #from src.FileImport.BatchProcessing import 
 from src.FileImport.ReadZeissStacks import readCziFile
