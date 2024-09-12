@@ -27,6 +27,27 @@ dataframe_results = batchProcessFiles(file_list, processFile, folder_with_data)
 print(dataframe_results.head)
 dataframe_results.to_csv('/Users/tetianasalamovska/Desktop/zeis/df.csv', index=False)
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Example: Get data for file_index 0, scene_index 2
 filtered_df = df[(df['file_index'] == 0) & (df['scene_index'] == 2)]
 
@@ -39,6 +60,11 @@ plot_images(dataframe_results[(dataframe_results['file_name'] == 'IHCT_THT53_40x
 print(dataframe_results.head())
 print(dataframe_results['file_name'].unique())  # Check the unique filenames to ensure your file is listed
 print(dataframe_results['scene_index'].unique())  # Check the unique scene indices
+
+
+
+
+
 def fetch_and_plot_images(df, file_name_1, scene_index_1, file_name_2, scene_index_2):
     """
     Fetch two images based on file name and scene index, and plot them side by side.

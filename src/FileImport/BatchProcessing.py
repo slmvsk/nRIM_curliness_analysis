@@ -72,7 +72,7 @@ def processFile(file_name):
     z_projected_scenes = zProjectScenes(pruned_scenes3D) # shifting to 2D image 
     del pruned_scenes3D
     
-    #cleaned_2d_skeletons = cleanMipSkeleton(z_projected_scenes, min_length=100, max_length=30000) #this 
+    cleaned_2d_skeletons = cleanMipSkeleton(z_projected_scenes, min_length=100, max_length=30000) #this 
     
     pruned_scenes, segmented_scenes, segment_objects_list = pruneScenes(cleaned_2d_skeletons, size=30, mask=None) # side branches removal 
     
