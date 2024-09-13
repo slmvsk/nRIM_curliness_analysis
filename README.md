@@ -46,6 +46,13 @@ After this, you need to clone this repository to your local machine (basically d
 git clone https://github.com/slmvsk/nRIM_curliness_analysis.git
 cd nRIM_curliness_analysis
 ```
+Install the dependencies listed in the requirements.txt file:
+
+```bash
+pip install -r requirements.txt
+```
+
+Now ensure your image files (CZI format) are in the correct single folder structured as expected by the script. File names must be written...
 
 
 ## Usage
