@@ -43,8 +43,9 @@ pip install numpy pandas czifile scikit-image opencv-python matplotlib scikit-le
 After this, you need to clone this repository to your local machine (basically download it):
 
 ```bash
-git clone https://github.com/yourusername/dendrite-analysis-pipeline.git
-cd dendrite-analysis-pipeline
+git clone https://github.com/slmvsk/nRIM_curliness_analysis.git
+cd nRIM_curliness_analysis
+```
 
 
 ## Usage
