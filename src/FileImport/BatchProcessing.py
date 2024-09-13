@@ -114,7 +114,7 @@ def batchProcessFiles(file_list, process_function, folder_path):
         output_skeletons = processFile(file_path)
         
         # Collect each scene's data in all_rows list
-        for scene_index, cleaned_scene in enumerate(cleaned_scenes):
+        for scene_index, scene in enumerate(output_skeletons):
             all_rows.append({
                 "file_name": file_name,
                 "scene_index": scene_index,
