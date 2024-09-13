@@ -27,7 +27,7 @@ dataframe_results = batchProcessFiles(file_list, processFile, folder_with_data)
 print(dataframe_results.head)
 dataframe_results.to_csv('/Users/tetianasalamovska/Desktop/zeis/df.csv', index=False)
 
-
+curliness, straightness, longest_path_length, max_dendritic_reach = analyzeCurliness(broken_skeletons[3])
 
 
 

@@ -6,6 +6,8 @@ Created on Sun Sep  1 14:33:32 2024
 @author: tetianasalamovska
 """
 
+
+
 # Git clone repository in terminal (instructions in README.txt file)
 # Navigate to the directory: this will be replaced with real path on cluster/your computer 
 
