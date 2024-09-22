@@ -326,10 +326,19 @@ print(np.median(straightness))
 
 
 
+# plot curliness and length to see if ZERO curliness are SHORT branches 
+
+plt.figure()
+plt.scatter(longest_path_length, curliness, alpha=0.7)
+plt.xlabel('Branch Length')
+plt.ylabel('Curliness')
+plt.title('Branch Length vs. Curliness')
+plt.show()
 
 
-
-
+for label, curl, length in zip(labels, curliness, longest_path_length):
+    if curl == 0:
+        print(f"Label: {label}, Curliness: {curl}, Length: {length}")
 
 
 
