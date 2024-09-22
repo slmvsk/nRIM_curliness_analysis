@@ -247,7 +247,8 @@ def analyze_dendrite_curliness_batch(dataframe):
 
 
 import matplotlib.pyplot as plt
-from matplotlib.colors import Normalize, ScalarMappable
+from matplotlib.colors import Normalize
+from matplotlib.cm import ScalarMappable
 import numpy as np
 from skimage import measure
 
