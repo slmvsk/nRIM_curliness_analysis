@@ -227,13 +227,14 @@ visualize3dMayavi(pruned_scenes3D[6])
 
 z_projected_scenes = zProjectScenes(pruned_scenes3D)
 
-plotToCompare(brpt, z_projected_scenes[6], 'dilated scenes', 'MIP')
-#cleaned_2d_skeletons = cleanMipSkeleton(z_projected_scenes, min_length=100, max_length=30000) #this 
+cleaned_2d_skeletons = cleanMipSkeleton(z_projected_scenes, min_length=30, max_length=30000) #this 
+plotToCompare(z_projected_scenes[6], cleaned_2d_skeletons[6], 'MIP', 'clean MIP')
 
 
 # + pruning 
 pruned_scenes, segmented_scenes, segment_objects_list = pruneScenes(cleaned_2d_skeletons, size=30, mask=None)
 plotToCompare(pruned_scenes[6], z_projected_scenes[6], 'cleaned skeletons', 'MIP')
+
 
 #skeleton_no_loops = removeLoops(pruned_scenes[6])
 
@@ -244,14 +245,15 @@ plotToCompare(pruned_scenes[6], z_projected_scenes[6], 'cleaned skeletons', 'MIP
 final_skeletons = removeLoopsScenes(pruned_scenes)
 
 
-plotToCompare(pruned_scenes[7], final_skeletons[7], 'cleaned skeletons', 'noloops')
+plotToCompare(pruned_scenes[6], final_skeletons[6], 'cleaned skeletons', 'noloops')
 
 skeleton_scenes, segmented_scenes, segment_objects_list = pruneScenes(final_skeletons, size=40, mask=None)
-skeletonized_scenes, segmented_scenes, segment_objects_list = pruneScenes(skeleton_scenes, size=110, mask=None)
+#skeletonized_scenes, segmented_scenes, segment_objects_list = pruneScenes(skeleton_scenes, size=110, mask=None)
+# do second round of pruning if needed!!! 
 
 
 
-plotToCompare(skeletonized_scenes[7], final_skeletons[7], 'cleaned skeletons', 'noloops')
+plotToCompare(skeleton_scenes[7], final_skeletons[7], 'cleaned skeletons', 'noloops')
 
 
 

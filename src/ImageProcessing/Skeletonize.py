@@ -564,6 +564,29 @@ def find_branch_pts(skel_img, mask=None, label=None):
 
 
 
+
+def break_at_junctions(skel_img, branch_points):
+    """
+    Break the skeleton at the identified junction points.
+    
+    Parameters:
+        skel_img (numpy.ndarray): A 2D binary skeleton image.
+        branch_points (numpy.ndarray): Binary image with junction points (branch points) marked.
+    
+    Returns:
+        numpy.ndarray: A skeleton image with junction points removed (broken skeleton).
+    """
+    broken_skeleton = skel_img.copy()
+    
+    # Remove junction points from the skeleton to break complex intersections
+    broken_skeleton[branch_points > 0] = 0
+    
+    return broken_skeleton
+
+
+
+
+
 import numpy as np
 from skimage.morphology import skeletonize, thin
 from skimage.measure import label
@@ -571,6 +594,7 @@ from skimage.morphology import remove_small_objects
 import cv2
 from skimage.color import label2rgb
 from skimage.measure import label
+
 
 def breakJunctionsAndLabelScenes(scenes, num_iterations=3):
     """
