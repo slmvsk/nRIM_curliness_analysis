@@ -32,7 +32,7 @@ from src.ImageProcessing.SubstractBackground import subtractBackgroundFromScenes
 from src.ImageProcessing.Binarize import removeSomaFromAllScenes, cleanBinaryScenes
 from src.ImageProcessing.Skeletonize import skeletonizeScenes, pruneScenes, zProjectScenes, cleanMipSkeleton, prune3Dscenes,removeLoopsScenes, breakJunctionsAndLabelScenes
 from src.ImageProcessing.Morphology import applyErosionToScenes, applyDilationToScenes
-from src.CurlinessAnalysis.AnalyzeCurliness import analyzeCurlinessBatch
+from src.CurlinessAnalysis.AnalyzeCurliness import analyzeCurliness, visualize_and_analyze_branches
 from src.ImageProcessing.Thresholding import otsuThresholdingScenes
 
 
@@ -266,11 +266,11 @@ plotToCompare(skeleton_scenes[7], final_skeletons[7], 'cleaned skeletons', 'nolo
 
 
 
+# this can be skipped if dont care about curliness function performance 
+# agressive , adjust 
+broken_skeletons = breakJunctionsAndLabelScenes(skeletonized_scenes, num_iterations=2)
 
-
-broken_skeletons = breakJunctionsAndLabelScenes(skeletonized_scenes, num_iterations=3)
-
-plotToCompare(skeletonized_scenes[3], broken_skeletons[3], 'cleaned skeletons', 'broken_skeleton')
+plotToCompare(skeleton_scenes[7], broken_skeletons[7], 'cleaned skeletons', 'broken_skeleton')
 
 
 
@@ -296,13 +296,15 @@ print(f"Processed skeleton connectivity: {processed_connectivity}")
 
 
 
-###################################################
+
+
+#################################################### all good up to here 
 # Analyze Curliness 
 
 
 curliness, straightness, longest_path_length, max_dendritic_reach = analyzeCurliness(broken_skeletons[3])
 
-visualize_and_analyze_branches(broken_skeletons[3], curliness, longest_path_length, max_dendritic_reach)
+visualize_and_analyze_branches(broken_skeletons[7], curliness, longest_path_length, max_dendritic_reach)
 
 mean_straightness = np.mean(straightness)
 mean_curliness = np.mean(curliness)
