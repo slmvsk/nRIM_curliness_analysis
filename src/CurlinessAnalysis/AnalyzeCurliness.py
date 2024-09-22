@@ -18,11 +18,8 @@ Created on Mon Jul 22 16:16:21 2024
 # will have curliness equal 0 (1-1 = 0). More curved branches have higher values approaching 1
 
 
-import numpy as np
-import matplotlib.pyplot as plt
 from skimage import measure, io, morphology
 from scipy.ndimage import distance_transform_edt
-from skimage import measure
 
 # NOTES: break points 
 # clean skeleton, keep this method
@@ -35,44 +32,85 @@ from skimage import measure
 # if the image before skeletonizing have loops remove
 
 
+import numpy as np
+import matplotlib.pyplot as plt
+from skimage import measure
+from matplotlib.colors import Normalize
+from matplotlib.cm import ScalarMappable
+
 def analyzeCurliness(image):
     # Label the skeleton
     labeled_skeleton = measure.label(image)
-    properties = measure.regionprops(labeled_skeleton) # give parameters 
+    properties = measure.regionprops(labeled_skeleton)
 
     longest_path_length = []
     max_dendritic_reach = []
+    labels = []
 
-    # Calculate measures
     for prop in properties:
-        # longest_path_length 
-        longest_path_length.append(prop.area)  # Assuming area as a proxy for path length
-        
-        # Calculate straight-line (Euclidean) distance between the end points of the skeleton
-        minr, minc, maxr, maxc = prop.bbox
-        distance = np.sqrt((maxr - minr) ** 2 + (maxc - minc) ** 2)
-        max_dendritic_reach.append(distance)
+        label = prop.label
+        coords = prop.coords  # N x 2 array of (row, col) coordinates
+        num_pixels = coords.shape[0]
+        if num_pixels < 2:
+            continue  # Skip branches with less than 2 pixels
+        # Compute all pairwise Euclidean distances
+        from scipy.spatial.distance import pdist
+        distances = pdist(coords, 'euclidean')
+        max_distance = distances.max()
+        # Append values
+        labels.append(label)
+        longest_path_length.append(num_pixels)
+        max_dendritic_reach.append(max_distance)
 
-    # Output each branch's measures
-    for length, reach in zip(longest_path_length, max_dendritic_reach):
-        print(f"Branch: Length = {length}, Max Reach = {reach}")
-
-    # Convert lists to arrays for numerical operations
     longest_path_length = np.array(longest_path_length)
     max_dendritic_reach = np.array(max_dendritic_reach)
 
-    # Calculate straightness and curliness
+    # Compute straightness and curliness
     straightness = np.clip(max_dendritic_reach / longest_path_length, 0, 1)
     curliness = 1 - straightness
 
-    # Calculate average, std, and sem of curliness
-    mean_straightness = np.mean(straightness)
-    mean_curliness = np.mean(curliness)
-    std_curliness = np.std(curliness)
-    median_curliness = np.median(curliness)
-    sem_curliness = std_curliness / np.sqrt(len(longest_path_length))
+    return curliness, straightness, longest_path_length.tolist(), max_dendritic_reach.tolist(), labeled_skeleton, labels
 
-    return curliness, straightness, longest_path_length.tolist(), max_dendritic_reach.tolist()
+
+
+#def analyzeCurliness(image):
+    # Label the skeleton
+    #labeled_skeleton = measure.label(image)
+    #properties = measure.regionprops(labeled_skeleton) # give parameters 
+
+    #longest_path_length = []
+    #max_dendritic_reach = []
+
+    # Calculate measures
+    #for prop in properties:
+        # longest_path_length 
+        #longest_path_length.append(prop.area)  # Assuming area as a proxy for path length
+        
+        # Calculate straight-line (Euclidean) distance between the end points of the skeleton
+        #minr, minc, maxr, maxc = prop.bbox
+        #distance = np.sqrt((maxr - minr) ** 2 + (maxc - minc) ** 2)
+        #max_dendritic_reach.append(distance)
+
+    # Output each branch's measures
+    #for length, reach in zip(longest_path_length, max_dendritic_reach):
+        #print(f"Branch: Length = {length}, Max Reach = {reach}")
+
+    # Convert lists to arrays for numerical operations
+    #longest_path_length = np.array(longest_path_length)
+    #max_dendritic_reach = np.array(max_dendritic_reach)
+
+    # Calculate straightness and curliness
+    #straightness = np.clip(max_dendritic_reach / longest_path_length, 0, 1)
+    #curliness = 1 - straightness
+
+    # Calculate average, std, and sem of curliness
+    #mean_straightness = np.mean(straightness)
+    #mean_curliness = np.mean(curliness)
+    #std_curliness = np.std(curliness)
+    #median_curliness = np.median(curliness)
+    #sem_curliness = std_curliness / np.sqrt(len(longest_path_length))
+
+    #return curliness, straightness, longest_path_length.tolist(), max_dendritic_reach.tolist()
 
 
 # Max dendritic reach (Euclidean distance between endpoints) is greater than the 
@@ -252,22 +290,15 @@ from matplotlib.cm import ScalarMappable
 import numpy as np
 from skimage import measure
 
-def visualize_and_analyze_branches(image, curliness, longest_path_length, max_dendritic_reach):
-    # Label the skeleton
-    labeled_skeleton = measure.label(image)
-    norm = Normalize(vmin=0, vmax=1)  # Normalize the curliness values to [0, 1] for coloring
+def visualize_and_analyze_branches(labeled_skeleton, curliness, labels, longest_path_length, max_dendritic_reach):
+    norm = Normalize(vmin=0, vmax=1)
+    cmap = plt.cm.nipy_spectral
 
-    # Create a vibrant and diverse color map
-    cmap = plt.cm.nipy_spectral  # Use 'nipy_spectral' for bright, diverse colors
-    
     # Create a color image where each label is colored by its curliness
-    colored_skeleton = np.zeros((*image.shape, 3))
-    properties = measure.regionprops(labeled_skeleton)
-    
-    for prop, curl in zip(properties, curliness):
-        color = cmap(norm(curl))[:3]  # Get the RGB values from the colormap
-        # Apply the color to the corresponding segment (branch) in the image
-        colored_skeleton[tuple(prop.coords.T)] = color
+    colored_skeleton = np.zeros((*labeled_skeleton.shape, 3))
+    for label, curl in zip(labels, curliness):
+        color = cmap(norm(curl))[:3]
+        colored_skeleton[labeled_skeleton == label] = color
 
     # Plot the colored skeleton
     plt.figure(figsize=(8, 6))
@@ -286,8 +317,7 @@ def visualize_and_analyze_branches(image, curliness, longest_path_length, max_de
     colors = mappable.to_rgba(curliness)
     n, bins, patches = plt.hist(curliness, bins=20, alpha=0.7)
     bin_centers = 0.5 * (bins[:-1] + bins[1:])
-    
-    # Color each bin in the histogram based on the curliness
+
     for bin_center, patch in zip(bin_centers, patches):
         color = cmap(norm(bin_center))
         patch.set_facecolor(color)
@@ -306,14 +336,12 @@ def visualize_and_analyze_branches(image, curliness, longest_path_length, max_de
     plt.xlabel('Straightness')
 
     plt.subplot(2, 2, 3)
-    plt.hist(longest_path_length, bins=100, color='green', alpha=0.7)
-    plt.xlim([0, 200])  # Set x-axis limits for example 
+    plt.hist(longest_path_length, bins=50, color='green', alpha=0.7)
     plt.title('Longest Path Length Distribution')
     plt.xlabel('Length')
 
     plt.subplot(2, 2, 4)
-    plt.hist(max_dendritic_reach, bins=100, color='red', alpha=0.7)
-    plt.xlim([0, 300])  # Set x-axis limits for example 
+    plt.hist(max_dendritic_reach, bins=50, color='red', alpha=0.7)
     plt.title('Maximum Dendritic Reach Distribution')
     plt.xlabel('Reach')
 
@@ -331,13 +359,13 @@ def visualize_and_analyze_branches(image, curliness, longest_path_length, max_de
 
 
 
+
 ############
 from matplotlib.colors import Normalize, LinearSegmentedColormap
 from matplotlib.cm import ScalarMappable  # Correct import for ScalarMappable
 
 import matplotlib.pyplot as plt
 from matplotlib.colors import Normalize
-from matplotlib.cm import ScalarMappable
 from skimage import measure
 import numpy as np
 

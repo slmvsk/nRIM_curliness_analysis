@@ -302,9 +302,20 @@ print(f"Processed skeleton connectivity: {processed_connectivity}")
 # Analyze Curliness 
 
 
-curliness, straightness, longest_path_length, max_dendritic_reach = analyzeCurliness(broken_skeletons[3])
 
-visualize_and_analyze_branches(broken_skeletons[7], curliness, longest_path_length, max_dendritic_reach)
+
+
+
+curliness, straightness, longest_path_length, max_dendritic_reach, labeled_skeleton, label = analyzeCurliness(broken_skeletons[7])
+
+plotToCompare(broken_skeletons[7], labeled_skeleton, 'cleaned skeletons', 'labeled_skeleton')
+
+
+
+
+
+
+visualize_and_analyze_branches(labeled_skeleton, curliness, label, longest_path_length, max_dendritic_reach)
 
 mean_straightness = np.mean(straightness)
 mean_curliness = np.mean(curliness)
