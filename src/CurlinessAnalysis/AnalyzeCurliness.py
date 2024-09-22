@@ -367,7 +367,7 @@ def visualize_and_analyze_curliness(image, curliness):
     norm = Normalize(vmin=0, vmax=1)  # Normalize the curliness values to [0, 1] for coloring
     
     # Use a colormap with high diversity, like 'jet' or 'nipy_spectral'
-    cmap = plt.cm.nipy_spectral  # You can switch to 'jet' or any other colormap
+    cmap = plt.cm.jet  # You can switch to 'jet' or any other colormap
 
     # Apply color map to labeled regions based on curliness
     colored_skeleton = np.zeros((*image.shape, 3))  # To store RGB values for the skeleton
