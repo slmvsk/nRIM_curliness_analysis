@@ -306,7 +306,7 @@ print(f"Processed skeleton connectivity: {processed_connectivity}")
 
 
 
-curliness, straightness, longest_path_length, max_dendritic_reach, labeled_skeleton, label = analyzeCurliness(broken_skeletons[1])
+curliness, straightness, longest_path_length, max_dendritic_reach, labeled_skeleton, label = analyzeCurliness(broken_skeletons[2])
 
 plotToCompare(broken_skeletons[1], labeled_skeleton, 'cleaned skeletons', 'labeled_skeleton')
 
@@ -336,7 +336,7 @@ plt.title('Branch Length vs. Curliness')
 plt.show()
 
 
-for label, curl, length in zip(labels, curliness, longest_path_length):
+for label, curl, length in zip(label, curliness, longest_path_length):
     if curl == 0:
         print(f"Label: {label}, Curliness: {curl}, Length: {length}")
 
