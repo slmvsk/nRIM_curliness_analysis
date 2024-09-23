@@ -9,7 +9,7 @@ Created on Thu Sep 12 08:03:07 2024
 import sys
 sys.path.append('/Users/tetianasalamovska/Documents/GitHub/nRIM_curliness_analysis') 
 
-from src.FileImport.BatchProcessing import processFile, batchProcessFiles
+from src.FileImport.BatchFunction import processFile, batchProcessFiles
 
 # Example usage
 folder_with_data = '/Users/tetianasalamovska/Desktop/zeis'

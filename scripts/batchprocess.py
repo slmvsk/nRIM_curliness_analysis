@@ -300,8 +300,11 @@ print(f"Processed skeleton connectivity: {processed_connectivity}")
 
 #################################################### all good up to here but make broke skelet function less harsh
 # Analyze Curliness 
-
-
+# input a df and output extended df with information PER BRANCH (TIDY DATA)
+# then completly different analysis for fractality and separate df 
+# then compute means from df1 and merge or compare with df2 fractality (per scene level, not per branch)
+# to understand it better I need to know how will ny fractality data look like so before putting it into df function 
+# I will work on fractality (below this)
 
 
 
@@ -343,23 +346,8 @@ for label, curl, length in zip(label, curliness, longest_path_length):
         print(f"Label: {label}, Curliness: {curl}, Length: {length}")
 
 
-# Plotting mean curliness across groups 
+################################## Fractality analysis 
 
-
-# Example usage
-#curliness, median_curliness, mean_straightness, mean_curliness, sem_curliness, branch_distances, branch_lengths = analyze_dendrite_curliness_3d(cleaned_skeleton)
-# Retrieve the image data for scene index 2
-# We assume that 'file_name' or another identifier may be needed if there are multiple entries for the same scene index.
-# Here, I'm directly accessing by index if the scene index is used as a row index. If not, you'd filter by conditions.
-#image_data = dataframe_results[dataframe_results['scene_index'] == 10]['cleaned_scene'].iloc[0]
-
-
-# Now apply the analyze function
-#properties, curliness, median_curliness, mean_straightness, mean_curliness, sem_curliness, longest_path_length, max_dendritic_reach = analyze_dendrite_curliness(image_data)
-#print("Mean Straightness:", mean_straightness)
-#print("Mean Curliness:", median_curliness)
-#print("Longest Path Length:", longest_path_length)
-#print("Maximum Dendritic Reach:", max_dendritic_reach)
 
 
 

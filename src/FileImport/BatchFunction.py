@@ -87,7 +87,7 @@ def processFile(file_name):
     
     print(f"Finished processing file: {file_name}")
     
-    return output_skeletons
+    return output_skeletons #which are broken_skeletones 
 
 
 
