@@ -298,7 +298,7 @@ print(f"Processed skeleton connectivity: {processed_connectivity}")
 
 
 
-#################################################### all good up to here 
+#################################################### all good up to here but make broke skelet function less harsh
 # Analyze Curliness 
 
 
@@ -306,9 +306,9 @@ print(f"Processed skeleton connectivity: {processed_connectivity}")
 
 
 
-curliness, straightness, longest_path_length, max_dendritic_reach, labeled_skeleton, label = analyzeCurliness(broken_skeletons[2])
+curliness, straightness, longest_path_length, max_dendritic_reach, labeled_skeleton, label = analyzeCurliness(broken_skeletons[3])
 
-plotToCompare(broken_skeletons[1], labeled_skeleton, 'cleaned skeletons', 'labeled_skeleton')
+plotToCompare(broken_skeletons[2], labeled_skeleton, 'cleaned skeletons', 'labeled_skeleton')
 
 
 
@@ -326,7 +326,9 @@ print(np.median(straightness))
 
 
 
-# plot curliness and length to see if ZERO curliness are SHORT branches 
+# plot curliness vs length to see the correlation !!!
+# longer branches are usually more curly what is expected but not always!!!!
+
 
 plt.figure()
 plt.scatter(longest_path_length, curliness, alpha=0.7)
@@ -335,37 +337,11 @@ plt.ylabel('Curliness')
 plt.title('Branch Length vs. Curliness')
 plt.show()
 
-
+# check for zero curliness!!!!!!!
 for label, curl, length in zip(label, curliness, longest_path_length):
     if curl == 0:
         print(f"Label: {label}, Curliness: {curl}, Length: {length}")
 
-
-
-
-
-
-
-
-# Plotting longest_path_length
-plt.figure(figsize=(6, 4))
-plt.hist(curliness, bins=100, color='blue', alpha=0.7)
-plt.title('Histogram of longest_path_length')
-plt.xlabel('Length')
-plt.ylabel('Frequency')
-plt.xlim([0, 1])  # Set x-axis limits
-plt.ylim([0, 6])  # Optionally adjust the y-axis to change how density appears
-plt.show()
-
-# Plotting max_dendritic_reach
-plt.figure(figsize=(6, 4))
-plt.hist(branch_distances, bins=10000, color='green', alpha=0.7)
-plt.title('Histogram of max_dendritic_reach')
-plt.xlabel('max_reach')
-plt.ylabel('Frequency')
-plt.xlim([0, 300])  # Set x-axis limits for example 
-plt.ylim([0, 50])  # Optionally adjust the y-axis to change how density appears
-plt.show()
 
 # Plotting mean curliness across groups 
 
