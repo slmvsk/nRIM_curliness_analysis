@@ -38,7 +38,43 @@ from skimage import measure
 from matplotlib.colors import Normalize
 from matplotlib.cm import ScalarMappable
 
+import networkx as nx
+from skimage import measure, morphology
+from scipy.spatial.distance import euclidean
+
+def compute_geodesic_length(branch_mask, start, end):
+    import networkx as nx
+
+    # Build the graph from the skeleton
+    G = nx.Graph()
+    indices = np.transpose(np.nonzero(branch_mask))
+    for idx in indices:
+        y, x = idx
+        # Consider all 8-connected neighbors
+        for dy in [-1, 0, 1]:
+            for dx in [-1, 0, 1]:
+                if dy == 0 and dx == 0:
+                    continue
+                ny, nx_ = y + dy, x + dx
+                if 0 <= ny < branch_mask.shape[0] and 0 <= nx_ < branch_mask.shape[1]:
+                    if branch_mask[ny, nx_]:
+                        # Euclidean distance between pixels (1 for orthogonal, sqrt(2) for diagonal)
+                        weight = np.hypot(dy, dx)
+                        G.add_edge((y, x), (ny, nx_), weight=weight)
+    # Compute shortest path length
+    try:
+        geodesic_length = nx.shortest_path_length(G, source=start, target=end, weight='weight')
+    except nx.NetworkXNoPath:
+        geodesic_length = 0
+    return geodesic_length
+
+
 def analyzeCurliness(image):
+    import numpy as np
+    from skimage import measure
+    from scipy.spatial.distance import euclidean
+    import networkx as nx
+
     # Label the skeleton
     labeled_skeleton = measure.label(image)
     properties = measure.regionprops(labeled_skeleton)
@@ -49,18 +85,41 @@ def analyzeCurliness(image):
 
     for prop in properties:
         label = prop.label
-        coords = prop.coords  # N x 2 array of (row, col) coordinates
+        coords = prop.coords
         num_pixels = coords.shape[0]
         if num_pixels < 2:
-            continue  # Skip branches with less than 2 pixels
-        # Compute all pairwise Euclidean distances
-        from scipy.spatial.distance import pdist
-        distances = pdist(coords, 'euclidean')
-        max_distance = distances.max()
+            continue
+
+        # Create a mask for the current branch
+        branch_mask = (labeled_skeleton == label)
+
+        # Find endpoints of the branch
+        endpoints = find_endpoints(branch_mask)
+        if len(endpoints) < 2:
+            continue  # Cannot compute if less than 2 endpoints
+
+        # For branches with multiple endpoints, consider all pairs
+        max_geodesic_length = 0
+        max_euclidean_dist = 0
+        for i in range(len(endpoints)):
+            for j in range(i+1, len(endpoints)):
+                ep1 = endpoints[i]
+                ep2 = endpoints[j]
+                # Compute geodesic path length between endpoints
+                geodesic_length = compute_geodesic_length(branch_mask, ep1, ep2)
+                # Euclidean distance between the two endpoints
+                euclidean_dist = euclidean(ep1, ep2)
+                if geodesic_length > max_geodesic_length:
+                    max_geodesic_length = geodesic_length
+                    max_euclidean_dist = euclidean_dist
+
+        if max_geodesic_length == 0:
+            continue
+
         # Append values
         labels.append(label)
-        longest_path_length.append(num_pixels)
-        max_dendritic_reach.append(max_distance)
+        longest_path_length.append(max_geodesic_length)
+        max_dendritic_reach.append(max_euclidean_dist)
 
     longest_path_length = np.array(longest_path_length)
     max_dendritic_reach = np.array(max_dendritic_reach)
@@ -71,54 +130,66 @@ def analyzeCurliness(image):
 
     return curliness, straightness, longest_path_length.tolist(), max_dendritic_reach.tolist(), labeled_skeleton, labels
 
+def find_endpoints(skeleton):
+    from scipy.ndimage import convolve
+
+    # Ensure the skeleton is binary
+    skeleton = skeleton.astype(np.uint8)
+
+    # Define a kernel to count neighbors
+    kernel = np.array([[1,1,1],
+                       [1,10,1],
+                       [1,1,1]])
+
+    # Convolve the skeleton with the kernel
+    convolved = convolve(skeleton, kernel, mode='constant', cval=0)
+
+    # For each pixel, subtract 10 (the pixel's own value multiplied by 10 in the kernel center)
+    neighbor_count = (convolved - 10) * skeleton
+
+    # Endpoints are pixels with only one neighbor
+    endpoints = (neighbor_count == 1)
+
+    # Get the coordinates of endpoints
+    endpoint_coords = np.column_stack(np.nonzero(endpoints))
+
+    return [tuple(coord) for coord in endpoint_coords]
 
 
 #def analyzeCurliness(image):
     # Label the skeleton
     #labeled_skeleton = measure.label(image)
-    #properties = measure.regionprops(labeled_skeleton) # give parameters 
+    #properties = measure.regionprops(labeled_skeleton)
 
-    #longest_path_length = []
-    #max_dendritic_reach = []
+    #longest_path_length = [] #geodesic
+    #max_dendritic_reach = [] #euclidean
+    #labels = []
 
-    # Calculate measures
     #for prop in properties:
-        # longest_path_length 
-        #longest_path_length.append(prop.area)  # Assuming area as a proxy for path length
-        
-        # Calculate straight-line (Euclidean) distance between the end points of the skeleton
-        #minr, minc, maxr, maxc = prop.bbox
-        #distance = np.sqrt((maxr - minr) ** 2 + (maxc - minc) ** 2)
-        #max_dendritic_reach.append(distance)
+        #label = prop.label
+        #coords = prop.coords  # N x 2 array of (row, col) coordinates
+        #num_pixels = coords.shape[0]
+        #if num_pixels < 2:
+            #continue  # Skip branches with less than 2 pixels
+        # Compute all pairwise Euclidean distances
+        #from scipy.spatial.distance import pdist
+        #distances = pdist(coords, 'euclidean')
+        #max_distance = distances.max()
+        # Append values
+        #labels.append(label)
+        #longest_path_length.append(num_pixels)
+        #max_dendritic_reach.append(max_distance)
 
-    # Output each branch's measures
-    #for length, reach in zip(longest_path_length, max_dendritic_reach):
-        #print(f"Branch: Length = {length}, Max Reach = {reach}")
-
-    # Convert lists to arrays for numerical operations
     #longest_path_length = np.array(longest_path_length)
     #max_dendritic_reach = np.array(max_dendritic_reach)
 
-    # Calculate straightness and curliness
+    # Compute straightness and curliness
     #straightness = np.clip(max_dendritic_reach / longest_path_length, 0, 1)
     #curliness = 1 - straightness
 
-    # Calculate average, std, and sem of curliness
-    #mean_straightness = np.mean(straightness)
-    #mean_curliness = np.mean(curliness)
-    #std_curliness = np.std(curliness)
-    #median_curliness = np.median(curliness)
-    #sem_curliness = std_curliness / np.sqrt(len(longest_path_length))
-
-    #return curliness, straightness, longest_path_length.tolist(), max_dendritic_reach.tolist()
+    #return curliness, straightness, longest_path_length.tolist(), max_dendritic_reach.tolist(), labeled_skeleton, labels
 
 
-# Max dendritic reach (Euclidean distance between endpoints) is greater than the 
-# longest path length, which can occur in some edge cases, especially if the skeleton 
-# has loops or inaccuracies in labeling the structure.
-
-
-#!!!!!!!!!!!!! not always length is larger than shortest path
 
 
 def analyzeCurlinessBatch(scenes_2d):
