@@ -354,11 +354,11 @@ for label, curl, length in zip(label, curliness, longest_path_length):
 #pruned_scenes, segmented_scenes, segment_objects_list = pruneScenes(cleaned_2d_skeletons, size=30, mask=None)
 plotToCompare(pruned_scenes[6], z_projected_scenes[6], 'cleaned skeletons', 'MIP')
 
-
+from src.CurlinessAnalysis.boxCount import boxCount
 
 
 # Perform box counting
-sizes, counts = box_count(pruned_scenes[7])
+sizes, counts = boxCount(pruned_scenes[7])
 
 # Convert to logarithmic scale
 log_sizes = np.log(sizes)
