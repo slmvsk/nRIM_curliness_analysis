@@ -129,6 +129,82 @@ def batchProcessFiles(file_list, process_function, folder_path):
     return results_df
 
 
-
 def release_memory(variable):
     del variable
+
+
+################### for fractal, you can modify 
+
+def processFileforFrac(file_name):
+    # Include your preprocessing pipeline here
+    # Make sure to adjust the paths and parameters as needed
+
+    # Step 1: Read the file as a list of 3D numpy arrays (scenes)
+    scenes, metadata = readCziFile(file_name)
+    
+    # Step 2: Normalize intensity 
+    normalized_scenes = normalizeScenes(scenes, percentiles=[1,99])
+    del scenes  # Free memory used by the original scenes
+    
+    # Step 3: Denoising 
+    blurred_scenes = applyGaussian(normalized_scenes, sigma=2)
+    del normalized_scenes
+
+    # Step 4: Background subtraction and contrast enhancement 
+    subtracted_scenes = subtractBackgroundFromScenes(blurred_scenes, radius=25)
+    del blurred_scenes
+    
+    median_scenes = applyMedianFilter(subtracted_scenes, size=3)
+    del subtracted_scenes
+    
+    stretched_scenes = applyContrastStretching(median_scenes, lower_percentile=1, upper_percentile=99)
+    del median_scenes
+    
+    # Step 5: Remove soma
+    binary_scenes = otsuThresholdingScenes(stretched_scenes)  # Adjust as needed
+    del stretched_scenes
+    
+    # Step 6: Cleaning
+    cleaned_scenes = cleanBinaryScenes(binary_scenes, min_size=4000) 
+    del binary_scenes
+    
+    eroded_scenes = applyErosionToScenes(cleaned_scenes, iterations=2, structure=np.ones((3, 3, 3)))
+    del cleaned_scenes
+    
+    dilated_scenes = applyDilationToScenes(eroded_scenes, iterations=2, structure=np.ones((3, 3, 3)))  
+    del eroded_scenes
+    
+    # Step 7: Skeletonize and clean, prune skeleton 
+    skeletonized_scenes = skeletonizeScenes(dilated_scenes)
+    del dilated_scenes
+    
+    pruned_scenes3D = prune3Dscenes(skeletonized_scenes, size=30)  # Remove small branches in 3D
+    del skeletonized_scenes
+    
+    z_projected_scenes = zProjectScenes(pruned_scenes3D)  # Shift to 2D image
+    del pruned_scenes3D
+    
+    cleaned_2d_skeletons = cleanMipSkeleton(z_projected_scenes, min_length=20, max_length=30000)
+    del z_projected_scenes
+    
+    pruned_scenes, segmented_scenes, segment_objects_list = pruneScenes(cleaned_2d_skeletons, size=20, mask=None)  # Side branches removal 
+    del cleaned_2d_skeletons
+
+    #skeletonized_scenes = removeLoopsScenes(pruned_scenes)
+    #del pruned_scenes
+    
+    # More pruning if needed 
+    # pruned_scenes, segmented_scenes, segment_objects_list = pruneScenes(cleaned_2d_skeletons, size=30, mask=None) 
+
+    #output_skeletons = breakJunctionsAndLabelScenes(skeletonized_scenes, num_iterations=3)
+    #del skeletonized_scenes
+    
+    print(f"Finished preprocessing file: {file_name}")
+    
+    # Return the list of 2D numpy arrays (scenes) for fractal analysis
+    return pruned_scenes 
+
+
+
+
+
