@@ -358,7 +358,7 @@ from src.CurlinessAnalysis.boxCount import boxCount
 
 
 # Perform box counting
-sizes, counts = boxCount(pruned_scenes[7])
+sizes, counts = boxCount(pruned_scenes[0])
 
 # Convert to logarithmic scale
 log_sizes = np.log(sizes)
