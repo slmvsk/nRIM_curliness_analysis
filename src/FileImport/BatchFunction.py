@@ -205,7 +205,7 @@ def processFileforFrac(file_name):
     print(f"Finished preprocessing file: {file_name}")
     
     # Return the list of 2D numpy arrays (scenes) for fractal analysis
-    return pruned_scenes 
+    return z_projected_scenes 
 
 
 
