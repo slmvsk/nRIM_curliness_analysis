@@ -4,16 +4,22 @@
 Created on Sat Sep 28 12:55:55 2024
 
 @author: tetianasalamovska
+
+
+Analysis inspired by https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5439180/
+They have their matlab code but I didn't look into it because describing the logic to gpt worked out
+
 """
 
-def box_count(binary_image, min_box_size=2):
-    import numpy as np
+
+import numpy as np
+
+def boxCount(binary_image, min_box_size=2):
     
     """ Calculate Box Sizes: Use powers of 2 to define box sizes.
     	Loop Over Box Sizes: For each box size, divide the image into boxes.
         Count Non-Empty Boxes: For each box, check if it contains any part of the dendrite.
         Collect Counts: Store the number of non-empty boxes for each box size. """
-
     # Get the size of the image
     rows, cols = binary_image.shape
 
