@@ -13,9 +13,11 @@ They have their matlab code but I didn't look into it because describing the log
 
 
 import numpy as np
+import os
 import sys
+import pandas as pd
 sys.path.append('/Users/tetianasalamovska/Documents/GitHub/nRIM_curliness_analysis') 
-from src.FileImport.BatchFunction import 
+from src.FileImport.BatchFunction import processFileforFrac
 
 
 
@@ -183,7 +185,9 @@ def batchProcessBoxCount(file_list, folder_path, min_box_size=2):
     return results_df
 
 
+result_frac_df = batchProcessBoxCount(file_list, folder_with_data, min_box_size=2)
 
+result_frac_df
 
 
 

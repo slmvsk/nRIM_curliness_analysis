@@ -175,20 +175,20 @@ def processFileforFrac(file_name):
     del eroded_scenes
     
     # Step 7: Skeletonize and clean, prune skeleton 
-    skeletonized_scenes = skeletonizeScenes(dilated_scenes)
-    del dilated_scenes
+    #skeletonized_scenes = skeletonizeScenes(dilated_scenes)
+    #del dilated_scenes
     
-    pruned_scenes3D = prune3Dscenes(skeletonized_scenes, size=30)  # Remove small branches in 3D
-    del skeletonized_scenes
+    #pruned_scenes3D = prune3Dscenes(skeletonized_scenes, size=30)  # Remove small branches in 3D
+    #del skeletonized_scenes
     
-    z_projected_scenes = zProjectScenes(pruned_scenes3D)  # Shift to 2D image
-    del pruned_scenes3D
+    #z_projected_scenes = zProjectScenes(pruned_scenes3D)  # Shift to 2D image
+    #del pruned_scenes3D
     
-    cleaned_2d_skeletons = cleanMipSkeleton(z_projected_scenes, min_length=20, max_length=30000)
-    del z_projected_scenes
+    #cleaned_2d_skeletons = cleanMipSkeleton(z_projected_scenes, min_length=20, max_length=30000)
+    #del z_projected_scenes
     
-    pruned_scenes, segmented_scenes, segment_objects_list = pruneScenes(cleaned_2d_skeletons, size=20, mask=None)  # Side branches removal 
-    del cleaned_2d_skeletons
+    #pruned_scenes, segmented_scenes, segment_objects_list = pruneScenes(cleaned_2d_skeletons, size=20, mask=None)  # Side branches removal 
+    #del cleaned_2d_skeletons
 
     #skeletonized_scenes = removeLoopsScenes(pruned_scenes)
     #del pruned_scenes
@@ -198,6 +198,9 @@ def processFileforFrac(file_name):
 
     #output_skeletons = breakJunctionsAndLabelScenes(skeletonized_scenes, num_iterations=3)
     #del skeletonized_scenes
+    
+    # here is not a part of orig function but a test 
+    z_projected_scenes = zProjectScenes(dilated_scenes)  # Shift to 2D image
     
     print(f"Finished preprocessing file: {file_name}")
     
