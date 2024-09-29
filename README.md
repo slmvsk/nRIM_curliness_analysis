@@ -56,6 +56,17 @@ Now ensure your image files (CZI format) are in the correct single folder struct
 
 ## Usage
 
+### Curliness Analysis 
+
+Curliness is a measure that quantifies how much a branch deviates from being straight. In this analysis, we compute the curliness of each branch in a skeletonized image by comparing the Euclidean distance between the endpoints of the branch to the actual path length along the branch (geodesic distance). 
+
+The input must be skeletonized image optionally after pruning (removing small side branches), but breaking junction action and removing loops action must be done to accurately calculate curliness. 
+
+To compute curliness, the function firstly computes straightness, which is defined as the ratio of the Euclidean distance to the geodesic path length.
+
+$$
+\text{Straightness} = \text{Euclidean Distance}/\text{Geodesic Path Length} 
+$$
 
 
 ### Fractality Analysis 
