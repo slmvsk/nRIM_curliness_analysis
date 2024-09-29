@@ -64,7 +64,9 @@ Here I also implement box-counting method to estimate the fractal dimension of 2
 
 The output of the core boxCount function is log-log plot of box sizes (the sizes of the boxes used in the box-counting method, typically powers of 2) and box counts (the number of boxes at each size that contain part of the structure) with linear fit to the data. Each point on the plot represents the log-transformed count for a specific box size. A straight-line pattern on the log-log plot suggests a fractal (self-similar) structure. Deviations from linearity may indicate non-fractal behavior or scales where the fractal approximation is less accurate. Then the linear fit provides the slope and intercept of the best-fit line through the data points. The slope of the line is directly related to the fractal dimension, because fractal dimension (FD) is calculated as: 
 
-Fractal Dimension (FD) = -slope,
+$$
+\text{Fractal Dimension (FD)} = -\text{slope}
+$$
 
 where the negative sign accounts for the inverse relationship between box size and count. 
 
