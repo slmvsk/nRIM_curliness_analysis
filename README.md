@@ -134,13 +134,22 @@ stretched_scenes = applyContrastStretching(median_scenes, lower_percentile=1, up
 
 <img width="582" alt="Screenshot 2024-09-29 at 14 57 44" src="https://github.com/user-attachments/assets/11d02ac8-02b0-4709-8b3b-7d3ccac313a9">
 
+
+### Step 5: Remove soma / Thresholding / Binarising / Segmenting 
+
+Here the thresholding take place. There was removeSoma function from Binarise.py that finds optimal thresholds, but for now I apply Otsu thresholding (from src.ImageProcessing.Thresholding) to binarise images (now we work with zeros and ones, where 0 is background). Ideally, you apply adaptive thresholding and there are commented functions for that in source code, but they need to be tested and validated (+fixed if needed). If making code/pipeline better - this is the place to start. 
+
 ```
-# Step 5: Remove soma
-binary_scenes = otsuThresholdingScenes(stretched_scenes) # maybe put old nosoma adaptive thresholding function back here 
+binary_scenes = otsuThresholdingScenes(stretched_scenes) # maybe put old nosoma adaptive thresholding function back here ? 
 ```
-   
+
+<img width="587" alt="Screenshot 2024-09-29 at 15 05 33" src="https://github.com/user-attachments/assets/2fa0fab6-2145-46cf-862b-76b91e5099e8">
+
+### Step 6: Cleaning
+
+
+
 ```
-# Step 6: Cleaning
 cleaned_scenes = cleanBinaryScenes(binary_scenes, min_size=4000) 
 
 eroded_scenes = applyErosionToScenes(cleaned_scenes, iterations=2, structure=np.ones((3, 3, 3)))
