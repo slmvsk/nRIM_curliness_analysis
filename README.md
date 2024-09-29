@@ -82,7 +82,10 @@ To normalize intensity we will apply the linear contrast stretching to an entire
 normalized_scenes = normalizeScenes(scenes, percentiles=[1,99])
 ```
 Example of normalizing intensities for one slice of one scene (=image stack): 
+
 <img width="600" alt="Screenshot 2024-09-29 at 14 31 59" src="https://github.com/user-attachments/assets/27d54dab-4e73-4cf4-b73b-548ecf7c5226">
+
+
 You can also apply validation function validateImageAdjustment and check the output: 
 
 Scene shape: (20, 1024, 1024)
@@ -91,12 +94,18 @@ Adjusted scene shape: (20, 1024, 1024)
 Adjusted scene - min, max: 0 65535
 
 
+### Step 3: Denoising 
 
+Dendrites in these images will be impossible to segment without some of denoising steps, morphological orerations etc. First thing will be common denoising techniques like Gaussian blur, which will help with sand noise and will smooth edges a little bit. 
 
 ```
-# Step 3: Denoising 
 blurred_scenes = applyGaussian(normalized_scenes, sigma=2)
 ```
+
+It has sigma parameter that represents the standard deviation of the Gaussian distribution used to create the blur. Higher sigma = more significant smoothing effect, because it means that when we apply a kernel, pixels farther from the central pixel contribute more to the final blurred pixel value, leading to a more pronounced blur effect over a wider area. 
+
+<img width="584" alt="Screenshot 2024-09-29 at 14 37 58" src="https://github.com/user-attachments/assets/9196cdbe-01e9-4e3d-976c-6ace74f4080b">
+
 
 ```
 # Step 4: Background substraction and contrast enhancement 
