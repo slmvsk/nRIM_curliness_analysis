@@ -30,7 +30,7 @@ from src.ImageProcessing.DenoisingFilters import applyGaussian, applyMedianFilte
 from src.ImageProcessing.SubstractBackground import subtractBackgroundFromScenes
 #from src.ImageProcessing.SatoTubeness import applySatoTubeness 
 from src.ImageProcessing.Binarize import removeSomaFromAllScenes, cleanBinaryScenes
-from src.ImageProcessing.Skeletonize import skeletonizeScenes, pruneScenes, zProjectScenes, cleanMipSkeleton, prune3Dscenes,removeLoopsScenes, breakJunctionsAndLabelScenes
+from src.ImageProcessing.Skeletonize import skeletonizeScenes, pruneScenes, zProjectScenes, cleanMipSkeleton, prune3Dscenes,removeLoopsScenes, find_branch_pts, breakJunctionsAndLabelScenes 
 from src.ImageProcessing.Morphology import applyErosionToScenes, applyDilationToScenes
 from src.CurlinessAnalysis.AnalyzeCurliness import analyzeCurliness, visualize_and_analyze_branches
 from src.ImageProcessing.Thresholding import otsuThresholdingScenes
@@ -272,7 +272,9 @@ plotToCompare(skeleton_scenes[7], final_skeletons[7], 'cleaned skeletons', 'nolo
 broken_skeletons = breakJunctionsAndLabelScenes(final_skeletons, num_iterations=2)
 
 plotToCompare(final_skeletons[7], broken_skeletons[7], 'noloops', 'broken skeleton')
-
+print(type(label))
+print(type(find_branch_pts))
+print(type(break_at_junctions))
 
 
 

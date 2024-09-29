@@ -11,7 +11,7 @@ from skimage.morphology import skeletonize_3d
 import gc
 from skimage import img_as_ubyte
 from scipy.spatial.distance import euclidean
-from skimage.measure import label, regionprops
+from skimage.measure import regionprops
 import os
 import cv2
 from plantcv.plantcv import params
@@ -154,7 +154,7 @@ def cleanMipSkeleton(scenes_2d, min_length=10, max_length=100):
         binary_image = (image_2d > 0).astype(np.uint8)
         
         # Label the connected components in the skeleton
-        labeled_skeleton = label(binary_image)
+        labeled_skeleton = label_f(binary_image)
         
         # Measure the properties of the labeled regions
         props = regionprops(labeled_skeleton)
@@ -323,7 +323,7 @@ def save_as_tiff(image_slice, file_name):
 
 # 3D prune 
 
-from skimage.measure import label
+
 from scipy.ndimage import distance_transform_edt
 
 def prune3D(skel_img, size=0):
@@ -340,7 +340,7 @@ def prune3D(skel_img, size=0):
     pruned_img = skel_img.copy()
 
     # Label the connected components in 3D
-    labeled_img, num_features = label(skel_img, connectivity=3, return_num=True)
+    labeled_img, num_features = label_f(skel_img, connectivity=3, return_num=True)
 
     # Measure the size (e.g., length or volume) of each segment in 3D and remove small segments
     if size > 0:
@@ -589,11 +589,10 @@ def break_at_junctions(skel_img, branch_points):
 
 import numpy as np
 from skimage.morphology import skeletonize, thin
-from skimage.measure import label
 from skimage.morphology import remove_small_objects
 import cv2
 from skimage.color import label2rgb
-from skimage.measure import label
+from skimage.measure import label as label_f
 
 
 #def breakJunctionsAndLabelScenes(scenes, num_iterations=3):
@@ -629,6 +628,7 @@ from skimage.measure import label
     #return colored_skeletons
 
 
+
 def breakJunctionsAndLabelScenes(scenes, num_iterations=3):
     """
     Iterate over all scenes in a list, break skeletons at junctions, and label each separate branch with a different color.
@@ -646,20 +646,36 @@ def breakJunctionsAndLabelScenes(scenes, num_iterations=3):
         print(f"Processing scene {i + 1}/{len(scenes)}")
         
         try:
+            if scene is None:
+                raise ValueError(f"Scene {i + 1} is None")
+
             # Ensure the input skeleton is in uint8 format
             broken_skel = (scene > 0).astype(np.uint8)
 
             # Iterate to break junctions multiple times
             for _ in range(num_iterations):
-                branch_points = find_branch_pts(broken_skel)  # Assuming this function returns branch points as binary
-                branch_points_uint8 = (branch_points > 0).astype(np.uint8)  # Ensure branch points are uint8
+                branch_points = find_branch_pts(broken_skel)
+                
+                # Check if branch_points is valid
+                if branch_points is None:
+                    raise ValueError(f"find_branch_pts returned None for scene {i + 1}")
+                
+                branch_points_uint8 = (branch_points > 0).astype(np.uint8)
                 broken_skel = break_at_junctions(broken_skel, branch_points_uint8)
+                
+                # Check if broken_skel is valid
+                if broken_skel is None:
+                    raise ValueError(f"break_at_junctions returned None for scene {i + 1}")
 
             # Label connected components in the broken skeleton
-            labeled_skel = label(broken_skel, connectivity=2)
+            labeled_skel = label_f(broken_skel, connectivity=2)
+            if labeled_skel is None:
+                raise ValueError(f"label returned None for scene {i + 1}")
 
             # Colorize the labeled skeleton (each label gets a different color)
             colored_skel = label2rgb(labeled_skel, bg_label=0, kind='avg')
+            if colored_skel is None:
+                raise ValueError(f"label2rgb returned None for scene {i + 1}")
 
             # Append the colored skeleton to the list
             colored_skeletons.append(colored_skel)
@@ -669,7 +685,3 @@ def breakJunctionsAndLabelScenes(scenes, num_iterations=3):
             continue
 
     return colored_skeletons
-
-
-
-
