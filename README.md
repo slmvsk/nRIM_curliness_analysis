@@ -147,11 +147,21 @@ binary_scenes = otsuThresholdingScenes(stretched_scenes) # maybe put old nosoma 
 
 ### Step 6: Cleaning
 
-
+If not applying fancy thresholding, then you need to clean you images after binarising them better. 
+First step is removing small objects (objects smaller that min_size). This function works with 3D connectivity so It takes in to the count Z-dimension. The min_size is measured in pixels (voxels for 3D images). 
 
 ```
-cleaned_scenes = cleanBinaryScenes(binary_scenes, min_size=4000) 
+cleaned_scenes = cleanBinaryScenes(binary_scenes, min_size=4000)
+```
+<img width="583" alt="Screenshot 2024-09-29 at 15 14 21" src="https://github.com/user-attachments/assets/c46b62e3-ed9a-4025-b30c-5a51c5278b8e">
 
+You can still see small pixels because some of them are large enough in Z-dimension. This is a 3D view from X axis. 
+
+<img width="443" alt="Screenshot 2024-09-29 at 15 16 45" src="https://github.com/user-attachments/assets/4d1fcaa1-b1d8-446f-92b3-0584c63e5233">
+
+Then I apply classic erosion-dilation steps to smooth image a little bit more and remove not useful "spines".  
+
+```
 eroded_scenes = applyErosionToScenes(cleaned_scenes, iterations=2, structure=np.ones((3, 3, 3)))
 
 dilated_scenes = applyDilationToScenes(eroded_scenes, iterations=2, structure=np.ones((3, 3, 3)))  
