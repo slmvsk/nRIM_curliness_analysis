@@ -61,8 +61,71 @@ You will mainly work with scripts, unless you will need to adjust some parameter
 
 I recommend test your analysis with first manual script, playing around with parameters and find the best optimal compromise in the preprocessing pipeline. Then go to src function ProcessFile (src.FileImport.BatchFunction) that consists of all the steps in the manual script but without plotting, and comment or uncomment some steps or adjust parameters if needed the same way you have it in manual script. Then import or run this function again, set your folder_with_data path and press "Run" button. The first script is more for analysis under someone's control, maybe you want to control the process in the details and analyse files one by one plotting each "scene" (image) after each step or checking images shapes or intensity distributions etc. 
 
+## Preprocessing steps 
 
-## Usage
+My main processing function includes steps: 
+
+```
+# Step 1: Read the file as a list of 3D numpy arrays (scenes)
+scenes, metadata = readCziFile(file_name)
+```
+```
+# Step 2: Normalize intensity 
+normalized_scenes = normalizeScenes(scenes, percentiles=[1,99])
+```
+```
+# Step 3: Denoising 
+blurred_scenes = applyGaussian(normalized_scenes, sigma=2)
+```
+
+```
+# Step 4: Background substraction and contrast enhancement 
+subtracted_scenes = subtractBackgroundFromScenes(blurred_scenes, radius=25)
+
+median_scenes = applyMedianFilter(subtracted_scenes, size=3)
+
+stretched_scenes = applyContrastStretching(median_scenes, lower_percentile=1, upper_percentile=99)
+```
+
+    
+```
+# Step 5: Remove soma
+binary_scenes = otsuThresholdingScenes(stretched_scenes) # maybe put old nosoma adaptive thresholding function back here 
+```
+   
+```
+# Step 6: Cleaning
+cleaned_scenes = cleanBinaryScenes(binary_scenes, min_size=4000) 
+
+eroded_scenes = applyErosionToScenes(cleaned_scenes, iterations=2, structure=np.ones((3, 3, 3)))
+
+dilated_scenes = applyDilationToScenes(eroded_scenes, iterations=2, structure=np.ones((3, 3, 3)))  
+```
+
+    
+```
+# Step 7: Skeletonize and clean, prune skeleton 
+skeletonized_scenes = skeletonizeScenes(dilated_scenes)
+
+pruned_scenes3D = prune3Dscenes(skeletonized_scenes, size=30) #here removes small branches in 3d as well
+
+z_projected_scenes = zProjectScenes(pruned_scenes3D) # shifting to 2D image 
+
+cleaned_2d_skeletons = cleanMipSkeleton(z_projected_scenes, min_length=100, max_length=30000) #this 
+    
+pruned_scenes, segmented_scenes, segment_objects_list = pruneScenes(cleaned_2d_skeletons, size=30, mask=None) # side branches removal 
+```
+
+```
+# Step 8: Removing loops and breaking junctions 
+skeletonizedscenes = removeLoopsScenes(pruned_scenes)
+
+output_skeletons = breakJunctionsAndLabelScenes(skeletonizedscenes, num_iterations=3)
+``` 
+
+
+
+## Analysis 
 
 ### Curliness Analysis 
 
