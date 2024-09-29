@@ -627,14 +627,12 @@ from skimage.measure import label as label_f
 
     #return colored_skeletons
 
-
-
 def breakJunctionsAndLabelScenes(scenes, num_iterations=3):
     """
     Iterate over all scenes in a list, break skeletons at junctions, and label each separate branch with a different color.
 
     Parameters:
-        scenes (list): List of 2D skeleton images.
+        scenes (list): List of 2D skeleton images in True/False format.
         num_iterations (int): Number of iterations to break at junctions.
 
     Returns:
@@ -646,36 +644,22 @@ def breakJunctionsAndLabelScenes(scenes, num_iterations=3):
         print(f"Processing scene {i + 1}/{len(scenes)}")
         
         try:
-            if scene is None:
-                raise ValueError(f"Scene {i + 1} is None")
+            # Convert the scene from True/False to 8-bit unsigned integer format
+            scene = (scene.astype(np.uint8)) * 255
 
-            # Ensure the input skeleton is in uint8 format
-            broken_skel = (scene > 0).astype(np.uint8)
+            # Make a copy of the scene to process
+            broken_skel = scene.copy()
 
             # Iterate to break junctions multiple times
             for _ in range(num_iterations):
                 branch_points = find_branch_pts(broken_skel)
-                
-                # Check if branch_points is valid
-                if branch_points is None:
-                    raise ValueError(f"find_branch_pts returned None for scene {i + 1}")
-                
-                branch_points_uint8 = (branch_points > 0).astype(np.uint8)
-                broken_skel = break_at_junctions(broken_skel, branch_points_uint8)
-                
-                # Check if broken_skel is valid
-                if broken_skel is None:
-                    raise ValueError(f"break_at_junctions returned None for scene {i + 1}")
+                broken_skel = break_at_junctions(broken_skel, branch_points)
 
             # Label connected components in the broken skeleton
             labeled_skel = label_f(broken_skel, connectivity=2)
-            if labeled_skel is None:
-                raise ValueError(f"label returned None for scene {i + 1}")
 
             # Colorize the labeled skeleton (each label gets a different color)
-            colored_skel = label2rgb(labeled_skel, bg_label=0, kind='avg')
-            if colored_skel is None:
-                raise ValueError(f"label2rgb returned None for scene {i + 1}")
+            colored_skel = label2rgb(labeled_skel, bg_label=0)
 
             # Append the colored skeleton to the list
             colored_skeletons.append(colored_skel)
