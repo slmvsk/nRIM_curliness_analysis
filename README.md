@@ -159,7 +159,9 @@ You can still see small pixels because some of them are large enough in Z-dimens
 
 <img width="443" alt="Screenshot 2024-09-29 at 15 16 45" src="https://github.com/user-attachments/assets/4d1fcaa1-b1d8-446f-92b3-0584c63e5233">
 
-Then I apply classic erosion-dilation steps to smooth image a little bit more and remove not useful "spines".  
+Then I apply classic erosion-dilation steps to smooth image a little bit more and remove not useful "spines".  The principle of the parameters here are similar to what we alredy saw before. In morphological operations like erosion, a structuring element determines the shape and size of the neighborhood around each pixel or voxel (for 3D images). The structuring element acts as a “template” that slides over the image to apply the morphological transformation. Erosion will examine each voxel in the 3D image and compare it with its neighbors defined by the structuring element. In this case, the neighbors form a 3x3x3 cube around each voxel.If any part of this cube (structuring element) contains a 0 when centered on the voxel, that voxel will be set to 0 in the output image. Thus, erosion tends to “shrink” objects, especially at their edges, by removing pixels/voxels.
+
+Dilation will examine each voxel in the 3D image and compare it with its neighbors defined by the structuring element. In this case, the neighbors form a 3x3x3 cube around each voxel. If any part of this cube (structuring element) overlaps with a “1” (foreground pixel/voxel) when centered on the voxel, that voxel will be set to 1 in the output image. Therefore, dilation tends to “expand” objects, adding pixels/voxels around their edges.
 
 ```
 eroded_scenes = applyErosionToScenes(cleaned_scenes, iterations=2, structure=np.ones((3, 3, 3)))
@@ -167,26 +169,64 @@ eroded_scenes = applyErosionToScenes(cleaned_scenes, iterations=2, structure=np.
 dilated_scenes = applyDilationToScenes(eroded_scenes, iterations=2, structure=np.ones((3, 3, 3)))  
 ```
 
-    
+<img width="589" alt="Screenshot 2024-09-29 at 15 23 17" src="https://github.com/user-attachments/assets/029d8f86-a901-4543-bf6a-1ac6922ef0f2">
+
+The difference is small, but It helps when working with binary image and you are limited only to morphological operations. 
+
+### Step 7: Skeletonize and clean, prune skeleton 
+
+For curliness analysis we need to skeletonize our images, Z-rpject them (from here we work with 2D), prune (remove small side branches) and remove small objects. 
+The prune2D function (for batch - pruneScenes)  removes small branches from a skeletonized 2D image based on a specified length (size). It identifies individual skeleton segments, retains those longer than size, and prunes shorter ones. The function returns the cleaned (pruned) skeleton image, a segmented version of the pruned skeleton, and a list of the remaining segment contours. This is the main operation here that will help us untangle skeletons when projected. 
+
 ```
-# Step 7: Skeletonize and clean, prune skeleton 
 skeletonized_scenes = skeletonizeScenes(dilated_scenes)
 
-pruned_scenes3D = prune3Dscenes(skeletonized_scenes, size=30) #here removes small branches in 3d as well
+```
 
+Skeletonized image example (3D): 
+
+<img width="489" alt="Screenshot 2024-09-29 at 15 33 03" src="https://github.com/user-attachments/assets/8f937290-24c8-486b-84ea-3fe667a5d560">
+
+```
+pruned_scenes3D = prune3Dscenes(skeletonized_scenes, size=30) #here removes small branches in 3d as well
+```
+After "pruning" in 3D: 
+
+<img width="554" alt="Screenshot 2024-09-29 at 15 34 25" src="https://github.com/user-attachments/assets/bfcd8040-5022-4271-acd5-d6cbe02b6965">
+
+```
 z_projected_scenes = zProjectScenes(pruned_scenes3D) # shifting to 2D image 
 
-cleaned_2d_skeletons = cleanMipSkeleton(z_projected_scenes, min_length=100, max_length=30000) #this 
-    
-pruned_scenes, segmented_scenes, segment_objects_list = pruneScenes(cleaned_2d_skeletons, size=30, mask=None) # side branches removal 
+cleaned_2d_skeletons = cleanMipSkeleton(z_projected_scenes, min_length=100, max_length=30000) #this
 ```
 
+Z-projected vs small objects removed (here you can adjust size and remove more):
+<img width="631" alt="Screenshot 2024-09-29 at 15 36 15" src="https://github.com/user-attachments/assets/e64fad59-43da-430c-8ffc-ecfdef37a44f">
+
 ```
-# Step 8: Removing loops and breaking junctions 
+pruned_scenes, segmented_scenes, segment_objects_list = pruneScenes(cleaned_2d_skeletons, size=30, mask=None) # side branches removal
+
+```
+<img width="631" alt="Screenshot 2024-09-29 at 15 39 36" src="https://github.com/user-attachments/assets/e3a352d6-25e3-4427-ba9c-00fff4ef05ac">
+
+Of course, you can do it more aggresive and you will not need next steps, but I want to save as much as possible of small objects, because they still have curliness information. 
+
+
+### Step 8: Removing loops and breaking junctions 
+
+Thses functions just do what they say. They are crucial for curliness analysis. 
+```
 skeletonizedscenes = removeLoopsScenes(pruned_scenes)
+```
+Result: 
 
+<img width="632" alt="Screenshot 2024-09-29 at 15 42 22" src="https://github.com/user-attachments/assets/4bcaffd6-4534-48d9-b38f-9c5e9331f73c">
+
+```
 output_skeletons = breakJunctionsAndLabelScenes(skeletonizedscenes, num_iterations=3)
 ``` 
+Result: 
+
 
 
 
