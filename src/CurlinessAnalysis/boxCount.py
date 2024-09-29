@@ -168,12 +168,12 @@ def batchProcessBoxCount(file_list, folder_path, min_box_size=2):
                 "file_name": file_name,
                 "scene_index": result["scene_index"],
                 "fractal_dimension": result["fractal_dimension"],
-                # Additional data can be included if needed
-                # "log_sizes": result["log_sizes"],
-                # "log_counts": result["log_counts"],
-                # "coefficients": result["coefficients"],
-                # "sizes": result["sizes"],
-                # "counts": result["counts"]
+                # Additional data can be included if needed (COMMENT if not needed)
+                "log_sizes": result["log_sizes"],
+                "log_counts": result["log_counts"],
+                "coefficients": result["coefficients"],
+                "sizes": result["sizes"],
+                "counts": result["counts"]
             }
             all_rows.append(row)
         
@@ -185,10 +185,18 @@ def batchProcessBoxCount(file_list, folder_path, min_box_size=2):
     return results_df
 
 
-result_frac_df = batchProcessBoxCount(file_list, folder_with_data, min_box_size=2)
+#result_frac_df2 = batchProcessBoxCount(file_list, folder_with_data, min_box_size=2)
 
-result_frac_df
+# this df is from skeletonized data 
 
+#result_frac_df # range 1.2-1.4
 
+# second df is not skeletonized images, just binary 
+
+#result_frac_df2 # range 1.6-1.8 (more like numbers from papers about neuropil)
+
+# plot output from preprocessing to check them, it means do not del scenes in the above function 
+# it looks okay, but it is possible that 3D analysis will suit better here, 3D box counting fD from 2 to 3
+# It will take not much time to rewrite the code for 3D if needed! 
 
 

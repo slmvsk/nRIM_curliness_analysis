@@ -188,9 +188,6 @@ visualize3dMayavi(dilated_scenes[7])
 
 
 
-
-
-
 # Step 4. Skeletonization 
 
     # 4.1. Skeletonization itself 
@@ -386,9 +383,12 @@ print(f'Estimated Fractal Dimension: {fractal_dimension:.4f}')
 	#•	FD = 1: Represents a simple, linear structure (like a straight line).
 	#•	FD = 2: Indicates a structure that completely fills a 2D plane (like a filled square).
 
+# here this is for BATCH DF 
 
+from src.CurlinessAnalysis.boxCount import batchProcessBoxCount
 
-
+result_frac_df2 = batchProcessBoxCount(file_list, folder_with_data, min_box_size=2)
+# comment data that we don't need to include in the df (in the function)
 
 
 
