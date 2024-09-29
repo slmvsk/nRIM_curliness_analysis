@@ -68,6 +68,17 @@ $$
 \text{Straightness} = \text{Euclidean Distance}/\text{Geodesic Path Length} 
 $$
 
+Straightness values range from 0 to 1, where 1 indicates a perfectly straight branch. 
+Curliness is defines as: 
+
+$$
+\text{Curliness} = 1 - \text{Straightness}
+$$
+
+Curliness values range from 0 to 1, where 1 indicates maximum curliness. 
+
+
+
 
 ### Fractality Analysis 
 
