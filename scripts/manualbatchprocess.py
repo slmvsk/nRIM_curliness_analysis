@@ -85,7 +85,11 @@ normalized_scenes = normalizeScenes(scenes, percentiles=[1,99])
 # Optionally visualize one of the slices in the one of the stacks before and after 
 # Here it is important to remember image shape structure: scenes - your list, [4] - index of scenes,
 # in Python index starts from 0, [8,:,:] - this means 8 slice with all X and Y dimension values
-plotToCompare(scenes[6][10,:,:], normalized_scenes[6][10,:,:], 'Original', 'Normalized')
+plotToCompare(scenes[7][10,:,:], normalized_scenes[7][10,:,:], 'Original', 'Normalized')
+
+
+validateImageAdjustment(scenes[7], normalized_scenes[7])
+
 
 # Inspect histograms if needed 
 plotImageHistogram(normalized_scenes[6], bins=256, pixel_range=(0, 65535), title='Pixel Intensity Histogram for Normalized Image')
@@ -95,7 +99,7 @@ plotImageHistogram(normalized_scenes[6], bins=256, pixel_range=(0, 65535), title
     # 2.2. Denoising and optional morphological techniques
 blurred_scenes = applyGaussian(normalized_scenes, sigma=2)
 
-plotToCompare(normalized_scenes[6][10,:,:], blurred_scenes[6][10,:,:], 'Normalized', 'Gaussian Blur')
+plotToCompare(normalized_scenes[7][10,:,:], blurred_scenes[7][10,:,:], 'Normalized', 'Gaussian Blur')
 
     # 2.3. Background substraction, try radius from 25 to 35++
     
@@ -104,7 +108,7 @@ plotToCompare(normalized_scenes[6][10,:,:], blurred_scenes[6][10,:,:], 'Normaliz
 
 subtracted_scenes = subtractBackgroundFromScenes(blurred_scenes, radius=25)
 
-plotToCompare(subtracted_scenes[6][10,:,:], blurred_scenes[6][10,:,:], 'Substracted', 'Gaussian Blur')
+plotToCompare(subtracted_scenes[7][10,:,:], blurred_scenes[7][10,:,:], 'Substracted', 'Gaussian Blur')
 
 # Might need some contrast enhancement here !!!!!!!!!!!!!!!!
 
@@ -122,12 +126,12 @@ plotToCompare(subtracted_scenes[6][10,:,:], blurred_scenes[6][10,:,:], 'Substrac
 # opening, closing? clean? stronger filtering here?? other? 
 
 median_scenes = applyMedianFilter(subtracted_scenes, size=4) # choose 3
-plotToCompare(subtracted_scenes[6][10,:,:], median_scenes[6][10,:,:], 'Substracted', 'Filter')
+plotToCompare(subtracted_scenes[7][10,:,:], median_scenes[7][10,:,:], 'Substracted', 'Filter')
 
 
 stretched_scenes = applyContrastStretching(median_scenes, lower_percentile=1, upper_percentile=99)
-plotToCompare(subtracted_scenes[6][10,:,:], stretched_scenes[6][10,:,:], 'Substracted', 'Stretched')
-plotToCompare(blurred_scenes[6][10,:,:], stretched_scenes[6][10,:,:], 'Blurr', 'Stretched')
+plotToCompare(subtracted_scenes[7][10,:,:], stretched_scenes[7][10,:,:], 'Substracted', 'Stretched')
+plotToCompare(median_scenes[7][10,:,:], stretched_scenes[7][10,:,:], 'Median scenes', 'Stretched')
 
 
 # Step 3. Thresholding and binarisation (previously "soma removal") + cleaning
@@ -138,7 +142,7 @@ plotToCompare(blurred_scenes[6][10,:,:], stretched_scenes[6][10,:,:], 'Blurr', '
 #plotToCompare(nosoma_scenes[6][10,:,:], stretched_scenes[6][10,:,:], 'Nosoma', 'Stretched')
 
 binary_scenes = otsuThresholdingScenes(stretched_scenes)
-plotToCompare(binary_scenes[6][10,:,:], stretched_scenes[6][10,:,:], 'Binary', 'Stretched')
+plotToCompare(binary_scenes[7][10,:,:], stretched_scenes[7][10,:,:], 'Binary', 'Stretched')
 
 
 
@@ -160,7 +164,7 @@ plotToCompare(binary_scenes[6][10,:,:], stretched_scenes[6][10,:,:], 'Binary', '
     # 3.2. CLeaning 
 cleaned_scenes = cleanBinaryScenes(binary_scenes, min_size=4000) #must work in 3D 
 
-plotToCompare(binary_scenes[6][10,:,:], cleaned_scenes[6][10,:,:], 'Nosoma', 'Cleaned')
+plotToCompare(binary_scenes[7][10,:,:], cleaned_scenes[7][10,:,:], 'Binary', 'Cleaned #1')
 
 
 # Save as tiff or visualize in 3D 
@@ -176,7 +180,7 @@ plotToCompare(eroded_scenes[6][10,:,:], cleaned_scenes[6][10,:,:], 'eroded scene
 
 dilated_scenes = applyDilationToScenes(eroded_scenes, iterations=2, structure=np.ones((3, 3, 3)))  # Apply dilation with a 3x3x3 structuring element
 
-plotToCompare(dilated_scenes[6][10,:,:], cleaned_scenes[6][10,:,:], 'dilated scenes', 'before erosion')
+plotToCompare(dilated_scenes[7][10,:,:], cleaned_scenes[7][10,:,:], 'after erosion-dilation', 'before erosion-dilation')
 
 
 visualize3dMayavi(dilated_scenes[7])
@@ -194,7 +198,7 @@ visualize3dMayavi(dilated_scenes[7])
 skeletonized_scenes = skeletonizeScenes(dilated_scenes) # So far so good 
 
 
-visualize3dMayavi(skeletonized_scenes[6]) # you can save snapshot in this window 
+visualize3dMayavi(skeletonized_scenes[7]) # you can save snapshot in this window 
 
 
 #pruned_img, segmented_img, segment_objects = prune3D(skeletonized_scenes[6], size=30)
@@ -216,7 +220,7 @@ visualize3dMayavi(skeletonized_scenes[6]) # you can save snapshot in this window
 
 pruned_scenes3D = prune3Dscenes(skeletonized_scenes, size=30)
 
-visualize3dMayavi(pruned_scenes3D[6])
+visualize3dMayavi(pruned_scenes3D[7])
 
 
 
@@ -224,13 +228,13 @@ visualize3dMayavi(pruned_scenes3D[6])
 
 z_projected_scenes = zProjectScenes(pruned_scenes3D)
 
-cleaned_2d_skeletons = cleanMipSkeleton(z_projected_scenes, min_length=30, max_length=30000) #this 
-plotToCompare(z_projected_scenes[6], cleaned_2d_skeletons[6], 'MIP', 'clean MIP')
+cleaned_2d_skeletons = cleanMipSkeleton(z_projected_scenes, min_length=20, max_length=30000) #this 
+plotToCompare(z_projected_scenes[7], cleaned_2d_skeletons[7], 'MIP', 'clean MIP')
 
 
 # + pruning 
 pruned_scenes, segmented_scenes, segment_objects_list = pruneScenes(cleaned_2d_skeletons, size=30, mask=None)
-plotToCompare(pruned_scenes[6], z_projected_scenes[6], 'cleaned skeletons', 'MIP')
+plotToCompare(pruned_scenes[7], z_projected_scenes[7], 'pruned skeletons', 'MIP')
 
 
 #skeleton_no_loops = removeLoops(pruned_scenes[6])
@@ -242,7 +246,7 @@ plotToCompare(pruned_scenes[6], z_projected_scenes[6], 'cleaned skeletons', 'MIP
 final_skeletons = removeLoopsScenes(pruned_scenes)
 
 
-plotToCompare(pruned_scenes[6], final_skeletons[6], 'cleaned skeletons', 'noloops')
+plotToCompare(pruned_scenes[7], final_skeletons[7], 'pruned skeletons', 'noloops')
 
 skeleton_scenes, segmented_scenes, segment_objects_list = pruneScenes(final_skeletons, size=40, mask=None)
 #skeletonized_scenes, segmented_scenes, segment_objects_list = pruneScenes(skeleton_scenes, size=110, mask=None)
@@ -265,9 +269,9 @@ plotToCompare(skeleton_scenes[7], final_skeletons[7], 'cleaned skeletons', 'nolo
 
 # this can be skipped if dont care about curliness function performance 
 # agressive , adjust 
-broken_skeletons = breakJunctionsAndLabelScenes(skeletonized_scenes, num_iterations=2)
+broken_skeletons = breakJunctionsAndLabelScenes(final_skeletons, num_iterations=2)
 
-plotToCompare(skeleton_scenes[7], broken_skeletons[7], 'cleaned skeletons', 'broken_skeleton')
+plotToCompare(final_skeletons[7], broken_skeletons[7], 'noloops', 'broken skeleton')
 
 
 
