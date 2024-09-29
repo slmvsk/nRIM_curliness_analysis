@@ -92,7 +92,14 @@ $$
 
 where the negative sign accounts for the inverse relationship between box size and count. 
 
+
+<img width="417" alt="Screenshot 2024-09-29 at 13 40 43" src="https://github.com/user-attachments/assets/3d61e8e7-ca64-4912-9bb4-91e9b010ae31">
+
+
+
 If performed on the skeletonized dendrites, it shows lower "fractality" in the range of 1.2-1.4, and when performed on original-wide binary image, it is showing FD in the range of 1.6 - 1.8, which are more realistic numbers for neuropil to give. You can easily adjust the input images by commenting or uncommenting some preprocessing steps in the main preprocessing function processFileforFrac (src.FileImport.BatchFunction). 
+
+
 
 
 
