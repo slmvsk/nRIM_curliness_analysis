@@ -107,16 +107,33 @@ It has sigma parameter that represents the standard deviation of the Gaussian di
 <img width="584" alt="Screenshot 2024-09-29 at 14 37 58" src="https://github.com/user-attachments/assets/9196cdbe-01e9-4e3d-976c-6ace74f4080b">
 
 
+### Step 4: Background substraction and contrast enhancement 
+
+Next step will be the substract background (with all its noise) function that uses a white top-hat filter on a 3D image stack. The function creates a 2D disk-shaped structuring element with a specified radius. This element helps identify and subtract the background from each slice of the 3D stack.
+
 ```
-# Step 4: Background substraction and contrast enhancement 
-subtracted_scenes = subtractBackgroundFromScenes(blurred_scenes, radius=25)
+subtracted_scenes = subtractBackgroundFromScenes(blurred_scenes, radius=25) # 25 is fine
+```
+A larger radius means the filter will subtract broader and larger background structures, useful for images with significant background noise or large objects.
+A smaller radius focuses on finer details, removing smaller background elements while retaining the primary features.
 
+<img width="584" alt="Screenshot 2024-09-29 at 14 49 14" src="https://github.com/user-attachments/assets/9c7d065f-2d86-4ab4-b74c-dc14eeb312b3">
+
+After that I am applying median filter that is a brother-filter of Gaussian blur. The size defines the dimensions of the filtering window (kernel) used to process the image. This window slides across the image, replacing each pixel’s value with the median value of all the pixel values within the window. For 2D it requires 2 dimensions and for 3D - 3, but when one single integer is provided, the filter will use a square window (ex. 3 x 3 x 3). Smaller size preserves more details and edges in the image.
+
+```
 median_scenes = applyMedianFilter(subtracted_scenes, size=3)
+```
+This step is not mandatory and by eye you will not see a difference. 
 
+Next step will be applying contrast stretching again, which is optional, but recommended for better visualisation. 
+
+```
 stretched_scenes = applyContrastStretching(median_scenes, lower_percentile=1, upper_percentile=99)
 ```
 
-    
+<img width="582" alt="Screenshot 2024-09-29 at 14 57 44" src="https://github.com/user-attachments/assets/11d02ac8-02b0-4709-8b3b-7d3ccac313a9">
+
 ```
 # Step 5: Remove soma
 binary_scenes = otsuThresholdingScenes(stretched_scenes) # maybe put old nosoma adaptive thresholding function back here 
