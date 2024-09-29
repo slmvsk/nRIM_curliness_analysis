@@ -55,6 +55,12 @@ Now ensure your image files (CZI format) are in the correct single folder struct
 
 ### Folder structure
 
+There are two main folders: src and scripts. In the src folder you can find files with functions that are sorted in 3 main categories: FileImport (reading images, metadata extraction, plotting and batch processing), CurlinessAnalysis (also has fractality analysis), and ImageProcessing (everything from normalizing images to skeletonization). 
+
+You will mainly work with scripts, unless you will need to adjust some parameters in one of the cases. There are 2 scripts: one for manual run with plotting and each step validation with the opportunity to analyze one or few files ajusting parameters in real time. It is called "manualbatchprocess.py". Another script "runAnalysis" is made for you to batch process files without your supervision. You just insert a folder of your interest and collect output dataframes later. Let's start with the second case when you acctualy need to look into source code to adjust settings in the src function ProcessFile (src.FileImport.BatchFunction) before running it in the headless mode. 
+
+I recommend test your analysis with first manual script, playing around with parameters and find the best optimal compromise in the preprocessing pipeline. Then go to src function ProcessFile (src.FileImport.BatchFunction) that consists of all the steps in the manual script but without plotting, and comment or uncomment some steps or adjust parameters if needed the same way you have it in manual script. Then import or run this function again, set your folder_with_data path and press "Run" button. The first script is more for analysis under someone's control, maybe you want to control the process in the details and analyse files one by one plotting each "scene" (image) after each step or checking images shapes or intensity distributions etc. 
+
 
 ## Usage
 
