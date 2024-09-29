@@ -21,6 +21,8 @@ from src.FileImport.BatchFunction import processFileforFrac
 
 
 
+
+
 def boxCount(binary_image, min_box_size=2):
     
     """ Calculate Box Sizes: Use powers of 2 to define box sizes.
