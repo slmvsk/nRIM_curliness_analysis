@@ -65,14 +65,34 @@ I recommend test your analysis with first manual script, playing around with par
 
 My main processing function includes steps: 
 
+###  Step 1: Read the file as a list of 3D numpy arrays (scenes)
+This functionreads a ZEISS CZI file and returns a list of 3D numpy arrays (one per scene) and metadata. It extracts scenes assuming shape (1, 1, S, 1, 1, Z, Y, X, 1), where S is number of scenes (scene index in the extracted form). Data has 3 dimensions (X, Y, Z) and is a single channel, that's why other 1D's doesn't matter and in the end we will have a list of scenes (with indexes starting at 0) with the shape (Z, X, Y) for example (20, 1024, 1024). Understanding of the numpy arrays and data shape will help us access specific slices in these lists. For example if I want to chech middle slice of third image in my list, I will plot these: scenes[2],[10, :,:], where ":" will mean to include all pixels. 
+
 ```
-# Step 1: Read the file as a list of 3D numpy arrays (scenes)
 scenes, metadata = readCziFile(file_name)
 ```
+To access metadata you will need ...
+
+
+### Step 2: Normalize intensity 
+
+To normalize intensity we will apply the linear contrast stretching to an entire 3D image stack globally with adjustable percentiles that are parameters to adjust in this function. The linearContrastStretching function enhances the contrast of a 3D image stack by applying linear contrast stretching based on adjustable percentiles. It rescales the pixel intensities of each slice within the stack to a defined output range, making details more visible. It only accepts np.uint8 or np.uint16 data types. The percentiles parameter allows control over which intensity values are stretched, making this function adaptable to different image characteristics, they define the lower and upper thresholds for intensity scaling. 
+
 ```
-# Step 2: Normalize intensity 
 normalized_scenes = normalizeScenes(scenes, percentiles=[1,99])
 ```
+Example of normalizing intensities for one slice of one scene (=image stack): 
+<img width="600" alt="Screenshot 2024-09-29 at 14 31 59" src="https://github.com/user-attachments/assets/27d54dab-4e73-4cf4-b73b-548ecf7c5226">
+You can also apply validation function validateImageAdjustment and check the output: 
+
+Scene shape: (20, 1024, 1024)
+Scene - min, max: 4 65535
+Adjusted scene shape: (20, 1024, 1024)
+Adjusted scene - min, max: 0 65535
+
+
+
+
 ```
 # Step 3: Denoising 
 blurred_scenes = applyGaussian(normalized_scenes, sigma=2)
