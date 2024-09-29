@@ -53,6 +53,8 @@ pip install -r requirements.txt
 
 Now ensure your image files (CZI format) are in the correct single folder structured as expected by the script. File names must be written like ...
 
+### Folder structure
+
 
 ## Usage
 
