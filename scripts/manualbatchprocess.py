@@ -262,12 +262,6 @@ plotToCompare(skeleton_scenes[7], final_skeletons[7], 'cleaned skeletons', 'nolo
 
 
 
-
-
-
-
-
-
 # this can be skipped if dont care about curliness function performance 
 # agressive , adjust 
 broken_skeletons = breakJunctionsAndLabelScenes(final_skeletons, num_iterations=2)
@@ -276,19 +270,42 @@ plotToCompare(final_skeletons[7], broken_skeletons[7], 'noloops', 'broken skelet
 
 
 
-from skimage.measure import label
+def measure_connectivity(skeleton, min_size=0):
+    """
+    Measure the number of connected components in a skeletonized image.
+    
+    Parameters:
+        skeleton (numpy.ndarray): The input skeletonized binary image.
+        min_size (int): Minimum size of objects to consider as connected components. Removes smaller artifacts.
+        
+    Returns:
+        int: Number of connected components in the skeletonized image.
+    """
+    # Convert to uint8 if in another format (True/False, float, etc.)
+    skeleton = skeleton.astype(np.uint8)
 
-def measure_connectivity(skeleton):
-    """Measure the number of connected components in a skeletonized image."""
-    labeled_skeleton, num_features = label(skeleton, connectivity=2, return_num=True)
+    # Label connected components
+    labeled_skeleton, num_features = label_f(skeleton, connectivity=2, return_num=True)
+
+    # Optionally, remove small components
+    if min_size > 0:
+        component_sizes = np.bincount(labeled_skeleton.ravel())
+        too_small = component_sizes < min_size
+        too_small_mask = too_small[labeled_skeleton]
+        labeled_skeleton[too_small_mask] = 0
+        num_features = np.unique(labeled_skeleton).size - 1  # Exclude background
+
     return num_features
 
 # Example usage
-original_connectivity = measure_connectivity(skeletonized_scenes[6])
-processed_connectivity = measure_connectivity(broken_skeletons[6])
+original_connectivity = measure_connectivity(final_skeletons[7])
+processed_connectivity = measure_connectivity(broken_skeletons[7])
 
 print(f"Original skeleton connectivity: {original_connectivity}")
 print(f"Processed skeleton connectivity: {processed_connectivity}")
+
+
+
 
 
 # or analyze curliness measures branches not correctly 
