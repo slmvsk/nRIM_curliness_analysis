@@ -227,6 +227,19 @@ output_skeletons = breakJunctionsAndLabelScenes(skeletonizedscenes, num_iteratio
 ``` 
 Result: 
 
+<img width="788" alt="Screenshot 2024-10-09 at 20 53 29" src="https://github.com/user-attachments/assets/6d7840db-5d27-456f-94fd-0b4574a52fab">
+
+It performs better on more "pruned" images, but I am still working on improving this function and adding some minimal separated length, so It will not create few pixel-long separate branches. Here I also measure connectivity to ensure that it worked. 
+
+print(f"Original skeleton connectivity: {original_connectivity}")
+Original skeleton connectivity: 100
+
+print(f"Processed skeleton connectivity: {processed_connectivity}")
+Processed skeleton connectivity: 110
+
+
+
+
 
 
 
