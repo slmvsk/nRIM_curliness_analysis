@@ -25,7 +25,7 @@ from skimage.color import label2rgb
 from src.FileImport.DesctiptorsBasedFileSearch import getMatchingFilesList
 #from src.FileImport.BatchProcessing import 
 from src.FileImport.ReadZeissStacks import readCziFile
-from src.ImageProcessing.NormilizeIntensity import normalizeScenes
+from src.ImageProcessing.NormilizeIntensity import normalizeScenes, validateImageAdjustment
 from src.FileImport.PlottingImage import plotToCompare, plotImageHistogram, visualize3dMayavi
 from src.ImageProcessing.DenoisingFilters import applyGaussian, applyMedianFilter, applyContrastStretching
 from src.ImageProcessing.SubstractBackground import subtractBackgroundFromScenes
@@ -62,6 +62,11 @@ file_name = '/Users/tetianasalamovska/Desktop/zeis/IHCT_THT53_40x3x_IHCT08_slice
 scenes, metadata = readCziFile(file_name)
 
     # 1.2. Create a metadata dictionary and access it with this function 
+
+
+
+
+
 
 
 
@@ -249,7 +254,7 @@ final_skeletons = removeLoopsScenes(pruned_scenes)
 
 plotToCompare(pruned_scenes[7], final_skeletons[7], 'pruned skeletons', 'noloops')
 
-skeleton_scenes, segmented_scenes, segment_objects_list = pruneScenes(final_skeletons, size=40, mask=None)
+skeleton_scenes, segmented_scenes, segment_objects_list = pruneScenes(final_skeletons, size=50, mask=None)
 #skeletonized_scenes, segmented_scenes, segment_objects_list = pruneScenes(skeleton_scenes, size=110, mask=None)
 # do second round of pruning if needed!!! 
 
@@ -264,11 +269,11 @@ plotToCompare(skeleton_scenes[7], final_skeletons[7], 'cleaned skeletons', 'nolo
 
 # this can be skipped if dont care about curliness function performance 
 # agressive , adjust 
-broken_skeletons = breakJunctionsAndLabelScenes(final_skeletons, num_iterations=2)
+broken_skeletons = breakJunctionsAndLabelScenes(skeleton_scenes, num_iterations=2)
 
-plotToCompare(final_skeletons[7], broken_skeletons[7], 'noloops', 'broken skeleton')
+plotToCompare(skeleton_scenes[9], broken_skeletons[9], 'noloops', 'broken skeleton')
 
-
+from skimage.measure import label 
 
 def measure_connectivity(skeleton, min_size=0):
     """
@@ -298,8 +303,8 @@ def measure_connectivity(skeleton, min_size=0):
     return num_features
 
 # Example usage
-original_connectivity = measure_connectivity(final_skeletons[7])
-processed_connectivity = measure_connectivity(broken_skeletons[7])
+original_connectivity = measure_connectivity(skeleton_scenes[9])
+processed_connectivity = measure_connectivity(broken_skeletons[9])
 
 print(f"Original skeleton connectivity: {original_connectivity}")
 print(f"Processed skeleton connectivity: {processed_connectivity}")

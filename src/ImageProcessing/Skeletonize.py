@@ -564,24 +564,47 @@ def find_branch_pts(skel_img, mask=None, label=None):
 
 
 
-
-def break_at_junctions(skel_img, branch_points):
+def break_at_junctions(skel_img, branch_points, min_neighbors=3, connectivity_threshold=2):
     """
-    Break the skeleton at the identified junction points.
+    Break the skeleton at the identified junction points with additional conditional checks.
     
     Parameters:
         skel_img (numpy.ndarray): A 2D binary skeleton image.
         branch_points (numpy.ndarray): Binary image with junction points (branch points) marked.
-    
+        min_neighbors (int): Minimum number of neighboring pixels to consider a true junction.
+        connectivity_threshold (int): Threshold to check the number of separate branches connecting to the junction point.
+
     Returns:
-        numpy.ndarray: A skeleton image with junction points removed (broken skeleton).
+        numpy.ndarray: A skeleton image with selective junction points removed (broken skeleton).
     """
     broken_skeleton = skel_img.copy()
     
-    # Remove junction points from the skeleton to break complex intersections
-    broken_skeleton[branch_points > 0] = 0
+    # Define the neighborhood structure for finding neighbors
+    structure = np.array([[1, 1, 1],
+                          [1, 0, 1],
+                          [1, 1, 1]])
+
+    # Iterate through each branch point
+    for y, x in zip(*np.where(branch_points > 0)):
+        # Extract the neighborhood of the branch point
+        neighborhood = broken_skeleton[max(y-1, 0):y+2, max(x-1, 0):x+2]
+
+        # Count neighboring pixels
+        neighbor_count = np.sum(neighborhood * structure)
+
+        # Condition 1: Only proceed if it has a minimum number of neighbors
+        if neighbor_count >= min_neighbors:
+            # Condition 2: Check for separate branch connectivity around the point
+            labeled_neighborhood, num_features = label(neighborhood, structure=structure)
+
+            # If the number of separate connections (num_features) exceeds the threshold, break the junction
+            if num_features >= connectivity_threshold:
+                broken_skeleton[y, x] = 0
     
     return broken_skeleton
+
+
+
 
 
 
